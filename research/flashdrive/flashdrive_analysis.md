@@ -52,7 +52,12 @@
 *그림 1 — 공식 데모 영상 프레임: 동일 교차로 장면에서 좌측 Alpamayo 1.5, 우측 +FlashDrive("4.5× Faster!"). 각 화면 상단에 모델이 생성한 추론 텍스트("Stop for the stop sign…", "Turn left because the intersection is clear")와 예측 궤적 오버레이가 표시된다. RTX PRO 6000 Blackwell에서 실행.*
 *출처: FlashDrive 프로젝트 페이지 프리뷰 영상 — [YouTube tDzMYGD_1dA](https://www.youtube.com/watch?v=tDzMYGD_1dA) (썸네일 캡처, 로컬 사본: `assets/flashdrive_demo_preview.jpg`)*
 
-> **그림 관련 주의**: 논문 PDF가 미공개라 **정적 아키텍처 다이어그램이 아직 존재하지 않는다**. 프로젝트 페이지의 그림(지연 분해 막대, ablation 표, 속도장 U-커브 차트)은 전부 웹에서 동적 렌더링되는 HTML/CSS 컴포넌트로, 이미지 파일이 없다(GitHub 저장소에도 이미지 0개 — API로 확인). 해당 그림들의 데이터는 본 문서 3·4·5장의 표와 [웹페이지 버전](https://z-lab.ai/projects/flashdrive/)의 차트로 재현했다. 논문 공개 시 원본 그림 추가 필요.
+![단계별 지연: Alpamayo 1.5 vs +FlashDrive (원본 차트)](assets/orig_latency_stages.png)
+
+*그림 2 — 단계별 지연 전후 비교(RTX PRO 6000). 모든 단계가 줄어 716→159ms.*
+*출처: [프로젝트 페이지](https://z-lab.ai/projects/flashdrive/) 차트 렌더링 캡처 — 페이지 그림이 이미지 파일 없이 동적 HTML로만 존재해, 헤드리스 브라우저(Playwright/Chromium)로 렌더링 화면을 요소 단위 캡처함. 로컬: `assets/orig_latency_stages.png`*
+
+> **그림 관련 주의**: 논문 PDF가 미공개라 **정적 아키텍처 다이어그램은 아직 존재하지 않는다**(GitHub 저장소에도 이미지 0개 — API로 확인). 페이지의 차트류는 위·아래처럼 렌더링 캡처로 수록했고(그림 2·3·4), 표 데이터는 본문 표로 재현했다. 논문 공개 시 아키텍처 그림 추가 필요.
 
 ---
 
@@ -71,7 +76,11 @@
 
 Alpamayo 1.5는 RTX PRO 6000에서 **스텝당 716ms(약 1.4Hz)** — 안전 주행의 실시간 요구에 크게 못 미친다. 추론 능력(CoT 토큰 생성)이 곧 지연의 원천이라는 딜레마가 FlashDrive의 출발점이다. ([프로젝트 페이지](https://z-lab.ai/projects/flashdrive/))
 
-### 3.4 Z Lab의 연구 계보
+### 3.4 누가 만들었나
+
+**Z Lab**은 UCSD ML Systems Group 산하의 효율 AI(알고리즘–시스템–응용 풀스택) 연구실 ([z-lab.ai](https://z-lab.ai/)). PI **Zhijian Liu**는 UCSD 조교수이자 **NVIDIA Research Scientist 겸직**으로, MIT에서 Song Han 지도로 박사 후 자율주행 인지의 대표작 [BEVFusion](https://arxiv.org/abs/2205.13542)(ICRA 2023, 공동 1저자)과 효율 VLM 계열(NVILA·SparseVILA)을 거쳤다 ([약력](https://zhijianliu.com/)) — NVIDIA 모델(Alpamayo)을 최적화 대상으로 고른 맥락과 "자율주행 × 효율 추론"이라는 주제 선택이 이 이력에서 자연스럽게 나온다.
+
+### 3.5 Z Lab의 연구 계보
 
 FlashDrive는 단독 논문이 아니라 Z Lab의 효율 추론 스택을 자율주행 VLA에 집약한 결과물이다. 아래 두 기술은 같은 랩이 먼저 발표한 범용 LLM 가속 기법으로, FlashDrive가 부품처럼 가져다 쓴다 (ICML·ICLR는 머신러닝 분야 최상위 국제 학회 — 두 기법 모두 동료 심사를 통과한 검증된 연구라는 의미):
 
@@ -132,6 +141,11 @@ Decode+Action이 전체의 약 2/3이지만, Encode/Prefill도 무시할 수 없
 - 스텝 0→1: 속도 변화 27%
 - 중간 스텝: 6% 미만 (코사인 유사도 0.99+)
 - 마지막 스텝: 다시 상승
+
+![스텝별 속도 변화율 (원본 차트)](assets/orig_velocity_reldiff.png)
+![스텝별 코사인 유사도 (원본 차트)](assets/orig_cosine_sim.png)
+
+*그림 3·4 — 속도 변화율(위: 0→1 스텝 27%에서 중간 6% 미만으로 급감 후 말단 재상승, 음영은 분포 밴드)과 코사인 유사도(아래: 중간 스텝 0.99+). 출처: [프로젝트 페이지](https://z-lab.ai/projects/flashdrive/) 렌더링 캡처.*
 
 **물리적 해석**: 초기 스텝은 거시적 궤적 구조(차선 선택, 회전 방향)를 결정하고, 마지막 스텝은 물리적으로 타당한 궤적 매니폴드[^manifold]에 스냅(운동학 제약·도로 기하 만족)하며, 중간 스텝은 이미 결정된 경로의 미세 조정만 수행한다. "끝점이 신호를 담고, 중간은 관성만 담는다."
 
@@ -299,6 +313,7 @@ DFlash와 ParoQuant는 **독립 저장소로도 사용 가능** — DFlash는 SG
 - **추론형 주행 VLA의 등장**(2025–2026): NVIDIA Alpamayo 계열이 Chain-of-Causation 추론으로 해석 가능한 주행을 열었으나, 추론 비용이 배포 장벽 ([NVIDIA Research: Alpamayo 1](https://research.nvidia.com/publication/2025-10_alpamayo-r1))
 - **LLM 추론 가속 기법의 VLA 이식**: speculative decoding(EAGLE-3 → DFlash), 양자화(AWQ → ParoQuant), KV 캐시 재사용 등 LLM 서빙 기법을 VLA의 멀티모달·연속제어 특성(비전 스트림, flow matching 헤드)에 맞게 재설계한 것이 차별점
 - **Z Lab의 효율 AI 스택**: SparseVILA(ICCV 2025), SparseLoRA(ICML 2025), DFlash(ICML 2026), ParoQuant(ICLR 2026)에 이은 응용 집약 프로젝트. 같은 랩의 VLASH(비동기 실시간 VLA)와 상보적 ([Z Lab 프로젝트 목록](https://z-lab.ai/))
+- **PI의 연구 궤적으로 본 위치**: 자율주행 인지(BEVFusion, ICRA 2023) → 효율 VLM(NVILA·SparseVILA, 2025) → LLM 추론 가속 부품(DFlash·ParoQuant, 2026) → 이 셋을 합류시킨 응용이 FlashDrive — "자율주행 × 효율 추론"이라는 랩의 두 축이 만나는 지점이다 (각 논문 링크는 위 참조; 위치 해석은 분석)
 
 ---
 
