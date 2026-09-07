@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 520" width="980" height="520" font-family="'IBM Plex Sans KR','Helvetica Neue',Arial,sans-serif">
+  <rect width="980" height="520" rx="14" fill="#f7f8fa"/>
+  <text x="28" y="40" font-size="19" font-weight="700" fill="#14213d">저장소 브랜치 구조와 개발 흐름</text>
+  <text x="28" y="62" font-size="12.5" fill="#5a6478">`alpamayo1.5` 브랜치만 보면 4월에 멈춘 듯하지만, 8월 활동은 별도 브랜치에 있었다.</text>
+
+  <defs>
+    <marker id="bm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#8b95ab"/>
+    </marker>
+  </defs>
+
+  <!-- time axis -->
+  <line x1="150" y1="96" x2="930" y2="96" stroke="#c7cddb" stroke-width="1"/>
+  <g font-size="10.5" fill="#8b95ab" text-anchor="middle">
+    <text x="196" y="88">2025-11</text>
+    <text x="320" y="88">2026-01</text>
+    <text x="450" y="88">2026-03</text>
+    <text x="560" y="88">2026-04</text>
+    <text x="672" y="88">2026-06</text>
+    <text x="790" y="88">2026-08</text>
+    <text x="900" y="88">2026-09</text>
+  </g>
+
+  <!-- upstream lane -->
+  <text x="28" y="130" font-size="12" font-weight="600" fill="#5a6478">NVlabs 상류</text>
+  <line x1="150" y1="126" x2="330" y2="126" stroke="#8b95ab" stroke-width="2.5"/>
+  <circle cx="196" cy="126" r="5" fill="#8b95ab"/>
+  <circle cx="320" cy="126" r="5" fill="#8b95ab"/>
+  <text x="196" y="147" font-size="10" fill="#77839a" text-anchor="middle">최초 커밋</text>
+  <text x="320" y="147" font-size="10" fill="#77839a" text-anchor="middle">상류 마지막 (01-15)</text>
+
+  <!-- main / 1.0 -->
+  <text x="28" y="184" font-size="12" font-weight="600" fill="#5a6478">main · alpamayo1.0</text>
+  <line x1="330" y1="180" x2="536" y2="180" stroke="#a8b0c2" stroke-width="2.5"/>
+  <circle cx="340" cy="180" r="5" fill="#a8b0c2"/>
+  <text x="352" y="200" font-size="10" fill="#77839a">01-23 ROS 2 노드 최초 구현 · AWF 공개</text>
+
+  <!-- 1.5 lane -->
+  <text x="28" y="242" font-size="12.5" font-weight="700" fill="#2f5da8">alpamayo1.5</text>
+  <text x="28" y="258" font-size="10" fill="#77839a">10B · 0.600 s · 1.67 FPS</text>
+  <line x1="440" y1="238" x2="600" y2="238" stroke="#2f5da8" stroke-width="3"/>
+  <circle cx="450" cy="238" r="6" fill="#2f5da8"/>
+  <circle cx="560" cy="238" r="6" fill="#2f5da8"/>
+  <text x="450" y="224" font-size="10.5" fill="#1b3b7a" text-anchor="middle">03-22 1.5 대응</text>
+  <text x="576" y="224" font-size="10.5" fill="#1b3b7a" text-anchor="middle">04-23 GPU 전처리 · TRT</text>
+  <line x1="600" y1="238" x2="930" y2="238" stroke="#2f5da8" stroke-width="1.5" stroke-dasharray="5 5"/>
+  <text x="768" y="256" font-size="10.5" fill="#8b95ab" text-anchor="middle">이후 새 기능 없음 — 최적화 PR 대기 중</text>
+
+  <!-- open PRs -->
+  <rect x="616" y="272" width="150" height="52" rx="8" fill="#fdf3e3" stroke="#c98a1e" stroke-width="1.2"/>
+  <text x="691" y="290" font-size="11" font-weight="600" fill="#7a5209" text-anchor="middle">PR #10 · 06-01</text>
+  <text x="691" y="305" font-size="10" fill="#8b6420" text-anchor="middle">FP8 TRT expert</text>
+  <text x="691" y="318" font-size="10" fill="#8b6420" text-anchor="middle">E2E 0.60~0.63 s · 미머지</text>
+
+  <rect x="778" y="272" width="152" height="52" rx="8" fill="#fdf3e3" stroke="#c98a1e" stroke-width="1.2"/>
+  <text x="854" y="290" font-size="11" font-weight="600" fill="#7a5209" text-anchor="middle">PR #12 · 07-27</text>
+  <text x="854" y="305" font-size="10" fill="#8b6420" text-anchor="middle">FlashDrive 사이드카</text>
+  <text x="854" y="318" font-size="10" fill="#8b6420" text-anchor="middle">Py3.12 프로세스 · 미머지</text>
+
+  <path d="M691 272 L691 248" stroke="#c98a1e" stroke-width="1.4" fill="none" stroke-dasharray="3 3"/>
+  <path d="M854 272 L854 248" stroke="#c98a1e" stroke-width="1.4" fill="none" stroke-dasharray="3 3"/>
+
+  <!-- 2.0 super lane -->
+  <text x="28" y="380" font-size="12.5" font-weight="700" fill="#6a4fbf">alpamayo2.0-super</text>
+  <text x="28" y="396" font-size="10" fill="#77839a">34B · 3.35 s · 0.30 FPS</text>
+  <path d="M536 180 L536 376 L790 376" stroke="#6a4fbf" stroke-width="1.6" fill="none" stroke-dasharray="6 4" marker-end="url(#bm)"/>
+  <text x="556" y="368" font-size="10" fill="#8b7ac4">main에서 분기</text>
+  <line x1="790" y1="376" x2="930" y2="376" stroke="#6a4fbf" stroke-width="3"/>
+  <circle cx="790" cy="376" r="7" fill="#6a4fbf"/>
+  <text x="790" y="360" font-size="11" font-weight="700" fill="#3c2a80" text-anchor="middle">08-06 PR #13 머지</text>
+
+  <rect x="640" y="398" width="292" height="62" rx="9" fill="#eae6f7" stroke="#6a4fbf" stroke-width="1.4"/>
+  <text x="786" y="418" font-size="11.5" font-weight="600" fill="#3c2a80" text-anchor="middle">Alpamayo 2 Super ROS 2 노드 · 45파일 +9,111줄</text>
+  <text x="786" y="434" font-size="10.5" fill="#54419b" text-anchor="middle">카메라 6대 고정 · 80 GB+ VRAM · TensorRT 경로 없음</text>
+  <text x="786" y="450" font-size="10.5" fill="#54419b" text-anchor="middle">nav CFG 구현했으나 효과 미달로 기본 off</text>
+
+  <!-- verdict -->
+  <rect x="28" y="472" width="904" height="34" rx="8" fill="#fdeceb" stroke="#c1462f" stroke-width="1.2"/>
+  <text x="480" y="493" font-size="12" font-weight="600" fill="#c1462f" text-anchor="middle">저장소 원문: "This node is not usable closed-loop, and the demo above is not evidence that it is."</text>
+</svg>

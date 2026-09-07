@@ -1,8 +1,8 @@
 # TIER IV × NVIDIA Alpamayo — Autoware에 추론형 VLA를 얹다
 
-- **작성일**: 2026-09-07
-- **조사 범위**: TIER IV·NVIDIA 협력 발표(2026-03), `autowarefoundation/alpamayo-autoware` 저장소 코드, Alpamayo 1.5 모델 카드, Co-MLOps × Cosmos 기술 보고, Isuzu L4 버스 트랙
-- **1차 자료**: 저장소 소스 코드 전량(커밋 `65eda63`, 브랜치 `alpamayo1.5`) · PRNewswire 보도자료 원문 · Hugging Face 모델/데이터셋 카드 · TIER IV 공식 기술 업데이트 · Autoware Foundation Discussion #6747
+- **작성일**: 2026-09-07 (2026-09-08 보강 — `alpamayo2.0-super` 브랜치와 열린 PR 반영)
+- **조사 범위**: TIER IV·NVIDIA 협력 발표(2026-03), `autowarefoundation/alpamayo-autoware` 저장소 **전 브랜치** 코드, Alpamayo 1.5·2 Super 모델 카드, Co-MLOps × Cosmos 기술 보고, Isuzu L4 버스 및 TIER IV 자체 E2E 모델 트랙
+- **1차 자료**: 저장소 소스 코드 전량(브랜치 `alpamayo1.5` 커밋 `65eda63`, `alpamayo2.0-super` 커밋 `b8747df`) · 이슈·PR 13건 · PRNewswire 보도자료 원문 2건 · Hugging Face 모델/데이터셋 카드 3건 · TIER IV 공식 기술 업데이트 · Autoware Foundation Discussion #6747
 - **표기 규칙**: 모든 사실 문장에 근거를 병기한다.
   - 💻 저장소 코드에서 직접 확인 (파일:줄 표기)
   - 🔍 1차 출처 원문 직접 확인
@@ -10,10 +10,11 @@
   - 📰 서드파티 매체 보도
   - ⚠️ 미확인·추정
 
-> **⚠️ 미리 알림 — 이 보고서에서 뒤집은 통설 3가지**
+> **⚠️ 미리 알림 — 이 보고서가 뒤집은 통설 4가지**
 > 1. "TIER IV가 Alpamayo를 Autoware에 통합해 차가 그걸로 주행한다" → **아니다.** 노드는 자기 네임스페이스로만 발행하고 Autoware 플래너·제어를 대체하지 않는다 (💻 §5.3).
 > 2. "Alpamayo는 diffusion 모델이다" → 코드상 실체는 **Flow Matching(Euler 적분)** 이다 (💻 §4.2).
-> 3. "모델 가중치는 이제 상용 가능하다" → Alpamayo 2 Super는 그렇지만, **1.5 모델 카드는 2026-09-07 확인 시점에도 여전히 비상용**이다 (🔍 §9.1).
+> 3. "모델 가중치는 이제 상용 가능하다" → Alpamayo 2 Super HF 카드는 그렇지만, **1.5 카드와 저장소 README는 여전히 비상용**이다 (🔍 §9.1).
+> 4. "저장소 개발은 4월에 멈췄다" → 초판의 오독이었다. **8월에 Alpamayo 2 Super 노드가 별도 브랜치로 머지**됐고, 그쪽은 더 느리다 — 3.35초 / 0.30 FPS (💻 §5.5).
 
 ---
 
@@ -30,6 +31,8 @@
 | 어느 모델을 쓰나 | `nvidia/Alpamayo-1.5-10B` 하드코딩 | 💻 `alpamayo_node.py:53` |
 | 차를 움직이나 | 아니다. `/alpamayo/*` 네임스페이스로만 발행 | 💻 저장소 전체에 `scenario_planning` 문자열 0건 |
 | 프로덕션 가능한가 | 저장소가 명시적으로 부정 | 🔍 README "not intended for use in production environments" |
+| 그럼 개발은 멈췄나 | 아니다. 2026-08-06 **Alpamayo 2 Super 노드**가 별도 브랜치로 머지 | 🔍 PR #13, 💻 `alpamayo2.0-super` |
+| 2 Super는 실시간인가 | 더 느리다. **3.35초 / 0.30 FPS**, 80 GB+ VRAM | 🔍 README "This node is not usable closed-loop" |
 
 ---
 
@@ -46,12 +49,17 @@
 | 2026-03-22~25 | Alpamayo **1.5** 대응 코드 수정, Lanelet2 경로 기반 내비 텍스트 구현 | 💻 커밋 `abe1ab1`~`d966583` (Shintaro Sakoda) |
 | 2026-03-25 | Isuzu·TIER IV·NVIDIA L4 버스(Erga 디젤/EV) 발표 | 📰 [just-auto](https://www.just-auto.com/news/isuzu-deploys-level-4-autonomous-buses/) |
 | 2026-04-21~23 | GPU 상주 전처리 + TensorRT expert 엔진 최적화 머지 | 💻 커밋 `a405214`, `e76d607`, `65eda63` |
+| 2026-05-25 | 커뮤니티 PR #9 "dp stack adaptor" 제출 (미머지) | 🔍 GitHub PR |
 | 2026-05-31 | Alpamayo 2 Super (34B) GTC Taipei 발표 | 🔍 [NVIDIA 뉴스룸](https://nvidianews.nvidia.com/news/nvidia-alpamayo-2-super-robotaxis) |
+| 2026-06-01 | PR #10 "FP8 TRT expert engine" 제출 (미머지) | 🔍 GitHub PR |
+| 2026-07-27 | 이슈 #11 / PR #12 — FlashDrive 가속 경로 제안 (미머지) | 🔍 GitHub |
 | 2026-08-04~05 | Alpamayo 2 Super 상용 공개 (OpenMDW-1.1) | 🔍 [NVIDIA 블로그](https://blogs.nvidia.com/blog/alpamayo-2-super-open-model-now-available/) |
-| 2026-08-06 | `alpamayo-autoware` 마지막 푸시 | 🔍 GitHub API `pushed_at` |
+| **2026-08-06** | **PR #13 머지 — `alpamayo2.0-super` 브랜치에 Alpamayo 2 Super ROS 2 노드 추가 (45파일, +9,111줄)** | 💻 `git log` · 🔍 GitHub PR #13 |
 | 2026-08-07 | TIER IV, Co-MLOps × Cosmos 기술 보고 공개 | 🔍 [TIER IV 기술 업데이트](https://tier4.co.jp/en/updates/technology/20260807-comlops-dataset-foundation-for-autonomous-driving-with-nvidia-cosmos) |
+| 2026-08-26 | TIER IV, Automotive World 2026 출품 발표 — **자체 Reference E2E AI 모델 + Jetson Orin 실증** | 🔍 [PRNewswire](https://www.prnewswire.com/news-releases/tier-iv-to-showcase-integrated-ai-data-and-computing-solution-for-sdvs-at-automotive-world-2026-302859969.html) |
+| 2026-09-09~11 | Automotive World 2026 (마쿠하리 멧세) — 위 실증 전시 | 🔍 동상 |
 
-**읽는 법**: 저장소의 개발 활동은 2026년 1월(초기 구현) → 3월(1.5 대응·발표) → 4월(성능 최적화)에 집중되고, 그 이후 5개월간 새 기능이 없다. 발표는 3월에 정점을 찍었지만 코드는 4월에 멈췄다 (💻 커밋 이력).
+**읽는 법**: 저장소는 브랜치로 세대를 나눈다 — `alpamayo1.0` / `alpamayo1.5` / `alpamayo2.0-super` / `main` (💻 GitHub API). `alpamayo1.5` 브랜치만 보면 4월에 멈춘 것처럼 보이지만, 실제로는 **8월에 2 Super 노드가 별도 브랜치로 들어왔다.** 1.5 라인은 최적화(FP8·FlashDrive) PR이 열린 채 대기 중이고, 개발 축은 2 Super로 옮겨갔다.
 
 ---
 
@@ -88,14 +96,22 @@
 
 ### 4.1 세대 비교
 
-| | Alpamayo 1 Nano | **Alpamayo 1.5** (이번 통합 대상) | Alpamayo 2 Super |
+| | Alpamayo 1 Nano | **Alpamayo 1.5** | **Alpamayo 2 Super** |
 |---|---|---|---|
 | 파라미터 | 10B | 약 10.5B | 34B |
-| 구성 | — | Cosmos-Reason2 백본 8.2B + 확산형 액션 디코더 2.3B | 32B급 VLM + 액션 디코더 |
-| 백본 계열 | — | Qwen3-VL 계열 (코드 기본값 `Qwen/Qwen3-VL-8B-Instruct`) | Cosmos 3 Super Reasoner |
+| 구성 | — | Cosmos-Reason2 백본 8.2B + flow matching 액션 디코더 2.3B | **32B Qwen3-VL 백본 + 2.3B flow matching 액션 expert** |
+| 백본 계열 | — | Qwen3-VL 계열 (코드 기본값 `Qwen/Qwen3-VL-8B-Instruct`) | Qwen3-VL (Cosmos 3 Super Reasoner 계열) |
+| 카메라 | — | 4대, 설정 가능 | **정확히 6대**, ID `(0,1,2,3,5,6)` 고정 |
+| 궤적 출력 | — | 64점 / 6.4초 | 64점 / 0.1~6.4초 |
+| 가중치 크기 | — | 약 21~22 GB | **약 72 GB (bf16, 32파일)** |
+| 최소 GPU | — | 24 GB VRAM | **80 GB+ VRAM** (피크 69.1 GiB) |
+| TensorRT expert | — | 있음 (`expert_onnx_path`) | **없음** |
 | 공개 | 2026-01 전후 | — | 발표 2026-05-31 / 상용 공개 2026-08-04~05 |
-| 상용 사용 | — | **비상용** ("Commercial licensing available upon request") | OpenMDW-1.1, 상용 가능 |
-| 근거 | 🔍 보도자료 | 🔍 [HF 모델 카드](https://huggingface.co/nvidia/Alpamayo-1.5-10B) · 💻 `base_model.py:211` | 🔍 NVIDIA 뉴스룸·블로그 |
+| 상용 사용 | — | **비상용** ("Commercial licensing available upon request") | **OpenMDW-1.1, 상용 허용** |
+| Autoware 노드 | `alpamayo1.0` 브랜치 | `alpamayo1.5` 브랜치 | **`alpamayo2.0-super` 브랜치** (2026-08-06) |
+| 근거 | 🔍 보도자료 | 🔍 [HF 모델 카드](https://huggingface.co/nvidia/Alpamayo-1.5-10B) · 💻 `base_model.py:211` | 🔍 [HF 모델 카드](https://huggingface.co/nvidia/Alpamayo2-Super) · 💻 `alpamayo2.0-super` README |
+
+액션 디코더가 flow matching이라는 점은 1.5에서는 코드를 읽어야 알 수 있었지만, 2 Super에 와서는 저장소 문서가 "32B Qwen3-VL backbone + 2B flow-matching action expert"라고 직접 쓴다 (💻 `alpamayo2.0-super` README). §4.2의 판정이 문서로 확인된 셈이다.
 
 보도자료는 TIER IV가 "Alpamayo 1의 얼리 어답터"라고 쓰지만(🔍), 저장소 코드는 `nvidia/Alpamayo-1.5-10B`를 하드코딩하고 브랜치명도 `alpamayo1.5`다(💻 `alpamayo_node.py:53`). 3월 발표 직전 커밋 `abe1ab1` "Fixed the code for Alpamayo-1.5"가 그 전환점이다. **실제 통합 대상은 1.5다.**
 
@@ -219,6 +235,75 @@ Sensing ─┬→ Perception → Planning → scenario_planning/trajectory → C
 
 ---
 
+### 5.5 2026-08: Alpamayo 2 Super 노드가 별도 브랜치로 들어왔다
+
+![저장소 브랜치 구조와 개발 흐름](images/branch-roadmap.svg)
+
+> 그림 출처: 본 보고서 작성. 근거는 GitHub API 브랜치 목록, `git log`, PR #10·#12·#13 메타데이터 (2026-09-08 확인).
+
+`alpamayo1.5` 브랜치만 보면 개발이 4월에 멈춘 것처럼 보이지만, 저장소는 브랜치로 세대를 관리한다 — `main` · `alpamayo1.0` · `alpamayo1.5` · `alpamayo2.0-super` (💻 GitHub API).
+
+2026-08-06, PR #13 "feat: add Alpamayo 2 Super ROS 2 node"가 `alpamayo2.0-super`로 머지됐다. 작성자 Yuto Takeuchi, 머지 Yukihiro Saito(TIER IV). **45파일 +9,111줄** (🔍 GitHub PR #13). 1.5 노드는 건드리지 않는 순수 추가다.
+
+**구성 방식** — NVIDIA `NVlabs/alpamayo2`의 추론 패키지를 `src/alpamayo2_super/`로 **벤더링**했다. `UPSTREAM.md`에 업스트림 커밋 해시(`9596749`, 2026-08-03)와 이탈 사항을 기록해 둔다: 데이터셋 리더 모듈 제거, 그리고 **업스트림이 요구하는 Python 3.12를 3.10으로 낮춰 이식**했다 — ROS 2 Humble이 3.10을 쓰기 때문이며, "35개 모듈 전부 3.10에서 파싱되고 `Self`·`tomllib`·`except*`·`StrEnum` 등을 쓰지 않는다"는 확인 근거까지 남겼다 (💻 `UPSTREAM.md`).
+
+**1.5와 달라진 점** (💻 `alpamayo2.0-super` README)
+
+| | Alpamayo 1.5 노드 | Alpamayo 2 Super 노드 |
+|---|---|---|
+| GPU 요구 | 24 GB+ | **80 GB+**, 피크 69.1 GiB |
+| 가중치 | ~21 GB | ~72 GB |
+| 카메라 | 4대, 설정 가능 | **정확히 6대** `(0,1,2,3,5,6)` 오름차순 |
+| CoT 토큰 예산 | 64 | **256** |
+| Flow matching 스텝 | 5 (기본) | 10 |
+| 추론 주기 기본값 | 0.1초 (launch 1.0) | **2.0초** |
+| TensorRT | expert 서브그래프 | **없음** |
+| Autoware 워크스페이스 | 필요 | **필수** — 모듈 로드 시점에 `autoware_planning_msgs`를 import하므로 순수 ROS 2 Humble에서는 노드가 뜨기 전에 실패 |
+
+**지연** — RTX PRO 6000 Blackwell(96 GB) 1장, 카메라 6대 10 Hz, **304회 측정** (🔍 README):
+
+| 항목 | 값 |
+|---|---|
+| 모델 로드 | 28.6 초 |
+| 추론 | **평균 3.35 s · 중앙값 3.29 s · p90 3.97 s · 최대 6.24 s** |
+| 피크 VRAM | 69.1 GiB |
+
+1.5의 0.600초에서 **5.6배 느려졌다.** 파라미터 3.4배, 카메라 1.5배, CoT 토큰 예산 4배가 겹친 결과다.
+
+**저장소가 스스로 못박은 문장**이 §5.3의 판정과 정확히 같다 (🔍 README 원문):
+
+> "This node is not usable closed-loop, and the demo above is not evidence that it is."
+> (이 노드는 폐루프로 쓸 수 없고, 위의 데모가 그 반대의 증거가 되지도 않는다.)
+
+이어지는 서술도 같은 취지다 — "초 단위 추론에서는 궤적이 발행되는 시점에 이미 낡았기 때문에, trajectory 헤더에 '현재'가 아니라 **입력 `t0` 타임스탬프**를 실어 소비자가 그 낡음을 직접 측정할 수 있게 했다." 관찰 창구라는 성격을 메시지 설계에까지 반영한 것이다.
+
+**주목할 구현 판단 2가지**
+
+- **속도는 모델 입력이 아니다.** 액션 스페이스가 16포즈 이력을 미분해 추정한다. 그래서 이력 프레임이 틀리면 롤아웃 전체가 조용히 망가진다 — 노드는 매 첫 추론마다 `implied_v0`를 오도메트리 `odom_v0`와 대조해 로그로 남긴다 (💻 README).
+- **`skip_on_bad_history` / `drop_bad_trajectory`가 기본 `true`.** 이력 불변식을 못 지키면 그 틱을 건너뛰고, 차량 위치에서 시작하지 않는 롤아웃은 버린다. 모델 출력을 그대로 믿지 않는 방어 코드가 노드 쪽에 들어가 있다 (💻 파라미터 기본값).
+
+**내비게이션 조건부 생성(nav CFG)은 실패로 기록됐다.** 2B expert는 VLM이 만든 KV 캐시로만 조건이 걸리므로, 경로 지시를 주려면 프롬프트에 문장으로 넣는 수밖에 없다. TIER IV는 VLM을 지시 있음/없음 두 번 프리필해 `v = unguided + w·(guided − unguided)`로 외삽하는 방식을 구현했고, 비용까지 측정했다 — 지연 3.35 → **5.2초**, VRAM 69.4 → 70.9 GiB. 업스트림 데모가 80 GB GPU 2장을 요구하는 것을 96 GB 1장으로 줄인 성과다. 그런데 **기본값은 off**다. 측정 결과가 이렇다 (🔍 README 원문 요지):
+
+- 가중치를 체크포인트 값의 2배(`6`)로 올려도 궤적이 **1 m 미만** 움직인다
+- 방향이 지시와 일치하지 않는다 — 한 프레임에서 "Turn left"와 "Turn right"가 **같은 방향**으로 궤적을 움직였다
+- 카메라를 이기지 못한다 — 좌회전 중에 우회전을 지시해도 좌회전 궤적이 나온다
+- 어느 쪽이든 CoC 텍스트는 동일하다
+
+**이 기록의 값어치**: 되는 것만 발표하는 보도자료와 달리, 저장소는 안 되는 것을 수치와 함께 남겼다. VLA에 언어로 경로를 지시하는 방식이 현시점에서 조향 수단이 못 된다는 걸 실측으로 보여준 몇 안 되는 공개 자료다.
+
+### 5.6 열린 PR — 어디로 가려 하는가
+
+머지되지 않은 채 열려 있는 제안들이 이 스택의 다음 관심사를 드러낸다 (🔍 GitHub, 2026-09-08 확인).
+
+| # | 제안 | 상태 | 내용 |
+|---|---|---|---|
+| #10 | FP8 TRT expert engine | 열림 (2026-06-01, Max-Bin) | ORT/INT8 경로를 NVIDIA ModelOpt FP8 + TensorRT 엔진으로 교체. expert 단계 **PyTorch bf16 14.8 ms → TRT FP16 9.1 ms → FP8 7.3 ms(2.0배)**, 엔진 2.29 GB. E2E는 **0.64~0.72 s → 0.60~0.63 s**(40~90 ms, 6~12% 절감), 궤적 편차 max\|Δ\|=0.023, CoT 텍스트 동일 |
+| #12 / #11 | FlashDrive 가속 경로 | 열림 (2026-07-27, gautamjain1009) | 외부 추론 가속 스택을 **Python 3.12 사이드카 프로세스**로 띄우고 ROS 2 노드(3.10)가 HTTP로 통신. 기본 `use_flashdrive:=false`. 메인테이너 재현은 HF 접근·GPU 문제로 대기 중 |
+| #9 | dp stack adaptor | 열림 (2026-05-25, Owen-Liuyuxuan) | 다른 주행 스택 어댑터 |
+| #8 | AWSIM 설정 요청 | 열림 (2026-05-09, awesthue-iav) | 시뮬레이터에서 돌리기 위한 설정 요청 |
+
+읽히는 것 셋. ① 1.5 라인의 남은 여지는 **양자화 정밀도**(FP16 → FP8)뿐이고, 그마저 6~12%다. ② 실시간성 격차를 저장소 안에서 못 메우니 **외부 가속 스택을 프로세스 분리로 붙이려는 시도**(#12)가 나왔다 — Python 버전이 달라 HTTP로 이어붙일 만큼 절박한 접근이다. ③ 시뮬레이터·타 스택 요청은 있는데 4개월 넘게 머지가 안 된다. 메인테이너 대역폭이 2 Super 쪽으로 옮겨간 정황이다.
+
 ## 6. 성능 — 숫자를 정직하게 읽기
 
 ![최적화 단계별 지연 벤치마크](images/latency-bench.svg)
@@ -263,6 +348,22 @@ Autoware 플래닝이 제어에 넘기는 궤적은 0.1초 해상도로 갱신�
 
 저장소 스스로도 "Alpamayo 1.5 is a pre-trained reasoning model for research purposes and is not a complete autonomous driving stack. It is not intended for use in production environments."라고 못박는다 (🔍 README).
 
+### 6.4 세대가 올라갈수록 더 느려진다
+
+성능 격차가 시간이 가면 좁혀질 것이라 기대하기 쉽지만, 실측은 반대 방향이다.
+
+| | Alpamayo 1.5 (2026-04) | Alpamayo 2 Super (2026-08) |
+|---|---|---|
+| 1회 추론 | 0.600 s (전면 최적화) | **3.35 s** (평균) |
+| 처리율 | 1.67 FPS | **0.30 FPS** |
+| 피크 VRAM | 24 GB급 | 69.1 GiB |
+| 최적화 여지 | TRT FP8로 6~12% 추가 (PR #10, 미머지) | TensorRT 경로 자체가 없음 |
+| 근거 | 🔍 `alpamayo1.5` README | 🔍 `alpamayo2.0-super` README (304회 측정) |
+
+모델이 커지고(10B → 34B), 카메라가 늘고(4 → 6), CoC 토큰 예산이 늘면서(64 → 256) 지연은 5.6배가 됐다. **품질을 올리는 방향과 실시간성을 확보하는 방향이 정면으로 충돌한다.** 이 구조에서는 온보드 플래너로의 승격이 세대 진화만으로 저절로 오지 않는다 — 증류·양자화·전용 SoC 같은 별도의 축소 작업이 필요하다.
+
+열린 PR들이 정확히 그 지점을 겨눈다. FP8 양자화(#10)는 6~12%를 벌고, FlashDrive 경로(#12)는 아예 다른 프로세스로 추론을 넘긴다 (§5.6). 저장소 안에서 짜낼 수 있는 폭이 거기까지라는 뜻이기도 하다.
+
 ---
 
 ## 7. 데이터 쪽 절반 — Cosmos × Co-MLOps
@@ -302,9 +403,11 @@ TIER IV는 Cosmos 3로 이행하며 일본 주행 환경 특화 파인튜닝을 
 
 ---
 
-## 8. 상용화 트랙 — Isuzu L4 버스
+## 8. 상용화 트랙 — Isuzu L4 버스, 그리고 자체 E2E 모델
 
 Alpamayo 노드가 연구 단계인 것과 별개로, TIER IV의 L4 상용화는 다른 경로로 진행 중이다.
+
+### 8.1 Isuzu L4 버스
 
 - **조합**: Autoware 기반 TIER IV L4 소프트웨어 스택 + Isuzu Erga 버스 플랫폼(디젤/EV 양쪽) + NVIDIA DRIVE AGX Thor SoC 및 DRIVE Hyperion 플랫폼 (📰 just-auto, 🔍 NVIDIA 뉴스룸).
 - **발표**: GTC 2026 기간, 2026-03-25 (📰 just-auto).
@@ -316,6 +419,28 @@ Alpamayo 노드가 연구 단계인 것과 별개로, TIER IV의 L4 상용화는
 
 **중요한 구분**: Isuzu 버스 스택에 Alpamayo가 들어간다는 서술은 **어느 출처에도 없다** (⚠️). 보도자료는 Alpamayo/Cosmos 통합과 Isuzu 버스 배치를 "함께(Together with)" 추진 중인 별개 이니셔티브로 병렬 서술한다 (🔍 PRNewswire). 두 트랙을 하나로 묶어 읽으면 안 된다.
 
+### 8.2 TIER IV 자체 Reference E2E AI 모델 — 차에 실리는 건 이쪽이다
+
+2026-08-26 발표, Automotive World 2026(2026-09-09~11, 마쿠하리 멧세) 출품 내용 (🔍 [PRNewswire](https://www.prnewswire.com/news-releases/tier-iv-to-showcase-integrated-ai-data-and-computing-solution-for-sdvs-at-automotive-world-2026-302859969.html)):
+
+- **Reference E2E AI 모델** — HD 지도 없이 **카메라 영상만으로** 주변을 이해하고 차량 궤적을 생성하는 end-to-end 모델
+- 그 모델을 **NVIDIA Jetson Orin 차량용 컴퓨팅 플랫폼에서 구동하는 실증 데모**
+- Co-MLOps 자동 라벨링 기능 — 주행 데이터의 객체·환경 요소를 자동 라벨링, 수백만 건을 일관된 품질로 즉시 생성
+- 희소 시나리오·악천후 합성 데이터 생성에 NVIDIA Cosmos 활용
+- 모델 학습·평가·개선 주기를 자동화하는 에이전틱 AI 개발 프로세스
+
+**여기서 구도가 분명해진다.** TIER IV는 두 개의 E2E 트랙을 동시에 굴린다.
+
+| | Alpamayo (NVIDIA 모델) | Reference E2E AI 모델 (TIER IV 자체) |
+|---|---|---|
+| 목적 | 추론·설명 레이어, 연구·검증 | **차량 탑재 주행** |
+| 하드웨어 | RTX PRO 6000급 데스크톱 GPU (24~80 GB) | **Jetson Orin** (차량용 SoC) |
+| 지연 | 0.600 s ~ 3.35 s | ⚠️ 미공개 |
+| 위치 | Autoware 옆의 별도 노드 | 스택 본류 |
+| 근거 | 💻 저장소 | 🔍 보도자료 (기술 상세 미공개) |
+
+Alpamayo가 "관찰 창구"에 머무는 것이 TIER IV의 E2E 전환 자체가 멈췄다는 뜻은 아니다. **탑재용 E2E는 자체 모델로 따로 가고, Alpamayo는 그 위층의 추론·설명·데이터 큐레이션 역할을 맡는 분업**으로 읽는 것이 실제에 가깝다. 다만 자체 모델의 파라미터·지연·성능 수치는 공개되지 않아 비교는 불가능하다 (⚠️).
+
 ---
 
 ## 9. 한계와 리스크
@@ -324,12 +449,12 @@ Alpamayo 노드가 연구 단계인 것과 별개로, TIER IV의 L4 상용화는
 
 | 항목 | 상태 | 근거 |
 |---|---|---|
-| `alpamayo-autoware` 추론 코드 | Apache-2.0 | 💻 `LICENSE`, 🔍 GitHub API |
+| `alpamayo-autoware` 추론 코드 | Apache-2.0 (벤더링한 `src/alpamayo2_super/`도 NVIDIA SPDX 헤더 보존한 Apache-2.0) | 💻 `LICENSE`, `UPSTREAM.md` |
 | **Alpamayo 1.5 가중치** | 라이선스는 OpenMDW-1.1이지만 카드 문구는 **"ready for non-commercial use. Commercial licensing available upon request."** | 🔍 [HF 모델 카드](https://huggingface.co/nvidia/Alpamayo-1.5-10B), 2026-09-07 확인 |
-| Alpamayo 2 Super 가중치 | OpenMDW-1.1, 파인튜닝·파생모델·상용 재배포 허용 | 🔍 NVIDIA 블로그 |
+| **Alpamayo 2 Super 가중치** | HF 카드: **OpenMDW-1.1, 상용 사용 허용** / 그런데 저장소 `alpamayo2.0-super` README는 같은 시기에 **"Model weights: Non-commercial license"** | 🔍 [HF 모델 카드](https://huggingface.co/nvidia/Alpamayo2-Super) vs 💻 저장소 README |
 | Physical AI AV 데이터셋 | 별도 "NVIDIA Autonomous Vehicle Dataset License Agreement" 동의 필요. AV 개발 용도로 한정되며, **법 집행·교통법규 단속 목적 사용 금지** 조항 존재 | 🔍 HF 데이터셋 카드 |
 
-NVIDIA 블로그는 OpenMDW를 Alpamayo 패밀리 전체에 적용해 이전 릴리스도 상용 배포 가능해졌다고 서술하지만(🔍), **1.5 모델 카드와 저장소 README는 2026-09-07 확인 시점에도 여전히 비상용을 명시**한다(🔍). 상용 도입을 검토한다면 NVIDIA에 직접 확인해야 한다.
+**엇갈림이 두 겹이다.** ① NVIDIA 블로그는 OpenMDW를 Alpamayo 패밀리 전체에 소급 적용해 이전 릴리스도 상용 배포 가능해졌다고 하지만, **1.5 모델 카드는 2026-09-07 확인 시점에도 비상용**을 명시한다. ② 2 Super는 HF 카드가 상용 허용인데 **저장소 README가 비상용이라고 적어 놓았다** — 저장소 문구가 갱신되지 않은 것으로 보이나 확정은 못 했다 (⚠️). 상용 도입을 검토한다면 어느 쪽 문서도 근거로 삼지 말고 NVIDIA에 직접 확인해야 한다.
 
 ### 9.2 기술적 한계
 
@@ -342,7 +467,9 @@ NVIDIA 블로그는 OpenMDW를 Alpamayo 패밀리 전체에 적용해 이전 릴
 | **결합도** | `autoware_planning_msgs`, `autoware_internal_debug_msgs`, `autoware_lanelet2_extension_python`에 의존. 다른 ROS 2 스택으로 옮기려면 메시지 계층부터 다시 써야 한다 (💻 `package.xml`) |
 | **지역 일반화** | 학습 데이터는 25개국 규모지만 일본 특화 정밀도 수치는 공개된 바 없다 (⚠️). Co-MLOps 쪽에서 "일본 환경 특화 파인튜닝"을 별도로 진행 중이라는 사실 자체가 이 격차의 방증이다 (🔍 TIER IV) |
 | **안전 인증** | ASIL 경로에서 생성형 VLA를 어떻게 다룰지에 대한 공식 서술 없음 (⚠️). DRIVE Hyperion 쪽 "ASIL-D 인증 DriveOS"는 플랫폼 OS 얘기지 Alpamayo 모델 얘기가 아니다 (🔍 NVIDIA 뉴스룸) |
-| **개발 정체** | 2026-04-23 이후 새 기능 커밋 없음. 이슈 5건 열림 (💻 `git log`, 🔍 GitHub API) |
+| **1.5 라인 정체** | `alpamayo1.5` 브랜치는 2026-04-23 이후 새 기능 없음. 최적화 PR 2건(FP8 #10, FlashDrive #12)과 확장 요청 2건(#8, #9)이 열린 채 4개월 이상 대기 (🔍 GitHub) |
+| **2 Super의 하드웨어 벽** | 80 GB+ VRAM 필수, 가중치 72 GB, 추론 3.35초. 차량 탑재는 물론 일반 워크스테이션 재현도 어렵다 (💻 README) |
+| **언어로 조향 불가** | nav CFG는 궤적을 1 m 미만 움직이고 방향도 일관되지 않는다. 기본 off (💻 README, §5.5) |
 
 ### 9.3 거버넌스
 
@@ -360,7 +487,9 @@ NVIDIA 블로그는 OpenMDW를 Alpamayo 패밀리 전체에 적용해 이전 릴
 
 4. **국내 관점.** 이 스택은 지금 그대로 가져와도 차를 움직이지 못한다. 반대로 말하면 **재현 비용이 낮은 학습·평가용 자산**이다. RTX 4090급 24 GB GPU 한 장과 rosbag만 있으면 자국 도로 데이터로 CoC 추론 품질을 정성 평가할 수 있다. §7의 Co-MLOps 방법론(합성 데이터로 롱테일 검출 IoU 0.671→0.893)이 더 직접적으로 이식 가능한 교훈이다.
 
-5. **주시할 것.** ① Alpamayo 2 Super의 Autoware 통합 여부 ② `alpamayo-autoware` 개발 재개 여부 ③ Isuzu 버스의 실제 운행 개시 ④ 1.5 가중치 라이선스 정리.
+5. **되는 것보다 안 되는 것의 기록이 값지다.** 2 Super 브랜치는 nav CFG 실패를 수치와 함께 남겼다 — 가중치를 2배로 올려도 궤적이 1 m 미만 움직이고, "좌회전"과 "우회전"이 같은 방향으로 움직인 프레임이 있으며, 카메라를 이기지 못한다. VLA에 자연어로 경로를 지시하는 방식이 현시점에서 조향 수단이 못 된다는 것을 실측으로 보여준 몇 안 되는 공개 자료다. 보도자료만 읽어서는 절대 얻을 수 없는 정보다 (§5.5).
+
+6. **주시할 것.** ① `alpamayo2.0-super` 브랜치가 `main`으로 승격되는지 ② FP8(#10)·FlashDrive(#12) PR 머지 여부 — 1.5 라인의 실시간성 개선이 계속되는지의 신호 ③ TIER IV **자체 Reference E2E 모델**의 사양 공개 (Automotive World 2026, 2026-09-09~11) ④ Isuzu 버스의 실제 운행 개시 ⑤ 1.5·2 Super 가중치 라이선스 문구 정리.
 
 ---
 
@@ -428,15 +557,19 @@ python3 scripts/build_trt_expert_engine.py --help
 
 | # | 항목 | 상태 |
 |---|---|---|
-| 1 | Alpamayo 1.5 가중치의 최종 상용 가능 여부 | NVIDIA 블로그(패밀리 전체 OpenMDW 적용)와 HF 모델 카드(비상용 명시)가 상충. NVIDIA 직접 확인 필요 |
+| 1 | Alpamayo 1.5·2 Super 가중치의 최종 상용 가능 여부 | 3중 상충 — NVIDIA 블로그(패밀리 전체 OpenMDW 소급), 1.5 HF 카드(비상용), 2 Super HF 카드(상용 허용) vs 저장소 README(비상용). NVIDIA 직접 확인 필요 |
 | 2 | Isuzu L4 버스의 노선·시기·대수 | 어느 출처에도 없음 |
 | 3 | Isuzu 버스 스택에 Alpamayo 포함 여부 | 언급 없음. 별개 트랙으로 서술됨 |
-| 4 | Alpamayo 2 Super의 Autoware 통합 계획 | 저장소·발표 어디에도 언급 없음 |
-| 5 | 2026-08-06 마지막 푸시의 내용 | 클론된 `alpamayo1.5` 브랜치 최신 커밋은 2026-04-23. 8월 푸시는 다른 참조(태그/브랜치)일 가능성 |
+| 4 | ~~Alpamayo 2 Super의 Autoware 통합 계획~~ | **해소 (2026-09-08)** — `alpamayo2.0-super` 브랜치에 노드 존재, PR #13 머지 |
+| 5 | ~~2026-08-06 마지막 푸시의 내용~~ | **해소 (2026-09-08)** — PR #13 (Alpamayo 2 Super 노드) 머지 커밋 `b8747df` |
 | 6 | 논문 "온보드 99 ms"의 측정 하드웨어·범위 | 초록에 명시 없음 |
 | 7 | Alpamayo 노드 도입에 따른 주행 성능 개선 수치 | TIER IV 공개 자료 없음 |
 | 8 | TIER IV 상용 스택(Pilot.Auto)에서의 Alpamayo 활용 여부 | 확인 불가 |
 | 9 | Medium 기술 블로그 원문의 추가 서술·다이어그램 | Cloudflare 403으로 접근 실패. 동일 내용 보도자료로 대체 |
+| 10 | **TIER IV 자체 Reference E2E 모델의 사양** | 파라미터·지연·성능 미공개. 보도자료가 "HD 지도 없이 카메라만, Jetson Orin 구동"이라고만 서술 |
+| 11 | **`alpamayo2.0-super` 브랜치의 위치** | `main` 승격 계획인지, 병렬 유지인지 불명. 브랜치 4개(`main`/`1.0`/`1.5`/`2.0-super`)의 관계에 대한 공개 서술 없음 |
+| 12 | **2 Super README의 1.5 궤적 표기** | 비교표가 1.5를 "20 points / 2.0 s"로 적는다. `alpamayo1.5` 브랜치 README·HF 카드·코드는 모두 64점/6.4초. 기반 브랜치(`main`) 차이로 보이나 확정 못 함 |
+| 13 | **열린 PR들의 머지 여부** | #8·#9·#10·#12 모두 4개월 이상 대기. 메인테이너 의사 표명 없음 |
 
 ## 검증 로그 (판정 이력)
 
@@ -444,7 +577,10 @@ python3 scripts/build_trt_expert_engine.py --help
 |---|---|---|---|
 | TIER IV가 통합한 Alpamayo 버전 | 보도자료: "early adopter of NVIDIA Alpamayo 1" | 코드: `nvidia/Alpamayo-1.5-10B` 하드코딩, 브랜치 `alpamayo1.5` | **둘 다 사실.** 1로 시작해 3월에 1.5로 전환(커밋 `abe1ab1`). 현재 통합 대상은 1.5 |
 | VLM 백본 계열 | 서드파티 해설: "Qwen2 기반" | 코드: `Qwen/Qwen3-VL-8B-Instruct`, 프로세서 `Qwen/Qwen3-VL-2B-Instruct`. 모델 카드: Cosmos-Reason2 8.2B | **Qwen3-VL 계열로 판정.** Cosmos-Reason2가 Qwen3-VL 위에 구축된 것. "Qwen2 기반"은 오기 |
-| 생성 방식 | 모델 카드·매체: "diffusion-based" | 코드: `class FlowMatching`, `int_method="euler"` | **Flow Matching으로 판정.** 넓은 의미의 확산 계열이나 정확한 명칭은 flow matching |
+| 생성 방식 | 모델 카드·매체: "diffusion-based" | 코드: `class FlowMatching`, `int_method="euler"` | **Flow Matching으로 판정.** 넓은 의미의 확산 계열이나 정확한 명칭은 flow matching. **2026-08 `alpamayo2.0-super` README가 "2B flow-matching action expert"라고 명시해 문서로도 확인됨** |
+| 저장소 개발 정지 여부 | `alpamayo1.5` 브랜치 최신 커밋 2026-04-23 | GitHub API `pushed_at` 2026-08-06 | **정지 아님.** 8월 활동은 별도 브랜치 `alpamayo2.0-super`의 PR #13. 초판의 "4월 이후 정지" 서술을 정정 |
+| Alpamayo 2 Super 상용 가능 여부 | HF 카드: OpenMDW-1.1, 상용 허용 | 저장소 `alpamayo2.0-super` README: "Model weights: Non-commercial license" | **미해결.** 저장소 문구 미갱신으로 추정하나 확정 불가. 양쪽 병기 |
+| 1.5 궤적 길이 | `alpamayo1.5` README·HF 카드·코드: 64점 / 6.4초 | `alpamayo2.0-super` README 비교표: 20점 / 2.0초 | **64점/6.4초 채택.** 3개 출처가 일치하고 2 Super README는 기반 브랜치가 달라 생긴 표기로 추정. 미확인 항목 #12로 남김 |
 | TensorRT 적용 범위 | 서드파티 해설: "TensorRT 양자화" | 코드: expert denoiser만 ONNX 추출 후 ONNX Runtime TRT EP | **부분 적용으로 판정.** VLM 본체는 PyTorch 유지 |
 | 가중치 라이선스 | NVIDIA 블로그(2026-08): 패밀리 전체 OpenMDW-1.1, 상용 가능 | HF 모델 카드·저장소 README(2026-09-07 확인): 비상용 | **미해결.** 양쪽 원문 병기. 상용 검토 시 NVIDIA 확인 필수 |
 | 벤치마크 수치 범위 | 서드파티 해설: 2개 구성(0.820 / 0.600)만 인용 | README: 6개 구성 전체 표 | **README 전체 표 채택.** 중간 단계가 정밀도-지연 교환을 드러냄 |
@@ -454,15 +590,18 @@ python3 scripts/build_trt_expert_engine.py --help
 ## 레퍼런스
 
 ### 1차 — 코드·모델·데이터
-- [autowarefoundation/alpamayo-autoware](https://github.com/autowarefoundation/alpamayo-autoware) — 브랜치 `alpamayo1.5`, 커밋 `65eda63` 기준 전량 확인 (💻)
-- [NVlabs/alpamayo](https://github.com/NVlabs/alpamayo) — 상류 저장소 (🔍 포크 관계 확인)
-- [nvidia/Alpamayo-1.5-10B (Hugging Face)](https://huggingface.co/nvidia/Alpamayo-1.5-10B) — 모델 카드 (🔍)
+- [autowarefoundation/alpamayo-autoware](https://github.com/autowarefoundation/alpamayo-autoware) — 브랜치 `alpamayo1.5`(커밋 `65eda63`) 및 `alpamayo2.0-super`(커밋 `b8747df`) 전량 확인 (💻)
+- [PR #13 — feat: add Alpamayo 2 Super ROS 2 node](https://github.com/autowarefoundation/alpamayo-autoware/pull/13) — 2026-08-06 머지, 45파일 +9,111줄 (🔍)
+- [PR #10 — FP8 TRT expert engine](https://github.com/autowarefoundation/alpamayo-autoware/pull/10) · [PR #12 / 이슈 #11 — FlashDrive 경로](https://github.com/autowarefoundation/alpamayo-autoware/pull/12) · [PR #9](https://github.com/autowarefoundation/alpamayo-autoware/pull/9) · [이슈 #8](https://github.com/autowarefoundation/alpamayo-autoware/issues/8) — 모두 미머지 (🔍)
+- [NVlabs/alpamayo](https://github.com/NVlabs/alpamayo) · [NVlabs/alpamayo2](https://github.com/NVlabs/alpamayo2) — 상류 저장소 (🔍, 벤더링 근거는 💻 `src/alpamayo2_super/UPSTREAM.md`)
+- [nvidia/Alpamayo-1.5-10B (Hugging Face)](https://huggingface.co/nvidia/Alpamayo-1.5-10B) · [nvidia/Alpamayo2-Super (Hugging Face)](https://huggingface.co/nvidia/Alpamayo2-Super) — 모델 카드 (🔍)
 - [nvidia/PhysicalAI-Autonomous-Vehicles (Hugging Face)](https://huggingface.co/datasets/nvidia/PhysicalAI-Autonomous-Vehicles) — 데이터셋 카드 (🔍)
 - [Autoware Foundation Discussion #6747](https://github.com/orgs/autowarefoundation/discussions/6747) — 패키지 공개 공지, 2026-01-23, yukkysaito (🔍)
 
 ### 1차 — 공식 발표
 - [TIER IV accelerates AI-based Level 4 autonomous driving with NVIDIA's reasoning-based AI and world foundation models (PRNewswire, 2026-03-18)](https://www.prnewswire.com/news-releases/tier-iv-accelerates-ai-based-level-4-autonomous-driving-with-nvidias-reasoning-based-ai-and-world-foundation-models-302717091.html) (🔍)
 - [Building a dataset foundation for autonomous driving with NVIDIA Cosmos (TIER IV, 2026-08-07)](https://tier4.co.jp/en/updates/technology/20260807-comlops-dataset-foundation-for-autonomous-driving-with-nvidia-cosmos) — Dan Umeda, GTC 세션 S81897 (🔍)
+- [TIER IV to showcase integrated AI, data, and computing solution for SDVs at Automotive World 2026 (PRNewswire, 2026-08-26)](https://www.prnewswire.com/news-releases/tier-iv-to-showcase-integrated-ai-data-and-computing-solution-for-sdvs-at-automotive-world-2026-302859969.html) — 자체 Reference E2E AI 모델 · Jetson Orin 실증 (🔍)
 - [BYD, Geely, Isuzu and Nissan Adopt NVIDIA DRIVE Hyperion for Level 4 Vehicles (NVIDIA, 2026-03-16)](https://nvidianews.nvidia.com/news/drive-hyperion-level-4) (🔍)
 - [NVIDIA Launches Alpamayo 2 Super Open Reasoning Model for Robotaxis](https://nvidianews.nvidia.com/news/nvidia-alpamayo-2-super-robotaxis) (🔍)
 - [NVIDIA Alpamayo 2 Super … Now Available for Commercial Use (NVIDIA Blog)](https://blogs.nvidia.com/blog/alpamayo-2-super-open-model-now-available/) (🔍)
