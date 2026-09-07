@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 470" width="980" height="470" font-family="'IBM Plex Sans KR','Helvetica Neue',Arial,sans-serif">
-  <rect width="980" height="470" rx="14" fill="#f7f8fa"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 492" width="980" height="492" font-family="'IBM Plex Sans KR','Helvetica Neue',Arial,sans-serif">
+  <rect width="980" height="492" rx="14" fill="#f7f8fa"/>
   <text x="28" y="40" font-size="19" font-weight="700" fill="#14213d">Autoware 파이프라인 안에서 Alpamayo 노드의 실제 위치</text>
   <text x="28" y="62" font-size="12.5" fill="#5a6478">핵심: 제어 루프에 끼어들지 않는다. 별도 네임스페이스로만 발행하는 병렬 관찰자다.</text>
 
@@ -76,10 +76,12 @@
 
   <!-- the missing link -->
   <path d="M694 311 L800 311 L800 200" stroke="#c1462f" stroke-width="2" fill="none" stroke-dasharray="7 5" marker-end="url(#a3)"/>
-  <text x="812" y="270" font-size="12.5" font-weight="700" fill="#c1462f">존재하지 않는 연결</text>
-  <text x="812" y="290" font-size="11" fill="#c1462f">저장소 어디에도</text>
-  <text x="812" y="306" font-size="11" fill="#c1462f">scenario_planning 발행/리맵 없음</text>
-  <text x="812" y="322" font-size="11" fill="#c1462f">→ 차량은 여전히 기존 플래너로 주행</text>
+  <text x="808" y="268" font-size="12" font-weight="700" fill="#c1462f">존재하지 않는 연결</text>
+  <text x="808" y="286" font-size="10.5" fill="#c1462f">저장소 어디에도 scenario_</text>
+  <text x="808" y="300" font-size="10.5" fill="#c1462f">planning 발행·리맵 없음</text>
+  <text x="808" y="318" font-size="10.5" fill="#c1462f">→ 차량은 여전히</text>
+  <text x="808" y="332" font-size="10.5" fill="#c1462f">기존 플래너로 주행</text>
 
-  <text x="28" y="462" font-size="11" fill="#8b95ab">근거: alpamayo_node.py 파라미터 기본값, launch/alpamayo.launch.py, 저장소 전체 grep "scenario_planning" 결과 0건 (커밋 65eda63) · Autoware 플래닝 인터페이스는 공식 문서 기준</text>
+  <text x="28" y="456" font-size="11" fill="#8b95ab">근거: alpamayo_node.py 파라미터 기본값, launch/alpamayo.launch.py, 저장소 전체 grep "scenario_planning" 결과 0건 (커밋 65eda63).</text>
+  <text x="28" y="472" font-size="11" fill="#8b95ab">Autoware 플래닝 인터페이스는 공식 문서 기준.</text>
 </svg>

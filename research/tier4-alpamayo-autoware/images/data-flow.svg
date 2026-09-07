@@ -11,14 +11,15 @@
     <text x="128" y="151" font-size="10.5" fill="#6a7ba3" text-anchor="middle">각 4프레임 (10 Hz 윈도우 0.4 s)</text>
 
     <rect x="252" y="92" width="185" height="66" rx="9" fill="#e8f0fe" stroke="#3b6fd4" stroke-width="1.4"/>
-    <text x="344" y="117" font-size="13.5" font-weight="600" fill="#1b3b7a" text-anchor="middle">/localization/kinematic_state</text>
-    <text x="344" y="136" font-size="11" fill="#40567f" text-anchor="middle">Odometry 50 Hz → 5개마다 1개</text>
-    <text x="344" y="151" font-size="10.5" fill="#6a7ba3" text-anchor="middle">과거 16스텝</text>
+    <text x="344" y="115" font-size="11.5" font-weight="600" fill="#1b3b7a" text-anchor="middle">/localization/kinematic_state</text>
+    <text x="344" y="134" font-size="11" fill="#40567f" text-anchor="middle">Odometry 50 Hz → 5개마다 1개</text>
+    <text x="344" y="150" font-size="10.5" fill="#6a7ba3" text-anchor="middle">과거 16스텝</text>
 
     <rect x="461" y="92" width="185" height="66" rx="9" fill="#eef3ec" stroke="#5f8a52" stroke-width="1.4"/>
-    <text x="553" y="117" font-size="13.5" font-weight="600" fill="#2f5427" text-anchor="middle">/planning/mission_planning/route</text>
-    <text x="553" y="136" font-size="11" fill="#4b6b42" text-anchor="middle">LaneletRoute + Lanelet2 지도</text>
-    <text x="553" y="151" font-size="10.5" fill="#6f8c66" text-anchor="middle">선택 입력</text>
+    <text x="553" y="113" font-size="11" font-weight="600" fill="#2f5427" text-anchor="middle">/planning/mission_planning/</text>
+    <text x="553" y="127" font-size="11" font-weight="600" fill="#2f5427" text-anchor="middle">route</text>
+    <text x="553" y="143" font-size="10.5" fill="#4b6b42" text-anchor="middle">LaneletRoute + Lanelet2 지도</text>
+    <text x="553" y="153" font-size="10" fill="#6f8c66" text-anchor="middle">선택 입력</text>
   </g>
 
   <!-- arrows down -->
