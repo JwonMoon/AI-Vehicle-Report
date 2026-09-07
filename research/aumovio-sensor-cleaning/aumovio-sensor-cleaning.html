@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AUMOVIO 센서 세정 시스템 리서치</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#f6f7f9; --surface:#fdfdfd; --surface-2:#eff1f4;
+  --ink:#15181d; --ink-2:#4d545e; --muted:#848a94; --hairline:#e2e5ea;
+  --accent:#1c5cab; --accent-soft:#e6eef8;
+  --warn-bg:#fdf6e7; --warn-edge:#d9a63f;
+  --ok-bg:#e9f6f0; --ok-edge:#1baf7a;
+  --code-bg:#eef0f3;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  font-size:16px;line-height:1.78;-webkit-font-smoothing:antialiased;}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid transparent}
+a:hover{border-bottom-color:var(--accent)}
+
+.layout{display:grid;grid-template-columns:15rem minmax(0,1fr);gap:2.5rem;
+  max-width:76rem;margin:0 auto;padding:0 1.5rem 6rem}
+nav.toc{position:sticky;top:0;align-self:start;max-height:100vh;overflow-y:auto;
+  padding:2.5rem 0 2rem;font-size:.86rem}
+nav.toc .toc-title{font-family:Archivo,sans-serif;font-size:.7rem;font-weight:700;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:.9rem}
+nav.toc a{display:block;color:var(--ink-2);padding:.28rem 0 .28rem .7rem;
+  border-left:2px solid var(--hairline);border-bottom:none;line-height:1.45}
+nav.toc a:hover{color:var(--accent);border-left-color:var(--accent)}
+nav.toc a.sub{padding-left:1.5rem;font-size:.81rem;color:var(--muted)}
+
+main{min-width:0;max-width:50rem}
+header.hero{padding:3.5rem 0 2rem;border-bottom:1px solid var(--hairline)}
+.kicker{font-family:Archivo,sans-serif;font-size:.75rem;font-weight:600;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 .9rem}
+h1{font-family:Archivo,"IBM Plex Sans KR",sans-serif;font-size:clamp(1.8rem,4.4vw,2.5rem);
+  font-weight:800;line-height:1.16;letter-spacing:-.01em;margin:0 0 .5rem;text-wrap:balance}
+.subtitle{color:var(--ink-2);font-size:1.02rem;margin:0 0 1.4rem}
+.byline{color:var(--muted);font-size:.86rem;margin:0}
+.statstrip{display:grid;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:1px;
+  background:var(--hairline);border:1px solid var(--hairline);border-radius:10px;
+  overflow:hidden;margin-top:1.9rem}
+.stat{background:var(--surface);padding:.9rem 1rem}
+.stat .v{font-family:"IBM Plex Mono",monospace;font-size:1.2rem;font-weight:600;display:block;line-height:1.35}
+.stat .k{font-size:.73rem;color:var(--muted);letter-spacing:.04em}
+
+section{margin-top:3.4rem;scroll-margin-top:1.5rem}
+.eyebrow{font-family:Archivo,sans-serif;font-size:.72rem;font-weight:700;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0 0 .5rem}
+.eyebrow .no{color:var(--accent);margin-right:.5em;font-family:"IBM Plex Mono",monospace}
+h2{font-family:Archivo,"IBM Plex Sans KR",sans-serif;font-size:1.5rem;font-weight:700;
+  margin:0 0 1rem;letter-spacing:-.005em;text-wrap:balance}
+h3{font-family:Archivo,"IBM Plex Sans KR",sans-serif;font-size:1.06rem;font-weight:700;
+  margin:2.2rem 0 .6rem;scroll-margin-top:1.5rem}
+p{margin:0 0 1rem}
+ul,ol{margin:0 0 1rem;padding-left:1.3rem}
+li{margin-bottom:.45rem}
+code{font-family:"IBM Plex Mono",monospace;font-size:.84em;background:var(--code-bg);
+  padding:.12em .4em;border-radius:4px}
+blockquote{margin:1.25rem 0;padding:.2rem 0 .2rem 1.1rem;border-left:3px solid var(--accent);
+  color:var(--ink-2);font-size:.95rem}
+
+table{width:100%;border-collapse:collapse;margin:1.3rem 0;font-size:.88rem;
+  background:var(--surface);border:1px solid var(--hairline);border-radius:8px;overflow:hidden}
+th,td{text-align:left;padding:.6rem .75rem;border-bottom:1px solid var(--hairline);vertical-align:top}
+th{background:var(--surface-2);font-weight:700;font-size:.8rem;letter-spacing:.02em}
+tr:last-child td{border-bottom:none}
+.tablewrap{overflow-x:auto}
+
+figure{margin:1.9rem 0}
+figure img{width:100%;height:auto;display:block;background:#fff;
+  border:1px solid var(--hairline);border-radius:10px}
+figure.photos{display:grid;gap:.8rem}
+figure.photos .row{display:grid;gap:.8rem;grid-template-columns:repeat(auto-fit,minmax(11rem,1fr))}
+figure.photos img{border-radius:10px;padding:.6rem}
+figcaption{font-size:.8rem;color:var(--muted);margin-top:.6rem;line-height:1.6}
+figcaption strong{color:var(--ink-2)}
+
+.callout{border-radius:0 8px 8px 0;padding:.85rem 1.15rem;margin:1.5rem 0;font-size:.9rem;color:var(--ink-2)}
+.callout.warn{background:var(--warn-bg);border-left:3px solid var(--warn-edge)}
+.callout.ok{background:var(--ok-bg);border-left:3px solid var(--ok-edge)}
+.callout.note{background:var(--accent-soft);border-left:3px solid var(--accent)}
+.callout strong{color:var(--ink)}
+
+.tldr{display:grid;gap:.9rem;margin:1.6rem 0}
+.tldr .item{background:var(--surface);border:1px solid var(--hairline);
+  border-left:4px solid var(--accent);border-radius:10px;padding:1rem 1.2rem;font-size:.95rem}
+.tldr .n{font-family:"IBM Plex Mono",monospace;font-weight:600;color:var(--accent);margin-right:.5em}
+
+footer{margin-top:4rem;padding-top:1.6rem;border-top:1px solid var(--hairline);
+  font-size:.82rem;color:var(--muted)}
+
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr;gap:0}
+  nav.toc{position:static;max-height:none;padding:2rem 0 0;
+    border-bottom:1px solid var(--hairline);padding-bottom:1.2rem}
+  nav.toc .links{display:flex;flex-wrap:wrap;gap:.3rem .9rem}
+  nav.toc a{border-left:none;padding-left:0}
+  nav.toc a.sub{display:none}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<nav class="toc">
+  <div class="toc-title">목차</div>
+  <div class="links">
+    <a href="#tldr">0. 세 줄 요약</a>
+    <a href="#why">1. 왜 안전 문제인가</a>
+    <a href="#company">2. AUMOVIO 개요</a>
+    <a href="#tech">3. 기술 해부</a>
+    <a href="#tech-4" class="sub">3.1 세정 4대 수단</a>
+    <a href="#tech-coanda" class="sub">3.2 Coanda 라이다·카메라</a>
+    <a href="#tech-wind" class="sub">3.3 윈드실드·wet-arm</a>
+    <a href="#tech-fluid" class="sub">3.4 유체 공급 체인</a>
+    <a href="#tech-trigger" class="sub">3.5 검출·트리거</a>
+    <a href="#integration">4. 시스템 통합</a>
+    <a href="#competition">5. 경쟁 구도</a>
+    <a href="#divest">6. 세정 사업 매각</a>
+    <a href="#takeaway">7. 시사점</a>
+    <a href="#sources">8. 출처</a>
+    <a href="#unknown">부록. 미확인 항목</a>
+  </div>
+</nav>
+
+<main>
+<header class="hero">
+  <p class="kicker">Research · Vehicle Perception Availability</p>
+  <h1>AUMOVIO 센서 세정 시스템</h1>
+  <p class="subtitle">라이다·카메라를 닦는 기술의 해부, 그리고 그 사업이 회사 밖으로 나가는 순간</p>
+  <p class="byline">작성일 2026-09-07 · 모든 사실 주장에 출처 병기 · 공식 / 서드파티 / 학술 / 시장조사 구분 표기</p>
+  <div class="statstrip">
+    <div class="stat"><span class="v">Coanda</span><span class="k">곡면 세정 원리</span></div>
+    <div class="stat"><span class="v">2.5–4.0 L</span><span class="k">리저버 용량</span></div>
+    <div class="stat"><span class="v">2.0–4.0 bar</span><span class="k">펌프 압력</span></div>
+    <div class="stat"><span class="v">40% / 50%</span><span class="k">fluidic / wet-arm 절수</span></div>
+    <div class="stat"><span class="v">~700명</span><span class="k">CERTINA 이관 인력</span></div>
+  </div>
+  <div class="callout warn" style="margin-top:1.6rem">
+    <strong>본 보고서의 출처 원칙</strong> — 공식 발표, 서드파티 보도, 학술 연구, 시장조사 추정을 구분해 표기한다.
+    공개 자료로부터 재구성·해석한 부분은 <strong>“본 보고서 해석”</strong>으로 명시하고, 확인하지 못한 항목은
+    <strong>“출처 미확인”</strong>으로 남긴다. 미확인 항목은 <a href="#unknown">부록</a>에 모두 열거했다.
+  </div>
+</header>
+
+<section id="tldr">
+  <p class="eyebrow"><span class="no">00</span>Summary</p>
+  <h2>세 줄 요약</h2>
+  <div class="tldr">
+    <div class="item"><span class="n">1</span>AUMOVIO의 세정 시스템은 <strong>공기·액체·가열·검출</strong> 네 수단의 조합이며,
+      라이다 커버(lidome)와 카메라 렌즈에는 <strong>Coanda 효과</strong>로 곡면 전체를 적은 유량으로 덮는다.</div>
+    <div class="item"><span class="n">2</span>설계를 지배하는 제약은 <strong>“세정액은 2.5~4.0 L뿐인 유한 자원”</strong>이다.
+      먼지도 물방울도 공기로 처리하고, 액체는 진흙·유막에만 쓰는 계층 전략이 제품 설명 전반에 일관된다.</div>
+    <div class="item"><span class="n">3</span>그런데 <strong>2026년 9월 3일, AUMOVIO는 이 세정 사업 전체를 CERTINA Group에 매각하기로 합의했다.</strong>
+      센서와 인지 SW는 남고 세정 하드웨어는 나가면서, 사내 조율이던 “검출–세정” 인터페이스가 회사 간 인터페이스가 된다.</div>
+  </div>
+  <p><strong>왜 지금인가.</strong> 자율주행 리서치는 대개 인지·추론 모델에 집중한다. 그러나 아무리 좋은 VLA도
+    <strong>렌즈에 진흙이 묻으면 입력 자체가 사라진다.</strong> 세정은 인지 스택의 최하단 가용성 레이어이고,
+    그 레이어가 산업 구조적으로 재편되는 시점이 지금이다.</p>
+</section>
+
+<section id="why">
+  <p class="eyebrow"><span class="no">01</span>Why it matters</p>
+  <h2>왜 센서 세정이 안전 문제인가</h2>
+
+  <h3>오염은 “고장”이 아니라 “성능 한계”다</h3>
+  <p>카메라가 정상 동작하는데 렌즈가 더러워 물체를 놓치는 상황은 부품 고장이 아니다. 이런 위험은 기능안전(ISO 26262)이 아니라
+    <strong>SOTIF(ISO 21448)</strong>의 영역이다. ISO 21448은 고장이 아닌 <strong>기능적 불충분(functional insufficiencies)</strong>에서
+    비롯되는 위험을 다루며, 그것을 유발하는 환경 조건을 <strong>트리거링 컨디션</strong>으로 식별하도록 요구한다.
+    (<a href="https://www.iso.org/standard/70939.html">ISO 21448</a> · 해설 <a href="https://report.asam.net/iso-21448-sotif">ASAM</a>)</p>
+  <p>즉 <strong>진흙·서리·물방울은 SOTIF의 트리거링 컨디션이고, 세정 시스템은 그것을 물리적으로 제거하는 대응책이다.</strong>
+    이 관점에서 세정의 요구사양은 “깨끗해 보이면 됨”이 아니라 <strong>ODD 내 인지 성능 유지</strong>라는 정량 목표가 된다.</p>
+
+  <h3>카메라는 특히 취약하다</h3>
+  <blockquote>“Cameras have a much higher degradation in performance due to soiling compared to other sensors.
+    Thus it is critical to accurately detect soiling on the cameras, particularly for higher levels of autonomous driving.”
+    — SoilingNet (<a href="https://arxiv.org/abs/1905.01492">arXiv:1905.01492</a>)</blockquote>
+  <p>SoilingNet은 오염을 <strong>불투명(opaque)</strong>과 <strong>투명(transparent)</strong>으로 나눈다. 이 구분은 세정 설계에 직결된다 —
+    불투명 오염(진흙·새똥)은 액체로 밀어내야 하지만, 투명 오염(물방울·유막)은 <strong>공기만으로도 제거 가능</strong>하다.
+    AUMOVIO가 “공기로 물방울 제거”, “공기만으로 먼지 제거 — 액체 절약”을 별도 항목으로 강조하는 배경이다.
+    <em>(대응 관계 정리는 본 보고서 해석)</em></p>
+  <p>후속 연구 <a href="https://arxiv.org/abs/1912.02249v2">“Let’s Get Dirty”(arXiv:1912.02249)</a>는 GAN으로 오염 패턴을 합성해
+    학습에 추가하면 검출 정확도가 <strong>18% 향상</strong>된다고 보고했다. 세정 하드웨어만큼이나
+    <strong>“언제 닦을지” 판단하는 소프트웨어가 별도의 학습 문제</strong>임을 보여준다.</p>
+  <div class="callout note">최근 연구 <a href="https://arxiv.org/pdf/2605.21446">“Lost in Fog”(arXiv:2605.21446)</a>는
+    안개·오염·가림 등 센서 교란이 주행 VLA의 추론을 무너뜨린다는 점을 다룬다.
+    <strong>정량 수치는 본 조사에서 원문 표를 직접 확인하지 못해 “출처 미확인”으로 남긴다.</strong></div>
+
+  <h3>열화 전파 경로</h3>
+  <figure>
+    <img src="images/g1-soiling-chain.svg" alt="센서 오염이 인지 파이프라인에 전파되는 경로">
+    <figcaption><strong>그림 1.</strong> 물리 오염 → 신호 열화 → 인지 저하 → 판단 오류 → 기능 축퇴. 세정과 검출은 앞 두 단계에서만 개입할 수 있다.
+      <strong>본 보고서 자작 도해.</strong> 근거: <a href="https://arxiv.org/abs/1905.01492">SoilingNet</a>,
+      <a href="https://www.iso.org/standard/70939.html">ISO 21448</a>,
+      <a href="https://www.aumovio.com/en/solutions/driver-assistance/optical-sensors-and-windshield-cleaning-systems.html">AUMOVIO 제품 페이지</a></figcaption>
+  </figure>
+  <p>핵심은 <strong>비가역성</strong>이다. 렌즈가 가린 광자는 알고리즘으로 복원되지 않는다. 오염 보정 네트워크는 “가려졌다”는 사실을
+    알려줄 수는 있어도 잃어버린 정보를 만들어내지 못한다. 세정은 사슬을 끊는 <strong>유일한 물리적 수단</strong>이다.
+    <em>(본 보고서 해석)</em></p>
+</section>
+
+<section id="company">
+  <p class="eyebrow"><span class="no">02</span>Company</p>
+  <h2>AUMOVIO는 어떤 회사인가</h2>
+  <div class="tablewrap"><table>
+    <tr><th>항목</th><th>내용</th><th>출처</th></tr>
+    <tr><td>출범</td><td>2025년 9월 18일 프랑크푸르트 상장 (Continental 스핀오프)</td><td><a href="https://www.continental.com/en/investors/events/spin-off-automotive/">Continental IR</a></td></tr>
+    <tr><td>상장 첫날</td><td>주가 €36.60, 시가총액 약 €37억</td><td><a href="https://www.bloomberg.com/news/articles/2025-09-18/aumovio-starts-trading-in-frankfurt-after-continental-spinoff">Bloomberg</a></td></tr>
+    <tr><td>2025년 실적</td><td>조정 매출 약 €18.5십억, 임직원 약 82,000명, 80개 이상 거점</td><td><a href="https://www.aumovio.com/en/company/about-us/facts-and-figures.html">Facts &amp; Figures</a></td></tr>
+    <tr><td>사업부</td><td>ACM(자율·상용 모빌리티) · ANS(아키텍처·네트워크) · SAM(세이프티·모션) · UX</td><td>동일</td></tr>
+    <tr><td>파트너십</td><td>Aurora(자율주행 트럭), Ambarella, Horizon Robotics</td><td>동일</td></tr>
+  </table></div>
+  <p>세정 사업은 ACM 산하 <strong>“Optical Sensors &amp; Windshield Cleaning Systems”</strong> 제품군에 속하며,
+    조직상 <strong>Head of Washer Systems</strong>(Petr Vanicky)가 이끄는 단위였다.</p>
+  <p>뿌리는 Continental 시절이다. Continental Automotive Systems는 이미 <strong>2012년 12월 6일</strong>
+    “Vehicle mounted optical and sensor cleaning system”(<a href="https://patents.google.com/patent/US20130146577A1/en">US20130146577A1</a>)을 출원했고,
+    거기에는 <strong>세정 노즐 + 열선 코일 또는 PTC 칩 제상 소자</strong>라는, 오늘날 제품에도 그대로 남아 있는 조합이 청구되어 있다.</p>
+</section>
+
+<section id="tech">
+  <p class="eyebrow"><span class="no">03</span>Technology</p>
+  <h2>기술 해부</h2>
+
+  <h3 id="tech-4">3.1 세정의 4대 수단</h3>
+  <div class="tablewrap"><table>
+    <tr><th>수단</th><th>원문 근거 (AUMOVIO 공식)</th><th>역할</th></tr>
+    <tr><td><strong>공기 (air)</strong></td><td>“Removing of water droplets with pressurized air to ensure the lidar availability and sensitivity…” / “Using air only to remove dust – saves liquid”</td><td>물방울·먼지 제거, 액체 절약</td></tr>
+    <tr><td><strong>액체 (fluid)</strong></td><td>“Cleaning of lidome with pressurized liquid using Coanda effect”</td><td>진흙·유막 등 부착성 오염 제거</td></tr>
+    <tr><td><strong>가열 (heating)</strong></td><td>“Self-regulating heater with Positive Temperature Coefficient (PTC)” / “Nozzle with heating harmonized with camera”</td><td>결빙 방지, 노즐 동결 방지</td></tr>
+    <tr><td><strong>검출 (detection)</strong></td><td>“intelligent applications” — 알고리즘 상세는 미공개</td><td>세정 트리거 판단</td></tr>
+  </table></div>
+  <p style="font-size:.85rem;color:var(--muted)">인용 전부 <a href="https://www.aumovio.com/en/solutions/driver-assistance/optical-sensors-and-windshield-cleaning-systems.html">AUMOVIO 제품 페이지</a> 2026-09-07 수집분.
+    전문은 <a href="reference/aumovio-product-page-extract.txt">reference/aumovio-product-page-extract.txt</a>에 보관.</p>
+
+  <figure>
+    <img src="images/g2-cleaning-matrix.svg" alt="세정 4대 수단과 오염 유형 적합도 매트릭스">
+    <figcaption><strong>그림 2.</strong> 수단별 적합도 매트릭스. <strong>수단 목록과 “먼지는 공기만으로” 원칙은 AUMOVIO 공식 설명</strong>,
+      오염 유형별 적합도 판정은 <strong>본 보고서 해석</strong>.
+      출처: <a href="https://www.aumovio.com/en/solutions/driver-assistance/optical-sensors-and-windshield-cleaning-systems.html">aumovio.com</a></figcaption>
+  </figure>
+  <div class="callout ok"><strong>설계 철학 — “가장 싼 수단부터 쓴다.”</strong> 공기는 재생 가능하지만 세정액은 리저버가 비면 끝이다.
+    L4 로보택시가 하루를 버티려면 액체 없이 견뎌야 하고, 이것이 <strong>가용 운행 시간을 직접 제한</strong>한다. <em>(본 보고서 해석)</em></div>
+
+  <h3 id="tech-coanda">3.2 라이다 lidome / 카메라 렌즈 — Coanda 효과</h3>
+  <p>AUMOVIO의 라이다 노즐과 카메라 노즐은 기술 설명이 거의 동일하다. 둘 다 다음을 명시한다.</p>
+  <ul>
+    <li>가압 액체 + <strong>Coanda 효과</strong>로 lidome / 렌즈 세정</li>
+    <li>가압 공기로 물방울 제거 → 악조건에서도 <strong>가용성(availability)·감도(sensitivity)</strong> 유지</li>
+    <li>먼지는 <strong>공기만</strong> 사용 — 액체 절약</li>
+    <li><strong>배수(draining) 기능</strong></li>
+    <li>카메라와 <strong>조화된(harmonized) 가열 사양</strong></li>
+    <li><strong>평면·원형 라이다 모두 대응</strong>, 최소 설치 공간</li>
+  </ul>
+  <figure>
+    <img src="images/g3-coanda.svg" alt="Coanda 효과 기반 lidome 세정 원리">
+    <figcaption><strong>그림 3.</strong> Coanda 효과 세정 원리. <strong>“Coanda 효과 사용”은 AUMOVIO 공식 기술 설명</strong>,
+      좌우 비교 도해와 유동 묘사는 <strong>본 보고서 자작 개념도</strong>.</figcaption>
+  </figure>
+  <p><strong>Coanda 효과란</strong> 오리피스에서 분출된 제트가 인접 표면을 따라 흐르려는 경향으로, 제트가 주변 유체를 끌어들이며
+    제트를 따라 저압 영역이 형성되기 때문에 생긴다.
+    (<a href="https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/12220733">정의 근거 — 미국 특허 12,220,733 배경 설명</a>)</p>
+  <p>라이다 커버는 반구 또는 원통 곡면이다. 직분사 제트는 곡률이 커지는 지점에서 표면에서 박리되어 세정 사각을 남긴다.
+    Coanda 노즐은 제트를 곡면에 <strong>붙여서 활주</strong>시키므로 <strong>같은 유량으로 훨씬 넓은 면적을 덮는다.</strong>
+    세정액이 유한 자원임을 고려하면 이는 성능 개선이 아니라 <strong>운행 가능 시간을 늘리는 설계 선택</strong>이다.
+    <em>(효과 해석은 본 보고서)</em></p>
+  <p><strong>배수 기능</strong>도 짚어둘 만하다. 세정 후 남은 액체는 그 자체로 광학 왜곡을 만들고, 영하에서는 얼어붙어 더 나쁜 오염이 된다.
+    배수는 “세정 후 상태”를 관리하는 기능이다. <em>(본 보고서 해석)</em></p>
+  <figure class="photos">
+    <div class="row">
+      <img src="images/official/nozzle-solutions-lidar-nozzle-air-and-liquid.png" alt="AUMOVIO 라이다 노즐">
+      <img src="images/official/nozzle-solutions-camera-nozzle-air-and-liquid.png" alt="AUMOVIO 카메라 노즐">
+    </div>
+    <figcaption><strong>그림 4.</strong> AUMOVIO 라이다 노즐(왼쪽)과 카메라 노즐(오른쪽) 제품 이미지.
+      출처: <a href="https://www.aumovio.com/en/solutions/driver-assistance/optical-sensors-and-windshield-cleaning-systems.html">aumovio.com</a> (© AUMOVIO SE)</figcaption>
+  </figure>
+
+  <h3 id="tech-wind">3.3 윈드실드 노즐 4종과 wet-arm</h3>
+  <p>윈드실드 세정은 자율주행과 무관해 보이지만, <strong>전방 카메라 대부분이 윈드실드 뒤에 있다.</strong>
+    윈드실드가 더러우면 카메라도 더럽다. 이 사업이 카메라 세정과 같은 조직에 있는 이유다. <em>(본 보고서 해석)</em></p>
+  <div class="tablewrap"><table>
+    <tr><th>노즐 기술</th><th>특징 (모두 AUMOVIO 공식)</th></tr>
+    <tr><td><strong>ball</strong></td><td>볼 조인트 — 분사각 조정 가능</td></tr>
+    <tr><td><strong>fluidic</strong></td><td>유체 진동으로 부채꼴 스윕. <strong>볼 노즐 대비 물 소비 최대 40% 절감.</strong> 유체 인서트 형상 변경으로 분사 패턴 조절</td></tr>
+    <tr><td><strong>multi-spray</strong></td><td>다공 분사</td></tr>
+    <tr><td><strong>laser-drilled</strong></td><td>레이저 미세 가공 노즐</td></tr>
+  </table></div>
+  <p>공통 설계 요소로 <strong>동일 하우징 설계</strong>(히터·체크밸브 유무와 무관하게 공용),
+    <strong>짧은 응답시간을 위한 통합 체크밸브</strong>, <strong>PTC 자기조절 히터</strong>가 명시되어 있다.</p>
+  <p><strong>wet-arm(와이퍼 암 일체형)</strong>은 세정액을 블레이드 <strong>바로 앞</strong>에 공급한다. 공식 설명이 드는 효과:</p>
+  <ul>
+    <li>기존 노즐 대비 <strong>물 소비 최대 50% 절감</strong>, 더 나은 세정 결과</li>
+    <li>분사 중 <strong>운전자 시야를 방해하지 않음</strong></li>
+    <li>노즐이 블레이드 뒤 슬립스트림 → <strong>제트가 주행풍·차속과 무관</strong></li>
+    <li>굽힘 사이클을 견디는 고유연 저항선(히터), 통합 체크밸브, 전기·유압 결합 커넥터</li>
+    <li>보닛 힌지를 넘는 호스 배선 불필요 → <strong>OEM 조립 시간 단축</strong>, 윈드실드 상단 오버스프레이 감소</li>
+  </ul>
+  <figure>
+    <img src="images/g6-nozzle-types.svg" alt="윈드실드 노즐 기술 4종과 wet-arm 시스템">
+    <figcaption><strong>그림 5.</strong> 노즐 기술 4종과 wet-arm 구조. <strong>수치(40%·50%)와 기술 목록은 AUMOVIO 공식 사양</strong>,
+      스프레이 패턴 묘사는 <strong>본 보고서 자작 개념도</strong>.</figcaption>
+  </figure>
+  <figure class="photos">
+    <div class="row" style="max-width:22rem"><img src="images/official/windscreen-cleaning.png" alt="AUMOVIO 윈드실드 세정 노즐"></div>
+    <figcaption><strong>그림 6.</strong> AUMOVIO 윈드실드 세정 노즐.
+      출처: <a href="https://www.aumovio.com/en/solutions/driver-assistance/optical-sensors-and-windshield-cleaning-systems.html">aumovio.com</a> (© AUMOVIO SE)</figcaption>
+  </figure>
+
+  <h3 id="tech-fluid">3.4 유체 공급 체인 — 리저버에서 노즐까지</h3>
+  <p>노즐만으로는 시스템이 되지 않는다. AUMOVIO는 <strong>분배 컴포넌트</strong> 전체를 함께 공급한다.</p>
+  <div class="tablewrap"><table>
+    <tr><th>구성 요소</th><th>공개 사양 (AUMOVIO 공식)</th></tr>
+    <tr><td><strong>리저버</strong></td><td>블로우 성형 = PE HD / 사출 성형 = PP. 윈드실드용 용량 <strong>2.5 ~ 4.0 L</strong>. 레벨 센서는 리드 스위치 또는 2-pin. 필러넥은 블로우·사출·코러게이트 선택. 펌프 통합으로 부품 수 감소, 박육 설계로 경량화</td></tr>
+    <tr><td><strong>펌프</strong></td><td>단일 또는 이중 토출구. 압력 <strong>2.0 ~ 4.0 bar</strong>. 하부·측면 흡입구. 고객 요구에 따른 EMC 보호. AMP, K-jetronic 등 고객별 전기 인터페이스. 자사 표현으로 “유럽 최대 펌프 유통사”</td></tr>
+    <tr><td><strong>호스</strong></td><td>코러게이트: PA·PP·PA/PP. 고무: EPDM·TPV. 압력 손실 저감용 대구경 옵션. <strong>공기·액체 분리 배관</strong></td></tr>
+    <tr><td><strong>커넥터</strong></td><td>전/후방 구분 <strong>색상 클립</strong>. 2세대(고온 내성, 청각적 클릭 체결) / 3세대(코러게이트 직결). 세대 혼용으로 비용 절감. <strong>레이저 용접 — 탄소발자국 감소</strong></td></tr>
+  </table></div>
+  <figure>
+    <img src="images/g4-fluid-chain.svg" alt="세정 유체 공급 체인 블록도">
+    <figcaption><strong>그림 7.</strong> 리저버 → 펌프 → 호스 → 노즐 체인. <strong>괄호 안 수치는 모두 AUMOVIO 공개 사양</strong>,
+      공기 경로 배치와 분기 구조는 공개 설명을 바탕으로 한 <strong>본 보고서 재구성</strong>.</figcaption>
+  </figure>
+  <figure class="photos">
+    <div class="row">
+      <img src="images/official/washers-reservoirs.png" alt="AUMOVIO 리저버">
+      <img src="images/official/washer-systems-pumps.png" alt="AUMOVIO 워셔 펌프">
+      <img src="images/official/hoses-and-connectors.png" alt="AUMOVIO 호스와 커넥터">
+    </div>
+    <figcaption><strong>그림 8.</strong> 분배 컴포넌트 — 리저버 / 펌프 / 호스·커넥터.
+      출처: <a href="https://www.aumovio.com/en/solutions/driver-assistance/optical-sensors-and-windshield-cleaning-systems.html">aumovio.com</a> (© AUMOVIO SE)</figcaption>
+  </figure>
+  <p><strong>엔지니어링 관점의 관전 포인트</strong> <em>(이하 본 보고서 해석)</em></p>
+  <ul>
+    <li><strong>체크밸브 = 응답 시간.</strong> 세정 지령 후 액체가 노즐까지 가는 시간은 호스 길이와 잔압에 좌우된다. 체크밸브로 라인을 채워두면 지연이 줄어든다. 자율주행에서 “세정 지령 → 시야 회복” 지연은 곧 <strong>기능 축퇴 시간</strong>이다.</li>
+    <li><strong>공기·액체 분리 배관.</strong> 노즐 하나에 유체 경로가 두 개 들어가므로 라우팅·커넥터·패키징 복잡도가 배로 는다. “최소 설치 공간”이 반복 강조되는 배경.</li>
+    <li><strong>PTC 자기조절 히터.</strong> 온도가 오르면 저항이 늘어 스스로 전력을 줄인다. 별도 온도 제어 회로 없이 과열을 막는 방식으로, 2012년 Continental 특허에도 같은 개념이 등장한다.</li>
+    <li><strong>“카메라와 조화된 히터”.</strong> 노즐 히터 발열 사양을 카메라 모듈 열 사양에 맞춘다는 뜻이다. 세정 부품과 센서 부품이 <strong>함께 설계될 때만 가능한 최적화</strong>이며, 뒤의 매각 이슈와 직결된다.</li>
+  </ul>
+
+  <h3 id="tech-trigger">3.5 오염 검출과 세정 트리거</h3>
+  <p>AUMOVIO는 검출 알고리즘을 “intelligent applications”라고만 하고 공개하지 않는다. 다만 스핀오프 이전 Continental이 발표한
+    <strong>Sensor Array</strong>에서 동작 방식의 윤곽이 확인된다. IAA TRANSPORTATION 2022(하노버, 2022-09-20~25)에서 공개된
+    상용차용 모듈로, 윈드실드 위에 장착되는 <strong>레이더 + 라이다 + 카메라 사전 캘리브레이션 통합체</strong>이며
+    <strong>“Camera and Sensor Cleaning, Cooling and Heating”</strong>이 통합되어 있고,
+    <strong>각 센서가 스스로 오염 정도를 감시해 필요할 때 자동으로 세정을 트리거</strong>한다.
+    (<a href="https://www.continental.com/en/press/press-releases/20220915-sensor-array-iaa/">Continental 보도자료 2022-09-15</a>)</p>
+  <figure>
+    <img src="images/g5-trigger-fsm.svg" alt="오염 검출과 세정 트리거 상태 머신">
+    <figcaption><strong>그림 9.</strong> 검출–분류–세정–검증 루프. <strong>“센서 자가 오염 감시 → 자동 세정”과 공기/액체/가열 3단 수단은 공식 근거</strong>,
+      상태 전이 구조와 기능 축퇴 경로는 <strong>본 보고서 재구성</strong>이며 AUMOVIO 공식 사양이 아니다.</figcaption>
+  </figure>
+  <p>이 루프에서 실무적으로 어려운 지점은 셋이다. <em>(본 보고서 해석)</em></p>
+  <ol>
+    <li><strong>오염 유형 분류.</strong> 먼지/물방울/진흙에 따라 최적 수단이 다르다. 잘못 고르면 액체를 낭비하거나(먼지에 액체) 세정에 실패한다(진흙에 공기만).</li>
+    <li><strong>효과 검증.</strong> 세정 후에도 오염이 남으면 재시도하고, 한계를 넘으면 해당 센서를 신뢰 불가로 보고 기능을 축퇴시켜야 한다. 이 판단은 SOTIF 논증의 일부가 된다.</li>
+    <li><strong>자원 예산.</strong> 남은 세정액으로 목적지까지 갈 수 있는가. 세정 제어기가 아니라 차량 수준 자원 관리자가 다뤄야 할 문제로 올라간다.</li>
+  </ol>
+</section>
+
+<section id="integration">
+  <p class="eyebrow"><span class="no">04</span>Integration</p>
+  <h2>시스템 통합 관점</h2>
+  <h3>센서 수가 늘면 세정은 비선형으로 는다</h3>
+  <p>L2+ 차량의 카메라 세정점은 몇 개면 충분하지만, L4 로보택시는 라이다 여러 대 + 서라운드 카메라와 그 각각의 세정점을 갖는다.
+    세정점마다 <strong>노즐 + 액체 라인 + 공기 라인 + 히터 배선 + 밸브</strong>가 필요하다. AUMOVIO가 “모듈형”과 “최소 설치 공간”을
+    반복하는 것은 이 조합 폭발에 대한 대응이다. <em>(본 보고서 해석)</em></p>
+  <p>경쟁사 Kautex도 같은 문제를 명시한다 — Allegro는 “카메라 세정점 하나부터, 카메라·라이다 조합, 고도 자동화 차량의 다중 센서 시스템까지”
+    L1~L5를 커버하도록 스케일링된다. (<a href="https://insights.kautex.com/en-WW/208675-sensor-cleaning-for-highly-automated-driverless-vehicles/">Kautex Insights</a>)</p>
+  <h3>EV·전력 제약</h3>
+  <p>가열은 세정 수단 중 전력을 가장 많이 쓴다. PTC 자기조절 방식이 선택되는 이유 중 하나는 제어 회로 없이
+    <strong>소비 전력에 자연스러운 상한</strong>이 걸리기 때문이다. 겨울철 EV에서 세정 히터·공기 압축·펌프가 동시에 도는 것은
+    주행거리에 직접 영향을 준다. Continental Sensor Array가 세정과 <strong>냉각·가열을 한 묶음</strong>으로 제공하는 것도 같은 맥락이다 —
+    라이다·카메라는 발열체이면서 동시에 결빙 대상이므로 열 관리와 세정은 분리해 설계할 수 없다. <em>(해석은 본 보고서)</em></p>
+  <h3>세정액 예산</h3>
+  <p>리저버 <strong>2.5~4.0 L</strong>, 펌프 <strong>2.0~4.0 bar</strong>. 세정 1회당 소모량은 공개되어 있지 않다(<strong>출처 미확인</strong>).
+    다만 AUMOVIO가 fluidic <strong>40%</strong>, wet-arm <strong>50%</strong> 절감을 전면에 내세우는 것 자체가,
+    이 사업에서 <strong>액체 소비량이 곧 경쟁력 지표</strong>임을 보여준다.</p>
+  <div class="callout warn"><strong>주의.</strong> 40%·50%는 AUMOVIO 자사 발표이며 측정 조건·비교 대상 노즐 사양은 공개되지 않았다.
+    독립 검증 자료는 <strong>출처 미확인</strong>이다.</div>
+</section>
+
+<section id="competition">
+  <p class="eyebrow"><span class="no">05</span>Competition</p>
+  <h2>경쟁 구도</h2>
+  <div class="tablewrap"><table>
+    <tr><th>기업</th><th>대표 제품/기술</th><th>차별점 (공개 자료 기준)</th><th>근거</th></tr>
+    <tr><td><strong>AUMOVIO</strong></td><td>라이다·카메라 노즐, 윈드실드 노즐 4종, wet-arm, 분배 컴포넌트 일체</td><td><strong>Coanda 효과</strong> 곡면 세정, 공기/액체/가열/배수 통합, 리저버·펌프·호스까지 풀 스택, fluidic 40%·wet-arm 50% 절수</td><td><a href="https://www.aumovio.com/en/solutions/driver-assistance/optical-sensors-and-windshield-cleaning-systems.html">공식</a></td></tr>
+    <tr><td><strong>Valeo</strong></td><td>everView 계열, Centricam, 라이다용 가열 텔레스코픽 노즐</td><td>자사 발표 <strong>“세정 없을 때 55% → 있을 때 100% 영상 확보”</strong>, “경쟁사 대비 액체 36% 적게 쓰는 노즐”. Centricam 2019 CLEPA 어워드 3위, 가열 텔레스코픽 노즐 2021 PACE 파이널리스트</td><td><a href="https://www.valeo.com/en/sensor-and-camera-cleaning-system-for-cars/">공식</a></td></tr>
+    <tr><td><strong>Kautex Textron</strong></td><td>Allegro / Allegro Premium</td><td><strong>소프트웨어 제어형 세정 전략</strong> — 속도·날씨·온도·오염 종류를 고려해 세정 방식을 즉석 결정. CAM·PwC AutomotiveINNOVATIONS 어워드 수상</td><td><a href="https://www.businesswire.com/news/home/20220803005184/en/Kautex-Textron-GmbH-Co.-KG-Receives-AutomotiveINNOVATIONS-Award">Businesswire</a></td></tr>
+    <tr><td><strong>Ficosa</strong></td><td>Sensor &amp; Camera Cleaning</td><td>물·공기 <strong>하이브리드 올인원</strong>. 윈드실드 회로에 연결되어 <strong>추가 워터펌프 불필요</strong>, 차내 어디든 장착</td><td><a href="https://www.ficosa.com/products/underhood/sensor-and-camera-cleaning/">공식</a></td></tr>
+    <tr><td><strong>ARaymond</strong></td><td>ADAS·라이다 세정 노즐, 전자밸브</td><td>라이다용 <strong>텔레스코픽 노즐 + 저속 충돌 시 자동 후퇴 기계적 퓨즈</strong>, 노즐 근처/중앙 배치 가능한 전자밸브, 고속 카메라 계측 자체 시험 랩</td><td><a href="https://www.araymond-mobility.com/en/cleaning-systems">공식</a></td></tr>
+    <tr><td><strong>Actasys</strong> (스타트업)</td><td>ActaJet</td><td><strong>유체를 전혀 쓰지 않는 방식</strong> — 두께 3 mm 디스크형 액추에이터가 압축기·팬 없이 최대 120 m/s 공기 펄스 생성. Volvo Cars와 개발 협력</td><td><a href="https://www.fierceelectronics.com/sensors/actasys-uses-tiny-air-jets-clean-and-cool-sensors-self-driving-vehicles">Fierce(서드파티)</a></td></tr>
+  </table></div>
+  <p><strong>기술 노선의 갈림</strong> <em>(본 보고서 해석)</em></p>
+  <ul>
+    <li><strong>유체 효율 노선</strong> — AUMOVIO(Coanda), Valeo(절수 노즐). 액체를 쓰되 최소한으로.</li>
+    <li><strong>기계 노선</strong> — Valeo·ARaymond 텔레스코픽, Bosch의 푸시체인 와이퍼 특허(<a href="https://patents.google.com/patent/WO2024199756A1/en">WO2024199756A1</a>, 출원인 Robert Bosch GmbH, 우선일 2023-03-27). 물리적으로 닦되 평시엔 숨긴다.</li>
+    <li><strong>무유체 노선</strong> — Actasys 합성 제트. 리저버 제약 자체를 없애지만 부착성 오염에는 한계.</li>
+    <li><strong>소프트웨어 노선</strong> — Kautex Allegro Premium. 어떤 수단을 언제 쓸지를 지능화.</li>
+  </ul>
+  <p>특허 지형은 완성차·자율주행 기업까지 넓게 걸쳐 있다. <a href="https://patents.google.com/patent/US20180015907A1/en">US20180015907A1</a>
+    (“Sensor cleaning system for vehicles”, 2016-07-18 출원)은 원래 Uber Technologies가 출원해 현재 <strong>Aurora Operations</strong>가 보유하며,
+    <strong>가압 액체 분사 후 슬릿 개구부의 “에어 나이프”로 건조</strong>하는 2단 방식을 청구한다.
+    AUMOVIO가 Aurora와 자율주행 트럭 파트너십을 맺고 있다는 점을 함께 놓고 보면 흥미로운 대목이다.</p>
+  <div class="callout warn"><strong>시장 규모 — 신뢰도 낮음.</strong> 시장조사기관 추정으로는 자동차 센서 세정 시스템 시장이
+    2025년 US$1.8십억 → 2032년 US$2.7십억, CAGR 6.5%로 제시된다
+    (<a href="https://www.openpr.com/news/4289799/automotive-sensor-cleaning-system-market-to-touch-us-2-7">Persistence Market Research 인용 보도</a>).
+    방법론이 공개되어 있지 않다. 같은 계열 자료의 업체별 점유율 수치와 “2030년까지 US$80십억” 같은 수치는
+    <strong>검증 불가</strong>이므로 본 보고서는 인용하지 않는다.</div>
+</section>
+
+<section id="divest">
+  <p class="eyebrow"><span class="no">06</span>Divestment</p>
+  <h2>그런데 AUMOVIO는 이 사업을 판다</h2>
+  <div class="tablewrap"><table>
+    <tr><th>항목</th><th>내용</th></tr>
+    <tr><td>발표일</td><td><strong>2026년 9월 3일</strong></td></tr>
+    <tr><td>대상</td><td>워셔 및 세정 사업 — <strong>윈도 워셔, 카메라·센서·헤드램프 세정 시스템, 유체 공급 제품</strong></td></tr>
+    <tr><td>인수자</td><td><strong>CERTINA Group</strong> (뮌헨 가족소유 산업 홀딩, 25년 이상 투자 경력, 자동차 부문 연매출 약 <strong>€600백만</strong>)</td></tr>
+    <tr><td>규모</td><td>체코 <strong>Adršpach</strong> 본거지, 사업 전체가 체코에서 운영, 약 <strong>700명</strong></td></tr>
+    <tr><td>이관 범위</td><td><strong>생산, R&amp;D, 전 인력, 관련 사업 활동 전부</strong></td></tr>
+    <tr><td>대가</td><td><strong>비공개</strong> (양측 합의)</td></tr>
+    <tr><td>클로징</td><td>관례적 선행조건 충족 시 <strong>2026년 말</strong> 예상</td></tr>
+  </table></div>
+  <p style="font-size:.85rem;color:var(--muted)">출처: <a href="https://www.aumovio.com/en/company/press/press-releases/20260903-washer-business.html">AUMOVIO 보도자료 2026-09-03</a> ·
+    법률자문 확인 <a href="https://www.klgates.com/KL-Gates-Advises-AUMOVIO-on-Sale-of-Washer-and-Cleaning-Business-Group-to-CERTINA-Group-9-3-2026">K&amp;L Gates</a> ·
+    보도 <a href="https://www.just-auto.com/news/aumovio-certina-agrees-unit-sale/">just-auto</a></p>
+  <p>AUMOVIO CEO <strong>Philipp von Hirschheydt</strong>는 이번 매각을 “핵심 사업에 집중하는 더 큰 전략의 또 한 걸음이며,
+    성장과 가치의 동인으로 식별한 기술로 자원을 옮기는 것”이라는 취지로 설명했다.</p>
+  <p>단독 사건이 아니다. AUMOVIO는 벨기에 Mechelen 사이트를 Dumarey Group에 매각했고, 2026년 말까지 최대 4,000명 감원을 수반하는
+    R&amp;D 개편을 이미 발표한 상태다. (<a href="https://www.just-auto.com/news/aumovio-certina-agrees-unit-sale/">just-auto</a> — 서드파티 보도)</p>
+
+  <h3>무엇이 바뀌는가</h3>
+  <figure>
+    <img src="images/g7-divestment.svg" alt="매각 전후 사업 경계 변화">
+    <figcaption><strong>그림 10.</strong> 매각 전후의 인터페이스 경계. <strong>매각 사실·규모·인용은 AUMOVIO 공식 보도자료</strong>,
+      경계 변화의 함의는 <strong>본 보고서 해석</strong>.</figcaption>
+  </figure>
+  <p>기술적으로 가장 중요한 변화는 <strong>조직 경계의 이동</strong>이다. 지금까지 AUMOVIO는 카메라·라이다 <strong>센서 본체</strong>,
+    그 센서를 닦는 <strong>세정 하드웨어</strong>, 언제 닦을지 판단하는 <strong>인지·검출 소프트웨어</strong>를 한 회사 안에 갖고 있었다.
+    그래서 “카메라와 조화된 히터” 같은 <strong>부품 간 사양 정합</strong>이 사내 조율로 가능했다.
+    매각 후 같은 최적화를 하려면 <strong>회사 간 계약과 사양 협의</strong>가 필요하다. <em>(이하 본 보고서 해석)</em></p>
+  <ul>
+    <li><strong>SOTIF 검증 책임 분담.</strong> “세정 후에도 오염이 남는다”는 시나리오의 안전 논증은 누가 소유하는가 — 센서 공급자, 세정 공급자, OEM?</li>
+    <li><strong>응답 시간 사양.</strong> 세정 지령부터 시야 회복까지의 지연은 두 회사의 부품이 함께 만드는 값이다. 계약상 어느 쪽이 보증하는가.</li>
+    <li><strong>변경 관리.</strong> 카메라 모듈이 개선되면 노즐 히터 사양도 따라 바뀐다. 사내 설계 변경이던 것이 사외 협의 항목이 된다.</li>
+  </ul>
+  <div class="callout ok"><strong>반대 해석도 성립한다.</strong> 세정 하드웨어는 사출·블로우 성형과 유체 부품 중심의 성숙한 기계 사업이고,
+    AUMOVIO의 성장 축(반도체·소프트웨어·HPC·레이더/카메라)과는 원가 구조와 필요 역량이 다르다. 전문 산업 홀딩 산하에서 오히려
+    더 나은 투자를 받을 수 있고, AUMOVIO는 세정을 구매 부품으로 다루면 된다. 어느 쪽이 맞았는지는 클로징 이후 실제 공급 계약 구조가
+    드러나야 판단할 수 있다.</div>
+</section>
+
+<section id="takeaway">
+  <p class="eyebrow"><span class="no">07</span>Takeaways</p>
+  <h2>시사점 — 차량 HPC·인지 아키텍처 설계자 체크리스트</h2>
+  <p style="font-size:.85rem;color:var(--muted)">아래는 본 보고서 해석이며 AUMOVIO 공식 권고가 아니다.</p>
+  <ol>
+    <li><strong>오염 검출을 인지 스택의 1급 시민으로.</strong> 오염 마스크는 검출·분할 결과와 함께 다운스트림으로 전달되어야 하고, 가려진 영역의 검출 결과는 신뢰도를 낮춰야 한다.</li>
+    <li><strong>세정을 액추에이터로 모델링하라.</strong> 부가 기능이 아니라 인지 가용성을 회복시키는 액추에이터다. 지령–효과 지연, 성공률, 자원 소모를 갖는 제어 대상이다.</li>
+    <li><strong>세정액을 자원 예산에 포함하라.</strong> 배터리 SoC처럼 세정액 잔량도 ODD 유지 조건이다. L4에서는 “세정액 부족”이 운행 종료 사유가 될 수 있다.</li>
+    <li><strong>오염 유형별 최소 수단 정책.</strong> 먼지에 액체를 쓰면 운행 시간을 낭비한다.</li>
+    <li><strong>열 설계와 세정 설계를 함께.</strong> 히터 사양은 센서 모듈 열 사양에 종속된다. 두 사양이 다른 조직·회사에 있으면 인터페이스를 문서로 못 박아야 한다.</li>
+    <li><strong>공급망 재편을 사양서에 반영하라.</strong> 2026년 말 이후 이 부품군의 공급자는 CERTINA다. 진행 중인 프로그램이라면 변경 관리·품질 보증 주체를 지금 확인해 두는 편이 안전하다.</li>
+    <li><strong>기구식 세정의 공간·신뢰성 비용을 조기에 평가하라.</strong> ARaymond·Bosch·Valeo가 모두 이 방향에 투자하지만, 가동부는 패키징과 고장 모드를 늘린다.</li>
+  </ol>
+</section>
+
+<section id="sources">
+  <p class="eyebrow"><span class="no">08</span>Sources</p>
+  <h2>출처</h2>
+  <h3>공식 발표 · 1차 자료</h3>
+  <div class="tablewrap"><table>
+    <tr><th>구분</th><th>자료</th></tr>
+    <tr><td>AUMOVIO</td><td><a href="https://www.aumovio.com/en/solutions/driver-assistance/optical-sensors-and-windshield-cleaning-systems.html">Optical Sensors &amp; Windshield Cleaning Systems 제품 페이지</a> (2026-09-07 수집)</td></tr>
+    <tr><td>AUMOVIO</td><td><a href="https://www.aumovio.com/en/company/press/press-releases/20260903-washer-business.html">세정 사업 CERTINA 매각 보도자료 (2026-09-03)</a></td></tr>
+    <tr><td>AUMOVIO</td><td><a href="https://www.aumovio.com/en/company/about-us/facts-and-figures.html">Facts and Figures</a></td></tr>
+    <tr><td>Continental</td><td><a href="https://www.continental.com/en/press/press-releases/20220915-sensor-array-iaa/">Sensor Array 보도자료 (2022-09-15, IAA TRANSPORTATION)</a></td></tr>
+    <tr><td>Continental</td><td><a href="https://www.continental.com/en/investors/events/spin-off-automotive/">스핀오프 IR 페이지</a></td></tr>
+    <tr><td>K&amp;L Gates</td><td><a href="https://www.klgates.com/KL-Gates-Advises-AUMOVIO-on-Sale-of-Washer-and-Cleaning-Business-Group-to-CERTINA-Group-9-3-2026">AUMOVIO 매각 법률자문 발표</a></td></tr>
+    <tr><td>Valeo</td><td><a href="https://www.valeo.com/en/sensor-and-camera-cleaning-system-for-cars/">Sensor and camera cleaning system</a></td></tr>
+    <tr><td>Ficosa</td><td><a href="https://www.ficosa.com/products/underhood/sensor-and-camera-cleaning/">Sensor and camera cleaning</a></td></tr>
+    <tr><td>ARaymond</td><td><a href="https://www.araymond-mobility.com/en/cleaning-systems">Cleaning systems</a></td></tr>
+    <tr><td>Kautex</td><td><a href="https://insights.kautex.com/en-WW/208675-sensor-cleaning-for-highly-automated-driverless-vehicles/">Sensor Cleaning for Highly Automated Driverless Vehicles</a></td></tr>
+  </table></div>
+
+  <h3>특허</h3>
+  <div class="tablewrap"><table>
+    <tr><th>번호</th><th>제목</th><th>출원인 / 보유자</th></tr>
+    <tr><td><a href="https://patents.google.com/patent/US20130146577A1/en">US20130146577A1</a></td><td>Vehicle mounted optical and sensor cleaning system (2012-12-06 출원)</td><td>Continental Automotive Systems</td></tr>
+    <tr><td><a href="https://patents.google.com/patent/US20180015907A1/en">US20180015907A1</a></td><td>Sensor cleaning system for vehicles (2016-07-18 출원)</td><td>Uber Technologies → Aurora Operations</td></tr>
+    <tr><td><a href="https://patents.google.com/patent/WO2024199756A1/en">WO2024199756A1</a></td><td>Lidar cleaning system (우선일 2023-03-27)</td><td>Robert Bosch GmbH</td></tr>
+  </table></div>
+
+  <h3>학술 연구 · 표준</h3>
+  <div class="tablewrap"><table>
+    <tr><th>자료</th><th>내용</th></tr>
+    <tr><td><a href="https://arxiv.org/abs/1905.01492">SoilingNet (arXiv:1905.01492)</a></td><td>서라운드뷰 카메라 오염 검출, 불투명/투명 오염 분류</td></tr>
+    <tr><td><a href="https://arxiv.org/abs/1912.02249v2">Let’s Get Dirty (arXiv:1912.02249)</a></td><td>GAN 기반 오염 데이터 증강 → 검출 정확도 18% 향상</td></tr>
+    <tr><td><a href="https://arxiv.org/pdf/2605.21446">Lost in Fog (arXiv:2605.21446)</a></td><td>센서 교란이 주행 VLA 추론에 미치는 영향 (<strong>정량 수치 미확인</strong>)</td></tr>
+    <tr><td><a href="https://www.iso.org/standard/70939.html">ISO 21448 (SOTIF)</a></td><td>의도된 기능의 안전 — 기능적 불충분·트리거링 컨디션</td></tr>
+  </table></div>
+
+  <h3>서드파티 보도 · 시장조사 (신뢰도 구분 필요)</h3>
+  <div class="tablewrap"><table>
+    <tr><th>자료</th><th>성격</th></tr>
+    <tr><td><a href="https://www.just-auto.com/news/aumovio-certina-agrees-unit-sale/">just-auto — AUMOVIO/CERTINA 매각 보도</a></td><td>업계 매체</td></tr>
+    <tr><td><a href="https://www.bloomberg.com/news/articles/2025-09-18/aumovio-starts-trading-in-frankfurt-after-continental-spinoff">Bloomberg — AUMOVIO 상장 첫날 시가총액</a></td><td>통신사</td></tr>
+    <tr><td><a href="https://www.businesswire.com/news/home/20220803005184/en/Kautex-Textron-GmbH-Co.-KG-Receives-AutomotiveINNOVATIONS-Award">Businesswire — Kautex 수상</a></td><td>기업 배포 보도자료</td></tr>
+    <tr><td><a href="https://www.businesswire.com/news/home/20201202005089/en/Actasys-Announces-%245M-Venture-Capital-Funding-To-Commercialize-Automotive-Sensor-Cleaning-System">Businesswire — Actasys $5M 투자 유치 (2020-12-02)</a></td><td>기업 배포 보도자료</td></tr>
+    <tr><td><a href="https://www.fierceelectronics.com/sensors/actasys-uses-tiny-air-jets-clean-and-cool-sensors-self-driving-vehicles">Fierce Electronics — ActaJet 기술 소개</a></td><td>기술 매체</td></tr>
+    <tr><td><a href="https://www.openpr.com/news/4289799/automotive-sensor-cleaning-system-market-to-touch-us-2-7">openpr — 시장 규모 (Persistence MR 인용)</a></td><td><strong>시장조사 추정, 방법론 비공개 — 신뢰도 낮음</strong></td></tr>
+  </table></div>
+
+  <h3>그림 출처</h3>
+  <div class="tablewrap"><table>
+    <tr><th>그림</th><th>출처</th></tr>
+    <tr><td>1 · 2 · 3 · 5 · 7 · 9 · 10 (SVG 다이어그램)</td><td><strong>본 보고서 자작.</strong> 각 캡션에 근거 자료와 해석 범위 명시</td></tr>
+    <tr><td>4 · 6 · 8 (제품 사진)</td><td>© AUMOVIO SE. <a href="https://www.aumovio.com/en/solutions/driver-assistance/optical-sensors-and-windshield-cleaning-systems.html">aumovio.com</a>에서 2026-09-07 수집</td></tr>
+  </table></div>
+  <p>원문 보관: <a href="reference/aumovio-product-page-extract.txt">reference/aumovio-product-page-extract.txt</a> — AUMOVIO 제품 페이지 본문 전체 추출본(2026-09-07)</p>
+</section>
+
+<section id="unknown">
+  <p class="eyebrow">Appendix</p>
+  <h2>부록. 확인하지 못한 항목 (출처 미확인)</h2>
+  <p>정직한 리서치를 위해, 조사 과정에서 <strong>확인에 실패한 항목</strong>을 명시한다.</p>
+  <div class="tablewrap"><table>
+    <tr><th>항목</th><th>상태</th></tr>
+    <tr><td>세정 1회당 액체 소모량(ml)</td><td>AUMOVIO 공개 자료에 없음</td></tr>
+    <tr><td>라이다·카메라 노즐의 공기 압력·유량 사양</td><td>공개되지 않음 (액체 펌프 2.0~4.0 bar만 공개)</td></tr>
+    <tr><td>PTC 히터 소비 전력</td><td>공개되지 않음</td></tr>
+    <tr><td>오염 검출 알고리즘 상세</td><td>“intelligent applications”로만 기술</td></tr>
+    <tr><td>세정 사업 매출 규모 및 매각가</td><td>양측 비공개</td></tr>
+    <tr><td>세정 제품의 OEM 수주 실적·차종</td><td>확인 실패</td></tr>
+    <tr><td>Valeo everView LiDAR 세정액 소모량 비교 수치</td><td>2차 인용만 확인, 공식 페이지 접근 실패(HTTP 404) — 본문에서 제외</td></tr>
+    <tr><td>업체별 시장 점유율</td><td>방법론 미공개 추정치만 존재 — 본문에서 제외</td></tr>
+    <tr><td>“Lost in Fog”(arXiv:2605.21446) 정량 열화 수치</td><td>원문 표 확인 실패</td></tr>
+  </table></div>
+</section>
+
+<footer>
+  AI-Vehicle-Research · research/aumovio-sensor-cleaning · 작성일 2026-09-07 ·
+  원본 마크다운: <a href="aumovio-sensor-cleaning.md">aumovio-sensor-cleaning.md</a>
+</footer>
+</main>
+</div>
+</body>
+</html>

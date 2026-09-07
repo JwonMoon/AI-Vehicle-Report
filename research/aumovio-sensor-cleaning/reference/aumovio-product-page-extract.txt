@@ -1,0 +1,116 @@
+출처: https://www.aumovio.com/en/solutions/driver-assistance/optical-sensors-and-windshield-cleaning-systems.html
+수집일: 2026-09-07
+
+Discover advanced optical sensors and windshield cleaning systems that ensure clear vision and enhanced safety in all driving conditions.
+1:21
+Driving Vision Forward
+From advanced Level 2+ ADAS features to fully autonomous vehicles, AUMOVIO cleaning systems ensures clean and clear vision in every driving scenario. Our modular and innovative cleaning solutions are designed to overcome environmental challenges (dust, rain, snow, and insects), ensuring your optical sensors stay reliable and available when you need them most.
+With deep expertise in windshield cleaning technologies and precision nozzle design, we deliver performance you can trust.
+At AUMOVIO, we are shaping the future of mobility by making visibility smarter, safer, and more efficient.
+Petr Vanicky
+Head of Washer Systems
+Our distribution components
+Reservoirs
+AUMOVIO offers modular products and solutions with intelligent applications that increase the safety of drivers by cleaning windshields and cameras/sensors in any weather conditions. The AUMOVIO washer fluid reservoir is available in two technologies: injection or blow molded.
+Technical description
+Advantages
+Blow-molded reservoirs: PE HD material
+Injection-molded reservoirs: PP material
+Reservoir volume for windshield cleaning: 2.5L to 4.0L
+Level sensors in different technologies: reed-switch or 2-pin-sensor
+Filler neck: blow molded, injection molded or corrugated
+Scalability: various reservoir volumes
+Reduction of tooling costs by using a common tooling half
+Reduction of logistic cost due to local production partners
+Environmentally friendly: weight reduction by thin-walled design
+Reduction of components with reservoir pump integration
+Pumps
+Soiled windshields and/or cameras/sensors are a risk to any driver. AUMOVIO offers modular products and solutions to increase the safety of drivers by cleaning windshield and cameras/sensors in any weather conditions. AUMOVIO is the largest European pump distributor and supplies pumps for various applications.
+Technical description
+Advantages
+Single or double outlet pump
+EMC protection according to customer requirements
+Pump pressure from 2,0 up to 4,0 bar
+Bottom or side water inlet
+Customer specific electric interfaces, e.g. AMP, K-jetronic, etc.
+Wide-spread portfolio of different pump sizes
+Customer specific water inlets: bottom & side inlet
+Environmentally friendly by weight reduction e.g. mini HLC pump
+Customer specific electric interface
+Various applications covered by various pump pressures
+Hose lines air & liquid
+Soiled windshields or/and cameras/sensors are a risk to any driver. AUMOVIO offers modular products and solutions with intelligent applications that increase the safety of drivers by cleaning windshields cameras/sensors in any weather conditions.
+Technical description
+Advantages
+Corrugated materials: PA (polyamide), PP (polypropylene), PA/PP
+Rubber materials: EPDM and TPV
+Hoses with various diameters; bigger hose for less pressure lost
+Connector clip in different colors to distinguish front and rear hose
+2nd generation connector: high temperature tolerance, easy mounting and dismounting with acoustic click-fastening
+3rd generation connector: High temperature tolerance, direct connection to the corrugated hose
+Hose lines, separately for air and liquid routing
+Flexible pipe lengths
+Easy connection and release of hoses
+Reduced connecting forces
+Simultaneous lens cleaning operation
+Meets highest temperature & pressure specifications
+Cost saving combination of different connector generations
+Laser welding - carbon footprint reduction
+Our nozzle solutions
+Lidar Nozzle air & liquid
+Soiled sensors are a risk to any driver. AUMOVIO offers modular products and solutions with intelligent applications that increase the safety of drivers by cleaning flat and round lidars in any weather conditions.
+Technical description
+Advantages
+Cleaning of lidome with pressurized liquid using Coanda effect
+Removing of water droplets with pressurized air to ensure the lidar availability and sensitivity even at adverse environment conditions
+Using air only to remove dust - saves liquid
+Draining function
+Long experience with heated nozzles and systems
+Nozzle with heating harmonized with camera
+Standardized and customized parts
+Minimized designed space
+Camera nozzle air & liquid
+Soiled cameras are a risk to any driver. AUMOVIO offers modular products and solutions with intelligent applications that increase the safety of drivers by cleaning the cameras in any weather conditions.
+Technical description
+Advantages
+Cleaning of lens with pressurized liquid using coanda effect
+Removing of water droplets with pressurized air to ensure the camera availability and sensitivity even at adverse environment conditions
+Using air only to remove dust - saves liquid
+Draining function
+Long experience with heated nozzles and systems
+Nozzle with heating harmonized with camera
+Standardized and customized parts
+Minimized designed space
+Windshield cleaning nozzles liquid
+The AUMOVIO windscreen washer nozzles are part of the reliable washer system that increases driver’s safety by clean windows in any weather conditions. Windscreen cleaning nozzles can be provided in different technologies: front nozzle, rear window nozzle, heated/unheated technology.
+Technical description
+Advantages
+Nozzle technologies: ball, fluidic, multi-spray and laser-drilled nozzle
+Water consumption reduction of max 40% with fluidic versus ball nozzle
+Same housing design for different equipped models (with or without heater or check valve)
+Integrated check valve for short response time
+Self-regulating heater with Positive Temperature Coefficient (PTC)
+Fluidic nozzles with different spray patterns due to geometry change of fluidic insert
+Nozzles combinable with different sealing
+Long experience with heated nozzles and systems
+Nozzle with heating harmonized with camera
+Standardized and customized parts
+Minimized designed space
+Wet arm system liquid
+The wiper arm cleaning nozzle system from AUMOVIO enables to supply the cleaning liquid directly in front of the wiper blade during the wipe cycle. This measure allows the best utilization of cleaning liquid and can reduce the water consumption compared to conventional nozzles up to 50 percent with better cleaning results and no visual disturbing of the driver while spraying.
+Technical description
+Advantages
+Nozzle technologies: ball joint nozzle (adjustable jet) / fluidic insert
+Heated with heater wire incl. check valve and hose system or unheated
+Nozzles positioned behind wiper blade in slipstream
+Jet is independent of airflow or speed
+High flexible resistance wire to cope with bending cycle
+Integrated check valve for short response time
+Combined connector for electrical and hydraulic interface
+Efficient cleaning, nearly invisible cleaning due to spray directly along the wiper blade
+No disturbing of sight during cleaning process
+Easy to adapt on different wiper arms
+Reduced assembly time at OEM
+No hose routing along the bonnet over the hinge necessary
+Spray time can be adjusted acc. to wipe angle
+Less overspray over the top of the windscreen
