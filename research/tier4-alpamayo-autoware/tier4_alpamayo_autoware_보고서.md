@@ -164,6 +164,41 @@ Alpamayo-R1 논문은 CoC를 "자동 라벨링과 human-in-the-loop 파이프라
 2. 발행 토픽 기본값이 전부 `/alpamayo/` 네임스페이스다 (💻 `:54-57`).
 3. 궤적 길이도 다르다. Autoware 플래닝이 제어에 넘기는 trajectory는 "일반적으로 10초 길이, 0.1초 해상도"인데(🔍 Autoware 문서), Alpamayo 출력은 6.4초 64점이다 (🔍 HF 모델 카드, 💻 코드).
 
+#### "스택 교체"와 "관찰 창구"의 차이
+
+두 표현의 갈림길은 하나다 — **모델 출력이 차량을 움직이느냐.**
+
+**스택 교체라면** 이렇게 된다. Autoware 파이프라인은 원래 이 흐름이다.
+
+```
+Sensing → Perception → Planning → /planning/scenario_planning/trajectory → Control → 조향·가감속
+```
+
+end-to-end VLA를 "통합"한다는 말을 들으면 보통 이걸 상상한다. Perception·Planning 모듈들을 걷어내고 **카메라 → 모델 → 궤적** 한 방으로 대체하는 것. 모델이 낸 궤적이 그대로 `scenario_planning/trajectory` 자리에 들어가고 Control이 그걸 따라간다. 차가 모델 판단대로 움직인다.
+
+**실제로 된 것은 이렇다.**
+
+```
+Sensing ─┬→ Perception → Planning → scenario_planning/trajectory → Control → 차량 주행
+         │                                                  (여기까지 기존 그대로)
+         └→ alpamayo_node → /alpamayo/predicted_trajectory  → RViz 화면
+                          → /alpamayo/reasoning             → 텍스트 로그
+```
+
+노드는 카메라·오도메트리·경로 토픽을 **읽기만** 하고, 결과를 `/alpamayo/*`라는 **아무도 구독하지 않는 별도 이름**으로 뱉는다. 소비자는 RViz(사람 눈)뿐이다. 차는 여전히 기존 규칙 기반 플래너로 간다.
+
+**교체하려면 무엇이 더 필요한가.** 코드상 세 가지가 전부 안 돼 있다.
+
+| 필요한 것 | 현재 상태 |
+|---|---|
+| 토픽 이름을 `/planning/scenario_planning/trajectory`로 리맵 | 저장소 전체에 그 문자열 0건 (💻) |
+| 궤적에 가속도·헤딩 레이트 채우기 | 전부 `0.0` 하드코딩 — 제어기가 쓸 수 없다 (💻 `:563-566`) |
+| 제어 루프 주기 맞추기 | 1.67 FPS. 두 자릿수 배 모자람 (🔍 §6) |
+
+세 번째가 근본 원인이다. **느려서 못 물리고, 못 물리니 관찰용으로 남는다.**
+
+**이게 나쁜 결론은 아니다.** L4 안전 논증에서 요구되는 것은 "왜 그렇게 판단했는가"의 기록이다. 관찰 창구는 그걸 만든다 — 기존 스택의 검증된 안전성은 건드리지 않은 채, 매 장면에 자연어 근거를 붙여 로그로 남긴다. 사고·해제 구간 사후 분석과 롱테일 장면 태깅에 곧바로 쓰인다. 교체를 못 해서 관찰에 머문 것이 아니라, **교체 이전 단계로서 관찰이 먼저 필요한 것**에 가깝다. 다만 발표문의 "integrating it into Autoware"를 스택 교체로 읽으면 실제와 어긋난다.
+
 즉 이 노드는 Autoware의 센서·경로 토픽을 **읽기만 하는 병렬 관찰자**다. 아래 데모 화면이 그 성격을 그대로 보여준다 — 상단은 4개 카메라 입력, 하단은 기존 Autoware의 LiDAR 점군·차선 지도 위에 Alpamayo가 그린 초록 궤적과 자연어 판단이 오버레이된 RViz 화면이다.
 
 ![Alpamayo × Autoware 데모 화면](images/demo-rviz.png)
