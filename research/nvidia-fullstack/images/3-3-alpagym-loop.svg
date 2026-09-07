@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="560" viewBox="0 0 1240 560" font-family="Helvetica, Arial, 'Noto Sans KR', sans-serif" font-size="12.5">
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#4a7a00"/></marker>
+    <marker id="arrb" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#3b6fd6"/></marker>
+  </defs>
+  <rect id="bg" width="1240" height="560" fill="#ffffff"/>
+  <text x="20" y="28" font-size="18" font-weight="bold" fill="#222">AlpaGym 폐루프 강화학습 루프 — AlpaSim(환경) · 정책 · Cosmos-RL(학습기)</text>
+
+  <!-- ===== AlpaSim environment (left) ===== -->
+  <rect x="30" y="70" width="430" height="330" rx="10" fill="#f7fbef" stroke="#76b900" stroke-width="3"/>
+  <text x="245" y="94" text-anchor="middle" font-size="15" font-weight="bold" fill="#222">AlpaSim — 환경 (시뮬레이터)</text>
+  <text x="245" y="112" text-anchor="middle" fill="#666" font-size="11">Python + gRPC 마이크로서비스 · 런타임이 중심 노드</text>
+
+  <rect x="50" y="128" width="180" height="46" fill="#76b900"/>
+  <text x="140" y="148" text-anchor="middle" fill="#fff" font-weight="bold">Runtime</text>
+  <text x="140" y="165" text-anchor="middle" fill="#eef7dd" font-size="10.5">세계 상태 · 로그</text>
+  <rect x="260" y="128" width="180" height="46" fill="#76b900"/>
+  <text x="350" y="148" text-anchor="middle" fill="#fff" font-weight="bold">Renderer</text>
+  <text x="350" y="165" text-anchor="middle" fill="#eef7dd" font-size="10.5">NuRec 기본 / OmniDreams 옵션</text>
+
+  <rect x="50" y="192" width="180" height="46" fill="#c9dd9a"/>
+  <text x="140" y="212" text-anchor="middle" fill="#3f5a10" font-weight="bold">Trafficsim</text>
+  <text x="140" y="229" text-anchor="middle" fill="#3f5a10" font-size="10.5">비자차 액터 · "coming soon"</text>
+  <rect x="260" y="192" width="180" height="46" fill="#76b900"/>
+  <text x="350" y="212" text-anchor="middle" fill="#fff" font-weight="bold">Controller · Physics</text>
+  <text x="350" y="229" text-anchor="middle" fill="#eef7dd" font-size="10.5">차량 모델 · 지면 구속</text>
+
+  <rect x="50" y="256" width="390" height="46" fill="#ffffff" stroke="#76b900" stroke-width="1.5"/>
+  <text x="245" y="276" text-anchor="middle" fill="#222" font-weight="bold">장면: PhysicalAI-Autonomous-Vehicles-NuRec (HF 게이트)</text>
+  <text x="245" y="293" text-anchor="middle" fill="#666" font-size="10.5">public_2601 913장면 · public_2604 1,606장면 · 장면당 약 1.5 GB</text>
+
+  <rect x="50" y="320" width="390" height="62" fill="#ffffff" stroke="#999" stroke-dasharray="4,3"/>
+  <text x="245" y="342" text-anchor="middle" fill="#333" font-weight="bold">Eval (루프 밖)</text>
+  <text x="245" y="360" text-anchor="middle" fill="#666" font-size="10.5">로그를 읽어 메트릭 계산 · AlpaGym에서는 보상 계산으로 대체</text>
+  <text x="245" y="375" text-anchor="middle" fill="#666" font-size="10.5">예: reward=progress_safety (진행 + 안전)</text>
+
+  <!-- ===== Policy (center) ===== -->
+  <rect x="520" y="160" width="200" height="150" rx="10" fill="#dbe9ff" stroke="#3b6fd6" stroke-width="3"/>
+  <text x="620" y="190" text-anchor="middle" font-size="15" font-weight="bold" fill="#1d3f86">정책 (Driver)</text>
+  <text x="620" y="212" text-anchor="middle" fill="#1d3f86" font-weight="bold">Alpamayo 1.5 · 10B</text>
+  <text x="620" y="232" text-anchor="middle" fill="#333" font-size="11">gRPC egodriver 서버</text>
+  <text x="620" y="250" text-anchor="middle" fill="#333" font-size="11">관측(카메라·자차·경로) → 궤적</text>
+  <text x="620" y="276" text-anchor="middle" fill="#666" font-size="10.5">현재 지원 모델은 이것 하나</text>
+  <text x="620" y="292" text-anchor="middle" fill="#666" font-size="10.5">(2 GPU × 40 GB 이상 권장)</text>
+
+  <!-- env <-> policy arrows -->
+  <line x1="460" y1="200" x2="514" y2="200" stroke="#4a7a00" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="487" y="188" text-anchor="middle" fill="#4a7a00" font-size="10.5">관측</text>
+  <line x1="520" y1="270" x2="466" y2="270" stroke="#4a7a00" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="493" y="290" text-anchor="middle" fill="#4a7a00" font-size="10.5">궤적</text>
+  <text x="490" y="240" text-anchor="middle" fill="#666" font-size="10">매 틱 반복</text>
+
+  <!-- ===== Cosmos-RL trainer (right) ===== -->
+  <rect x="780" y="70" width="430" height="330" rx="10" fill="#f5f5f5" stroke="#999" stroke-width="2"/>
+  <text x="995" y="94" text-anchor="middle" font-size="15" font-weight="bold" fill="#222">Cosmos-RL — 학습기 (분산 롤아웃 · 학습)</text>
+  <text x="995" y="112" text-anchor="middle" fill="#666" font-size="11">정책 replica와 롤아웃 replica를 비동기로 운영</text>
+
+  <rect x="800" y="128" width="390" height="50" fill="#ffffff" stroke="#999"/>
+  <text x="995" y="149" text-anchor="middle" fill="#222" font-weight="bold">① 롤아웃 워커</text>
+  <text x="995" y="167" text-anchor="middle" fill="#666" font-size="10.5">장면을 뽑아 AlpaSim 에피소드를 돌리고 관측을 모은다</text>
+  <rect x="800" y="192" width="390" height="50" fill="#ffffff" stroke="#999"/>
+  <text x="995" y="213" text-anchor="middle" fill="#222" font-weight="bold">② 채점 · 아티팩트</text>
+  <text x="995" y="231" text-anchor="middle" fill="#666" font-size="10.5">완료된 에피소드에 보상을 매겨 파일로 남긴다</text>
+  <rect x="800" y="256" width="390" height="50" fill="#ffffff" stroke="#999"/>
+  <text x="995" y="277" text-anchor="middle" fill="#222" font-weight="bold">③ 트레이너: GRPO 한 스텝</text>
+  <text x="995" y="295" text-anchor="middle" fill="#666" font-size="10.5">아티팩트를 읽어 정책을 갱신하고 가중치를 롤아웃 워커에 동기화</text>
+  <rect x="800" y="320" width="390" height="62" fill="#ffffff" stroke="#999" stroke-dasharray="4,3"/>
+  <text x="995" y="342" text-anchor="middle" fill="#333" font-weight="bold">AlpaGym 하니스가 잇는 것</text>
+  <text x="995" y="360" text-anchor="middle" fill="#666" font-size="10.5">host(제어면: 설정·AlpaSim 기동·Slurm) / runtime(GPU: 롤아웃·보상·정책)</text>
+  <text x="995" y="375" text-anchor="middle" fill="#666" font-size="10.5">"어느 하나든 교체할 수 있게 인터페이스를 작게" — README</text>
+
+  <!-- policy <-> trainer arrows -->
+  <line x1="720" y1="200" x2="794" y2="200" stroke="#3b6fd6" stroke-width="2" marker-end="url(#arrb)"/>
+  <text x="757" y="188" text-anchor="middle" fill="#1d3f86" font-size="10.5">에피소드</text>
+  <line x1="800" y1="281" x2="726" y2="281" stroke="#3b6fd6" stroke-width="2" marker-end="url(#arrb)"/>
+  <text x="757" y="300" text-anchor="middle" fill="#1d3f86" font-size="10.5">새 가중치</text>
+
+  <!-- bottom strip -->
+  <rect x="30" y="424" width="1180" height="112" fill="#fafafa" stroke="#ccc"/>
+  <text x="45" y="448" font-weight="bold" fill="#222">한 바퀴가 뜻하는 것</text>
+  <text x="45" y="470" fill="#333">정책이 낸 궤적이 다음 장면을 바꾸고, 그 결과(진행·안전)가 점수가 되어 정책을 고친다. 녹화 영상에 정답을 대 보는 지도학습과 달리, 자기 조향의 결과로 배운다.</text>
+  <text x="45" y="490" fill="#333">3장 2.3절의 "추론과 행동을 같이 강화학습" — Alpamayo 1.5의 RL 후학습이 이 루프다. Cosmos-RL 자체는 7장(활용 패턴 C).</text>
+  <text x="45" y="510" fill="#333">상태: 2026-06-16 공개, "초기 활발 개발" · 처리량·확장·모델 추가 작업 중 · 처리량 수치 미공개 ⚠️</text>
+  <text x="45" y="528" fill="#777" font-size="11">근거: NVlabs/alpagym README·ONBOARDING, NVlabs/alpasim DESIGN.md·data/scenes/README 🔍. 실선 = 코드·문서로 확인. 자체 작성.</text>
+</svg>

@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>부록 A Tier-1이 해야 할 일 — NVIDIA가 주는 것 밖에서 | NVIDIA 차량용 풀스택 SW 조사</title>
+<style>
+:root{
+  --bg:#f6f7f5; --paper:#ffffff; --ink:#1f2421; --muted:#5f6b63; --line:#dfe4df;
+  --accent:#76b900; --accent-ink:#3f6a00; --accent-soft:#eef7dd;
+  --ok:#2e7d32; --ok-bg:#e6f4ea; --src:#1565c0; --src-bg:#e3f0fc; --sec:#8d6e00; --sec-bg:#fff6d6; --warn:#c62828; --warn-bg:#fde8e8;
+  --card:#fbfcfa; --note:#f3f0ff; --note-ink:#4a3a9c; --sidebar-w:280px;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#141715; --paper:#1c201d; --ink:#e7ebe6; --muted:#9aa59d; --line:#2e352f;
+    --accent:#8fd400; --accent-ink:#b9ea4c; --accent-soft:#233016;
+    --ok:#7ad38a; --ok-bg:#1c3021; --src:#8ab8ff; --src-bg:#1a2a44; --sec:#e6c35a; --sec-bg:#3a3110; --warn:#ff8a80; --warn-bg:#3d1c1c; --card:#20251f; --note:#26223a; --note-ink:#c9bfff; }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans KR","Pretendard","Apple SD Gothic Neo","Noto Sans KR",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.75;word-break:keep-all}
+a{color:var(--src);text-decoration:none} a:hover{text-decoration:underline}
+code{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.88em;background:var(--accent-soft);padding:.05em .35em;border-radius:4px}
+.layout{display:grid;grid-template-columns:var(--sidebar-w) minmax(0,1fr)}
+nav.side{position:sticky;top:0;height:100vh;overflow-y:auto;border-right:1px solid var(--line);background:var(--paper);padding:18px 14px 40px;font-size:13px}
+nav.side .brand{font-weight:700;color:var(--accent-ink);margin-bottom:4px;font-size:14px}
+nav.side .brand-sub{color:var(--muted);font-size:12px;margin-bottom:12px}
+nav.side .nav-ch{margin:14px 0 4px;font-weight:700;border-top:1px solid var(--line);padding-top:10px}
+nav.side a.nav-h2{display:block;padding:3px 6px;border-radius:5px;color:var(--ink);font-weight:600}
+nav.side a.nav-h3{display:block;padding:2px 6px 2px 18px;border-radius:5px;color:var(--muted);font-size:12.5px}
+nav.side a.active{background:var(--accent-soft);color:var(--accent-ink)}
+nav.side .other{margin-top:16px;padding-top:10px;border-top:1px solid var(--line);font-size:12.5px}
+nav.side .other a{display:block;padding:2px 6px;color:var(--src)}
+nav.side .legend{margin-top:14px;padding-top:10px;border-top:1px solid var(--line);color:var(--muted);font-size:12px;line-height:1.9}
+main{padding:0 0 80px}
+.wrap{max-width:58rem;margin:0 auto;padding:0 36px}
+@media (max-width:1100px){ .layout{grid-template-columns:1fr} nav.side{display:none} .wrap{padding:0 18px} }
+.hero{background:linear-gradient(135deg,#0f1a05 0%,#243c07 55%,#3f6a00 100%);color:#f2f7ea;padding:56px 0 40px;margin-bottom:28px}
+.hero .kicker{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#c9dfa6;margin-bottom:10px}
+.hero h1{font-size:30px;margin:0 0 10px;line-height:1.3}
+.hero .sub{color:#dbe8c4;font-size:16px;max-width:46rem}
+.hero .facts{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13.5px;color:#dbe8c4;margin-top:18px}
+.hero .facts b{color:#fff} .hero .facts a{color:#fff;text-decoration:underline}
+.hero .g{background:rgba(255,255,255,.14);color:#fff}
+h2{font-size:22px;margin:46px 0 12px;scroll-margin-top:16px}
+h2::before{content:"";display:inline-block;width:10px;height:10px;background:var(--accent);border-radius:2px;margin-right:10px}
+h3{font-size:18px;margin:32px 0 8px;scroll-margin-top:16px}
+h4{font-size:15.5px;margin:22px 0 6px;color:var(--accent-ink)}
+p{margin:.6em 0} ul,ol{padding-left:1.4em} li{margin:.3em 0}
+strong{font-weight:700}
+.q{background:var(--paper);border:1px solid var(--line);border-left:5px solid var(--accent);border-radius:8px;padding:10px 16px;margin:12px 0 16px;font-size:15px}
+.q b{color:var(--accent-ink)}
+.oneline{background:var(--accent-soft);border-radius:8px;padding:12px 16px;margin:18px 0 8px;font-size:15.5px;border-left:5px solid var(--accent)}
+.oneline b{color:var(--accent-ink)}
+.analogy{background:var(--note);color:var(--ink);border-radius:8px;padding:12px 16px;margin:14px 0;font-size:15px;border-left:5px solid var(--note-ink)}
+.analogy b{color:var(--note-ink)}
+.term{background:var(--paper);border:1px dashed var(--line);border-radius:8px;padding:10px 14px;margin:12px 0;font-size:14px;color:var(--muted)}
+.term b{color:var(--ink)}
+.warn{background:var(--warn-bg);border-left:5px solid var(--warn);border-radius:8px;padding:10px 16px;margin:14px 0;font-size:15px}
+.constraint{background:var(--sec-bg);border-left:5px solid var(--sec);padding:12px 16px;border-radius:8px;font-size:14.5px;margin:0 0 24px}
+details.ev{margin:12px 0 20px;border:1px solid var(--line);border-radius:8px;background:var(--paper)}
+details.ev>summary{cursor:pointer;padding:9px 14px;font-weight:600;color:var(--accent-ink);font-size:14px;list-style:none}
+details.ev>summary::before{content:"▸ ";} details.ev[open]>summary::before{content:"▾ ";}
+details.ev>*:not(summary){padding:0 14px 6px}
+details.ev .tbl{margin:8px 0 12px;border:none}
+.g{display:inline-block;font-size:.78em;line-height:1;padding:.18em .32em;border-radius:5px;vertical-align:.1em;margin:0 .05em}
+.g-ok{background:var(--ok-bg);color:var(--ok)} .g-src{background:var(--src-bg);color:var(--src)} .g-sec{background:var(--sec-bg);color:var(--sec)} .g-warn{background:var(--warn-bg);color:var(--warn)}
+a.cite{display:inline-block;font-size:.74em;line-height:1.35;padding:.05em .45em;border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--src);white-space:nowrap;max-width:22em;overflow:hidden;text-overflow:ellipsis;vertical-align:middle;margin:0 .1em}
+a.cite:hover{border-color:var(--src);text-decoration:none}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:14px 0}
+.stat{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.stat .n{font-size:22px;font-weight:700;color:var(--accent-ink);line-height:1.2}
+.stat .l{font-size:12.5px;color:var(--muted)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin:14px 0 18px}
+.card{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:8px;padding:10px 12px;font-size:14px}
+.card-k{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-ink);font-weight:700;margin-bottom:4px}
+.qa{display:grid;gap:10px;margin:14px 0}
+.qa .item{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 16px}
+.qa .item .qq{font-weight:700;color:var(--accent-ink);margin-bottom:4px}
+.timeline{list-style:none;padding:0;margin:14px 0;border-left:3px solid var(--accent)}
+.timeline li{position:relative;padding:4px 0 12px 18px;font-size:15px}
+.timeline li::before{content:"";position:absolute;left:-8px;top:12px;width:12px;height:12px;border-radius:50%;background:var(--accent);border:2px solid var(--paper)}
+.timeline .d{font-weight:700;color:var(--accent-ink);margin-right:8px;font-variant-numeric:tabular-nums}
+.tbl{overflow-x:auto;margin:14px 0 20px;border:1px solid var(--line);border-radius:8px;background:var(--paper)}
+table{border-collapse:collapse;width:100%;font-size:13.5px;line-height:1.55}
+th{position:sticky;top:0;background:var(--accent-soft);color:var(--accent-ink);text-align:left;padding:8px 10px;border-bottom:2px solid var(--accent)}
+td{padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:nth-child(even) td{background:rgba(118,185,0,.04)}
+td:first-child{font-weight:600}
+figure{margin:20px 0;text-align:center}
+figure img{max-width:100%;height:auto;border:1px solid var(--line);border-radius:8px;background:#fff}
+figcaption{font-size:13px;color:var(--muted);margin-top:6px;text-align:left}
+figcaption b{color:var(--ink)}
+.scale{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin:10px 0 16px;font-size:12.5px;text-align:center}
+.scale div{padding:8px 4px;border-radius:6px;background:var(--paper);border:1px solid var(--line);color:var(--muted)}
+.scale div b{display:block;color:var(--accent-ink);font-size:16px}
+.tier{margin:18px 0 6px;padding:8px 14px;border-radius:8px;background:var(--paper);border:1px solid var(--line);border-left:5px solid var(--accent);font-size:15px}
+.tier b{color:var(--accent-ink)}
+.todo{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0 18px}
+.todo>div{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-size:14px}
+.todo>div h5{margin:0 0 6px;font-size:13px;letter-spacing:.06em;text-transform:uppercase}
+.todo .nv h5{color:var(--muted)} .todo .t1 h5{color:var(--warn)}
+.todo ul{margin:0;padding-left:1.2em}
+@media (max-width:760px){ .todo{grid-template-columns:1fr} .scale{grid-template-columns:repeat(2,1fr)} }
+.src-note{color:var(--muted);font-size:13px;margin-top:30px}
+@media print{ nav.side{display:none} .layout{display:block} .hero{background:#243c07;-webkit-print-color-adjust:exact} a.cite{border:none;padding:0} .tbl{overflow:visible;border:none} details.ev{display:block} details.ev>summary{display:none} details.ev>*:not(summary){display:block} }
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="side" id="side">
+  <div class="brand">NVIDIA 풀스택 SW 조사</div>
+  <div class="brand-sub">부록 A · Tier-1 관점</div>
+  <a class="nav-h2" href="#top">표지</a>
+  <a class="nav-h2" href="#summary">3분 요약</a>
+  <a class="nav-h2" href="#howto">읽기 전에</a>
+  <a class="nav-h2" href="#s1">1. Android 경험에서 출발하기</a>
+  <a class="nav-h3" href="#s1-1">1.1 경계를 정하는 세 가지 사실</a>
+  <a class="nav-h3" href="#s1-2">1.2 대입표</a>
+  <a class="nav-h3" href="#s1-3">1.3 Android와 다른 점 세 가지</a>
+  <a class="nav-h2" href="#s2">2. 11개 계층별 할 일</a>
+  <a class="nav-h3" href="#s2-1">1 하드웨어·ECU</a>
+  <a class="nav-h3" href="#s2-2">2 BSP·OS 적응</a>
+  <a class="nav-h3" href="#s2-3">3 센서 HAL·시각 동기·캘리브레이션</a>
+  <a class="nav-h3" href="#s2-4">4 차량 신호·액추에이터 정합</a>
+  <a class="nav-h3" href="#s2-5">5 AV 기능 계층</a>
+  <a class="nav-h3" href="#s2-6">6 AI 모델 사이클</a>
+  <a class="nav-h3" href="#s2-7">7 시뮬레이션·검증</a>
+  <a class="nav-h3" href="#s2-8">8 안전·보안·인증 통합</a>
+  <a class="nav-h3" href="#s2-9">9 HMI·UX</a>
+  <a class="nav-h3" href="#s2-10">10 양산·운영</a>
+  <a class="nav-h3" href="#s2-11">11 프로세스·조직</a>
+  <a class="nav-h2" href="#s3">3. 어디서 차별화가 생기나</a>
+  <a class="nav-h2" href="#s4">4. 실제 Tier-1은 무엇을 하나</a>
+  <a class="nav-h2" href="#s5">5. 세 가지 결론과 다음 과제</a>
+  <a class="nav-h2" href="#s6">6. 아직 확인 못 한 것</a>
+  <a class="nav-h2" href="#sources">출처</a>
+  <div class="other">다른 보고서<a href="report-03-autonomous-driving-stack.html">3장 자율주행 스택</a><a href="report-07-physical-ai-cosmos.html">7장 Physical AI / Cosmos</a><a href="README.md">폴더 안내</a></div>
+  <div class="legend">검증 등급<br><span class="g g-ok">✅</span> 두 출처 교차검증<br><span class="g g-src">🔍</span> 1차 출처 원문 확인<br><span class="g g-sec">📄</span> 검색 요약·2차 출처만<br><span class="g g-warn">⚠️</span> 미확인·추정</div>
+</nav>
+<main>
+<div class="hero" id="top"><div class="wrap">
+  <div class="kicker">리서치 보고서 · 부록 A · 2026-09-02</div>
+  <h1>Tier-1이 해야 할 일 — NVIDIA가 주는 것 밖에서</h1>
+  <div class="sub">3장과 7장이 "NVIDIA가 무엇을 주는가"였다면, 이 부록은 "그것을 받은 우리는 양산 ADAS를 내기까지 무엇을 더 만들어야 하는가"다. Android 양산 경험을 출발점으로 삼아 11개 계층으로 나눠 본다. 각 항목에서 NVIDIA 제공 범위는 출처로, 우리 몫은 근거 또는 추정(<span class="g g-warn">⚠️</span>)으로 구분했다.</div>
+  <div class="facts"><span><b>입력</b> <a href="report-03-autonomous-driving-stack.html">3장</a>·<a href="report-07-physical-ai-cosmos.html">7장</a> 조사 결과 + Tier-1·OEM 공개 자료</span><span><b>근거</b> 문장 끝 출처 칩과 등급 <span class="g g-ok">✅</span><span class="g g-src">🔍</span><span class="g g-sec">📄</span><span class="g g-warn">⚠️</span></span><span><b>조사 원본(사실 목록)</b> <a href="appendix-a-tier1-workscope.md">appendix-a-tier1-workscope.md</a></span></div>
+</div></div>
+<div class="wrap">
+
+<h2 id="summary">3분 요약</h2>
+<div class="qa">
+  <div class="item"><div class="qq">NVIDIA를 쓰면 Tier-1의 일이 줄어드나?</div>줄지 않고 종류가 바뀐다. BSP·HAL·차량 신호 정합·HMI·인증은 Android 때와 똑같이 남고, 여기에 <b>데이터 사이클</b>(수집→라벨→학습→시뮬 검증→OTA)과 <b>AI 안전 논거</b>가 새로 추가된다.</div>
+  <div class="item"><div class="qq">경계는 어디서 결정되나?</div>세 가지 공개 사실이 경계를 긋는다. 커스텀 보드는 PDK 별도 계약이고 <span class="g g-ok">✅</span>, NVIDIA 부품은 SEooC(맥락 밖 안전 요소)로 평가되어 통합자가 안전 케이스를 만들어야 하며 <span class="g g-ok">✅</span>, Magna·Bosch가 "통합·검증·안전 승인·배포"를 서비스로 판다 <span class="g g-ok">✅</span>. NVIDIA는 그 일을 하지 않는다는 뜻이다.</div>
+  <div class="item"><div class="qq">어디서 차별화가 생기나?</div>칩·OS·SDK는 모두 같은 것을 쓰므로 차별화가 없다. 차별화는 <b>기능 계층(ODD·규제 매핑·지역 튜닝), 데이터 사이클, 검증 체계, 안전 케이스</b>에서 생긴다. Magna와 Bosch가 파는 서비스 목록이 정확히 이것이다.</div>
+  <div class="item"><div class="qq">실제 Tier-1은 무엇을 하나?</div>컴퓨트 ECU 제조사(Desay SV·Lenovo·Quanta·Foxconn)는 하드웨어·BSP·센서 층을, AD 시스템 Tier-1(Bosch·Magna·Continental)은 차량 정합·기능·데이터·검증·안전 승인 층을 사업화한다. 한 회사가 전 층을 다 하는 사례는 공개 자료에서 확인되지 않는다.</div>
+</div>
+
+<h2 id="howto">읽기 전에</h2>
+<p><b>등급 표기.</b> 사실 문장 끝에 출처 칩과 등급을 붙였다. <span class="g g-ok">✅</span>는 독립된 두 출처가 일치, <span class="g g-src">🔍</span>는 1차 출처 원문을 직접 읽음, <span class="g g-sec">📄</span>는 검색 요약이나 2차 보도로만 확인, <span class="g g-warn">⚠️</span>는 미확인이거나 추정이다. 이 부록은 성격상 <span class="g g-warn">⚠️</span>가 많다. "NVIDIA가 주는 것"은 출처가 있지만, "우리가 해야 할 것"의 상당수는 NVIDIA 제공 범위 설명에 그 항목이 없다는 사실에서 추론한 것이기 때문이다. 실제 프로그램 경험자와의 대조가 필요하다.</p>
+<div class="constraint"><b>조사 제약.</b> 조사 세션의 네트워크 정책 때문에 nvidia.com·주요 언론사 원문에 직접 접근할 수 없었다. DriveOS 문서·NVIDIA 블로그 인용은 검색 요약(<span class="g g-sec">📄</span>)이거나 다른 출처와 교차한 것(<span class="g g-ok">✅</span>)이고, GitHub(OxTS 플러그인, Alpamayo·AlpaSim README)만 원문(<span class="g g-src">🔍</span>)으로 확인했다. NVONLINE 파트너 포털 뒤의 안전 매뉴얼·PDK 문서는 열람하지 못했다. 전체 출처 목록은 <a href="reference/references.md">reference/references.md</a>.</div>
+<h4>이 문서에 필요한 용어 6개</h4>
+<div class="card-grid">
+  <div class="card"><div class="card-k">BSP / PDK</div>Board Support Package는 특정 보드에서 OS를 돌리기 위한 부트로더·드라이버·설정 묶음. NVIDIA는 이를 만들기 위한 Platform Development Kit를 별도 계약으로 준다.</div>
+  <div class="card"><div class="card-k">SAL (DriveWorks)</div>Sensor Abstraction Layer. Android HAL처럼 센서 종류를 추상화하는 층. 레퍼런스 센서는 NVIDIA가, 그 외는 우리가 플러그인(<code>.so</code>)을 만든다.</div>
+  <div class="card"><div class="card-k">SEooC</div>Safety Element out of Context. "어떤 차에 들어갈지 모르는 상태"로 안전 평가된 부품. 통합자가 그 사용 가정을 검증하고 차량(아이템) 수준 안전 케이스를 만들어야 한다.</div>
+  <div class="card"><div class="card-k">세이프티 MCU</div>메인 SoC 옆에서 전원·워치독·결함 처리를 맡는 작은 마이크로컨트롤러(예: Infineon AURIX). AUTOSAR Classic 소프트웨어를 우리가 올린다.</div>
+  <div class="card"><div class="card-k">ODD / MRM</div>Operational Design Domain은 기능이 동작하도록 설계된 조건 범위. Minimal Risk Maneuver는 그 범위를 벗어났을 때 안전하게 멈추는 동작.</div>
+  <div class="card"><div class="card-k">SOTIF / PAS 8800</div>ISO 21448(의도된 기능의 안전)은 고장이 아니라 성능 한계로 인한 위험을 다루고, PAS 8800은 AI 구성 요소의 안전 논거를 다루는 규격. 둘 다 NVIDIA가 대신 써 주지 않는다.</div>
+</div>
+
+<h2 id="s1">1. Android 경험에서 출발하기</h2>
+<div class="q"><b>이 절의 질문</b> Android로 인포테인먼트를 양산할 때 Google이 준 것과 우리가 만든 것의 경계는 분명했다. NVIDIA DRIVE에 그 경계를 그대로 대입하면 무엇이 보이나?</div>
+<p>Android 양산을 해 본 팀이라면 안다. Google은 커널과 프레임워크 소스, HAL 인터페이스, 호환성 테스트를 주지만, 우리 보드의 BSP, 우리 부품의 HAL, 차량 신호를 잇는 VHAL, 양산 HMI, 그리고 인증 통과는 우리가 했다. NVIDIA DRIVE에 이 그림을 겹치면 어디까지가 NVIDIA이고 어디부터가 우리인지가 보인다.</p>
+
+<h3 id="s1-1">1.1 경계를 정하는 세 가지 사실</h3>
+<ol>
+  <li><b>커스텀 보드는 PDK 별도 계약이다.</b> DriveOS 문서: "PDK(Platform Development Kit)는 비(非)레퍼런스 DRIVE AGX 하드웨어에서 DriveOS를 돌리도록 수정하는 데 쓰이며, NVIDIA와의 별도 계약이 필요하다" <a class="cite" href="https://developer.nvidia.com/docs/drive/drive-os/6.0.6/public/drive-os-linux-sdk/common/topics/intro_sdk/GettingStarted1.html">DriveOS 6.0.6 Getting Started</a><span class="g g-ok">✅</span>. 즉 NVIDIA는 우리 보드용 BSP를 만들어 주지 않는다.</li>
+  <li><b>NVIDIA 부품은 SEooC로 평가된다.</b> DRIVE Orin SoC는 "SEooC로서 ISO 26262 ASIL D 체계적 요구사항·ASIL B 랜덤 결함 요구사항을 충족하는 것으로 평가"됐다 <a class="cite" href="https://blogs.nvidia.com/blog/nvidia-drive-safety-milestones">NVIDIA 블로그</a><a class="cite" href="https://discourse.openrobotics.org/t/drive-orin-achieves-safety-certification-for-iso26262/31027">Open Robotics 포럼</a><span class="g g-ok">✅</span>. SEooC의 정의상 통합자가 "사용 가정"을 검증하고 아이템 수준 안전 케이스를 만들어야 한다.</li>
+  <li><b>Tier-1들이 실제로 파는 것이 그 공백을 보여준다.</b> Magna는 Thor 위 DRIVE AV 스택에 대해 "시스템 통합, 검증, 밸리데이션, <b>안전 승인</b>, 배포" 서비스를 판다고 발표했고(2026-01-05) <a class="cite" href="https://www.magna.com/stories/news-press-release/2026/magna-to-offer-drive-hyperion-compatible-ecus-and-tier-1-integration-services-for-nvidia-drive-av">Magna</a><span class="g g-sec">📄</span>, Bosch는 "안전 전문성과 고성능 ECU·ADAS 시스템 노하우로 양산 준비 배포"를 담당한다고 밝혔다(2025-10-01) <a class="cite" href="https://us.bosch-press.com/pressportal/us/en/press-release-28736.html">Bosch</a><span class="g g-ok">✅</span>.</li>
+</ol>
+<p>오픈 모델 쪽 경계는 3장에서 봤다. Alpamayo README는 "완전한 주행 스택이 아니며 … 자동차 등급 검증을 거치지 않았고 … 인증된 AV 스택의 대체물이 아니다"라고 쓴다 <a class="cite" href="https://github.com/NVlabs/alpamayo">NVlabs/alpamayo</a><span class="g g-src">🔍</span>.</p>
+
+<h3 id="s1-2">1.2 대입표</h3>
+<div class="tbl"><table>
+<tr><th>Android 계층</th><th>Google이 주는 것</th><th>양산 시 우리가 했던 일</th><th>NVIDIA 대응 계층</th><th>NVIDIA가 주는 것</th><th>Tier-1이 해야 할 일</th></tr>
+<tr><td>Linux 커널·BSP</td><td>AOSP 커널, 레퍼런스 보드 지원</td><td>자사 보드 BSP·드라이버</td><td>DriveOS 7 (부트로더·Type-1 하이퍼바이저·QNX/Linux 게스트 VM) <a href="https://developer.nvidia.com/docs/drive/drive-os/7.0.3/public/drive-os-linux-sdk/introduction/introduction.html">DriveOS 7.0.3 소개</a> <span class="g g-sec">📄</span></td><td>레퍼런스 보드(Thor 개발 키트 SKU 10/12)용 SDK; 커스텀 보드는 PDK 계약</td><td>ECU 보드 설계·브링업(pinmux·디바이스 트리), 전원·세이프티 MCU 연동, 세큐어부트 키</td></tr>
+<tr><td>HAL</td><td>HAL 인터페이스 정의 + 레퍼런스 구현</td><td>벤더 HAL 구현</td><td>DriveWorks SAL (센서 추상화)</td><td>SAL 프레임워크와 플러그인 SDK(라이다·레이더·GPS·IMU·CAN) <a href="https://docs.nvidia.com/drive/driveworks-3.5/sensorplugins_mainsection.html">DriveWorks 센서 플러그인</a> <span class="g g-ok">✅</span></td><td>자사·협력사 센서용 <code>.so</code> 플러그인, ISP 튜닝, 캘리브레이션, 시각 동기</td></tr>
+<tr><td>Framework(AOSP)</td><td>프레임워크 소스</td><td>확장 스택·커스터마이즈</td><td>CUDA/TensorRT/NvMedia + DriveWorks 라이브러리(바이너리)</td><td>표준 API(NvMedia·CUDA·TensorRT) <span class="g g-sec">📄</span>, DriveWorks는 "샘플은 소스+바이너리, 라이브러리·툴은 바이너리" <span class="g g-sec">📄</span></td><td>미들웨어 선택·스케줄링·메모리/VM 파티션 설계, 결정론적 실행 보장</td></tr>
+<tr><td>GMS/Play 번들</td><td>비공개 앱·서비스(라이선스)</td><td>라이선스 계약·통합</td><td>DRIVE AV 상용 스택(AI E2E + 클래식 안전 스택) / Alpamayo 오픈 가중치</td><td>선택 OEM에 라이선스(Mercedes CLA 첫 양산) <span class="g g-ok">✅</span>; Alpamayo는 연구용 오픈 모델 <span class="g g-src">🔍</span></td><td>기능 계층(ACC·LKA·AEB·HWP 등) 구현·튜닝, 또는 DRIVE AV 위 통합·검증</td></tr>
+<tr><td>VHAL(AAOS)</td><td>인터페이스만</td><td>차량 신호 매핑</td><td>(해당 없음 — DriveOS는 Tegra CAN 등 저수준 인터페이스만 문서화) <span class="g g-sec">📄</span></td><td>—</td><td>CAN-FD/Ethernet 신호 정합, DBC/ARXML, 액추에이터 ECU 연동</td></tr>
+<tr><td>HMI 앱</td><td>샘플 앱</td><td>양산 HMI</td><td>(해당 없음; DRIVE IX는 별도 코크핏 제품)</td><td>—</td><td>클러스터/HUD/DMS 연계 ADAS HMI</td></tr>
+<tr><td>CTS/VTS</td><td>호환성 테스트 스위트</td><td>인증 통과</td><td>Halos AI Systems Inspection Lab + 부품 SEooC 평가</td><td>ISO/IEC 17020 인정 검사 기관(2026-06-22 ANAB) <span class="g g-ok">✅</span>; DriveOS 6.0 ASIL D(Orin) <span class="g g-ok">✅</span></td><td>아이템 수준 안전 케이스, 제3자 인증, 형식승인</td></tr>
+</table></div>
+
+<h3 id="s1-3">1.3 Android와 결정적으로 다른 점 세 가지</h3>
+<p><b>첫째, 소스 공개 범위.</b> AOSP는 프레임워크까지 소스지만 DriveOS·DriveWorks 핵심은 바이너리이고 DRIVE AV 상용 스택은 계약 기반이다. 오픈된 것은 Alpamayo·AlpaSim·Cosmos 같은 연구·개발 도구다. 문제가 생겼을 때 소스를 열어 고칠 수 없다는 뜻이다.</p>
+<p><b>둘째, 안전 인증 체계.</b> Android에는 없는 ISO 26262·SOTIF·ISO 21434·PAS 8800 축이 추가된다. NVIDIA는 "부품(SEooC) 평가 + 프로세스 인증 + 검사 랩"까지 제공하고, 아이템 수준 인증과 형식승인은 파트너 몫이다.</p>
+<p><b>셋째, 데이터 사이클.</b> Android 앱에는 없는 "데이터 수집→라벨→학습→시뮬 검증→OTA" 루프가 제품의 핵심 경쟁력이 된다. NVIDIA는 도구(DGX·Omniverse·Cosmos·NeMo Curator)를 주지만 데이터·법적 근거·검증 논거는 파트너 몫이다.</p>
+<div class="oneline"><b>한 줄 정리.</b> Android 때의 일(BSP·HAL·차량 정합·HMI·인증)은 그대로 남고, 안전 인증 축과 데이터 사이클이 새로 얹힌다. 소스는 덜 열려 있다.</div>
+
+<h2 id="s2">2. 11개 계층별 할 일</h2>
+<div class="q"><b>이 절의 질문</b> 계층마다 NVIDIA가 어디까지 주고, 우리는 무엇을 만들어야 하나? 각 왼쪽 상자는 출처가 있는 NVIDIA 제공 범위, 오른쪽 상자는 우리 몫이다.</div>
+<p>아래 11개 계층은 차 안의 아래층(하드웨어)에서 위층(기능·HMI)으로, 그 다음 개발·검증·운영 순으로 늘어놓았다. 각 계층의 첫 문장이 "왜 이 일이 남는가"를 말한다.</p>
+
+<h3 id="s2-1">1. 하드웨어·ECU</h3>
+<p>NVIDIA는 개발 키트와 SoC를 팔지만 양산 ECU는 만들지 않는다. 양산용 Thor 시스템은 NVIDIA가 아니라 Tier-1이 공급한다.</p>
+<div class="todo">
+<div class="nv"><h5>NVIDIA가 주는 것</h5><ul>
+<li>DRIVE AGX Thor 개발 키트: 2025-08-27 발표, 2025년 9월 출하. SKU 10(벤치)·SKU 12(차량 탑재)는 "전원 입력만 다르다" <a class="cite" href="https://blogs.nvidia.com/blog/drive-agx-developer-kit-general-availability">NVIDIA 블로그</a><a class="cite" href="https://www.edge-ai-vision.com/2025/09/accelerate-autonomous-vehicle-development-with-the-nvidia-drive-agx-thor-developer-kit/">edge-ai-vision</a><span class="g g-ok">✅</span>. 인터페이스: GMSL2 16채널 + GMSL3 2채널, 10G-T1 이더넷 3포트 <span class="g g-sec">📄</span>.</li>
+<li>양산용 Thor 시스템은 NVIDIA가 아니라 Tier-1(Continental, Desay SV, Lenovo, Magna, Quanta)이 공급 <span class="g g-ok">✅</span>.</li>
+<li>Orin 플랫폼의 세이프티 MCU는 Infineon AURIX TC397 <a class="cite" href="https://developer.nvidia.com/docs/drive/drive-os/6.0.9/public/drive-os-linux-sdk/common/topics/mcu_setup_usage/mcu_setup_and_usage1.html">DriveOS 6.0.9 MCU 문서</a><span class="g g-ok">✅</span>. Thor 키트의 MCU 부품 번호는 미확인 <span class="g g-warn">⚠️</span>.</li></ul></div>
+<div class="t1"><h5>Tier-1이 해야 할 일</h5><ul>
+<li>양산 ECU 설계: 전원 트리·PMIC, 열 설계, EMC·진동, 커넥터, 변형 관리. Desay SV IPU14(Thor-U)·Lenovo AD1(듀얼 Thor)이 실례 <a class="cite" href="https://en.desaysv.com/newsDetails/544.html">Desay SV</a><a class="cite" href="https://news.lenovo.com/pressroom/press-releases/lenovo-works-with-swm-to-develop-next-generation-robotaxi-on-nvidia-drive-agx-thor/">Lenovo</a><span class="g g-ok">✅</span>.</li>
+<li>세이프티 MCU 소프트웨어: AUTOSAR Classic 기반 워치독·전원 시퀀스·네트워크 관리·진단 게이트웨이. Infineon: "NVIDIA 개발 플랫폼에서 TC397 같은 SMCU가 전원 제어와 결함 처리 조정을 맡는다" <a class="cite" href="https://community.infineon.com/t5/Blogs/Driving-autonomous-safety-and-efficiency-with-Infineon-and-NVIDIA-DRIVE/ba-p/1161805">Infineon</a><span class="g g-sec">📄</span>.</li>
+<li>폴백(2차) 컴퓨터: Continental은 Aurora Driver용으로 "주 컴퓨터 고장 시 운행을 넘겨받는 독립적 2차 시스템"을 개발. NVIDIA는 주 컴퓨터(듀얼 Thor + DriveOS)만 공급 <a class="cite" href="https://ir.aurora.tech/news-events/press-releases/detail/112/aurora-continental-and-nvidia-partner-to-deploy-driverless-trucks-at-scale">Aurora IR</a><span class="g g-ok">✅</span>.</li>
+<li>공급망: Thor 조달 조건·수량·리드타임은 비공개 <span class="g g-warn">⚠️</span>.</li></ul></div>
+</div>
+
+<h3 id="s2-2">2. BSP·OS 적응</h3>
+<p>DriveOS SDK는 레퍼런스 보드용이다. 우리 보드에서 돌리려면 PDK 계약을 맺고 NVIDIA의 도구·지원을 받아 브링업을 직접 해야 한다.</p>
+<div class="todo">
+<div class="nv"><h5>NVIDIA가 주는 것</h5><ul>
+<li>DriveOS SDK는 레퍼런스 보드 대상. 비레퍼런스 보드는 PDK, "NVIDIA와의 별도 계약 필요" <span class="g g-ok">✅</span>. PDK 프로그램 페이지와 QNX/Linux PDK 패키지 문서 존재 <a class="cite" href="https://developer.nvidia.com/drive/agx-pdk-program">PDK 프로그램</a><span class="g g-sec">📄</span>.</li>
+<li>커스텀 보드 절차(DriveOS 7.0.3 "Customizing DriveOS for a Different Board"): NVIDIA 하드웨어 앱 지원팀에 최신 pinmux XLS 요청 → 보드별 탭에서 DT 파일 생성 → <code>drive-foundation/platform-config/.../bct/&lt;BOARD&gt;</code>에 통합 → 기존 pinmux dtsi와 diff <a class="cite" href="https://developer.nvidia.com/docs/drive/drive-os/7.0.3/public/drive-os-linux-sdk/platform-customization/customizing_driveos_for_different_board.html">DriveOS 7.0.3</a><span class="g g-sec">📄</span>. 즉 브링업은 파트너가 NVIDIA 도구·지원을 받아 수행한다.</li>
+<li>배포 채널: 개발자 프로그램(NGC 프라이빗 레지스트리)과 파트너 포털 NVONLINE(Artifactory) <a class="cite" href="https://developer.nvidia.com/docs/drive/drive-os/7.0.3/public/drive-os-linux-installation/config-registry/config-artifactory.html">DriveOS 7.0.3 설치</a><span class="g g-ok">✅</span>.</li>
+<li>QNX OS for Safety 8이 Thor 키트에 통합 출하(ISO 26262 ASIL-D·ISO 21434 사전 인증) <a class="cite" href="https://seekingalpha.com/pr/20212880-qnx-os-for-safety-integrated-in-nvidia-drive-agx-thor-development-kit-at-general-availability">QNX 보도자료</a><span class="g g-ok">✅</span>.</li></ul></div>
+<div class="t1"><h5>Tier-1이 해야 할 일</h5><ul>
+<li>보드 브링업(pinmux·디바이스 트리·BPMP 설정·부트 스트랩 GPIO 변형 처리) <span class="g g-sec">📄</span>.</li>
+<li>하이퍼바이저 파티션·VM 구성(AV VM, 안전 VM, 인포테인먼트 VM 등)과 자원 격리 설계 <span class="g g-warn">⚠️</span>.</li>
+<li>세큐어부트·HSM 키 프로비저닝, 양산 라인 키 주입 <span class="g g-warn">⚠️</span>.</li>
+<li>전원 모드(슬립/웨이크)·부팅 시간 최적화 <span class="g g-warn">⚠️</span>.</li>
+<li>LTS·보안 패치 정책: 공개 정보 없음, 파트너 계약 영역으로 추정 <span class="g g-warn">⚠️</span>.</li></ul></div>
+</div>
+
+<h3 id="s2-3">3. 센서 HAL·시각 동기·캘리브레이션</h3>
+<p>DriveWorks SAL은 Android HAL의 위치에 있다. 레퍼런스 센서 세트(Hyperion)를 그대로 쓰면 NVIDIA 플러그인으로 되지만, 자사 센서를 쓰는 순간 플러그인·ISP 튜닝·캘리브레이션은 우리 일이 된다.</p>
+<div class="todo">
+<div class="nv"><h5>NVIDIA가 주는 것</h5><ul>
+<li>DriveWorks SAL과 커스텀 센서 플러그인 프레임워크(라이다·레이더·GPS·IMU·CAN). "장치별 디코더 함수를 구현해 <code>.so</code>로 컴파일" <a class="cite" href="https://info.nvidia.com/using-custom-sensors-with-driveworks.html">NVIDIA 자료</a><a class="cite" href="https://developer.nvidia.com/docs/drive/driveworks/latest/nvsdk_dw_html/sensorplugins_canbussensor.html">DriveWorks 문서</a><span class="g g-ok">✅</span>.</li>
+<li>실례: OxTS가 DriveWorks 7.03·Thor 전용 GNSS/IMU 플러그인 <code>.so</code>를 GitHub에 배포 <a class="cite" href="https://github.com/OxfordTechnicalSolutions/nvidia-driveworks-plugin">OxTS</a><span class="g g-src">🔍</span>. NVIDIA 공식 DriveWorks 소스는 GitHub에 없음 <span class="g g-src">🔍</span>.</li>
+<li>Hyperion 레퍼런스 센서 세트에 맞춘 "공통 레퍼런스 아키텍처 대비 검증된 ECU·센서 스위트"를 파트너(Aeva, Hesai, Omnivision, Arbe, Sony 등)가 공급 <a class="cite" href="https://www.eenewseurope.com/en/nvidia-drive-hyperion-ecosystem-expands-ces-2026/">eeNews CES 2026</a><span class="g g-sec">📄</span>.</li></ul></div>
+<div class="t1"><h5>Tier-1이 해야 할 일</h5><ul>
+<li>자사 센서 구성(레퍼런스와 다르면)용 플러그인·드라이버·GMSL 데시리얼라이저 설정, ISP 튜닝(렌즈·이미저별) <span class="g g-warn">⚠️</span>.</li>
+<li>시각 동기(PTP/gPTP)·타임스탬프 체계, 공장 EOL 캘리브레이션 장비·절차와 온라인 캘리브레이션 <span class="g g-warn">⚠️</span>.</li>
+<li>센서 장착 공차·세정·열화 감시 <span class="g g-warn">⚠️</span>.</li></ul></div>
+</div>
+
+<h3 id="s2-4">4. 차량 신호·액추에이터 정합</h3>
+<p>Android의 VHAL에 해당하는 층이 NVIDIA 쪽에는 없다. 조향·제동 ECU와 말을 맞추는 일은 전부 우리 몫이다.</p>
+<div class="todo">
+<div class="nv"><h5>NVIDIA가 주는 것</h5><ul>
+<li>DriveOS 시스템 구성 요소로 Tegra CAN 등 저수준 인터페이스가 문서화 <a class="cite" href="https://docs.nvidia.com/drive/drive-os-5.2.6.0L/drive-os/DRIVE_OS_Linux_SDK_NGC_Development_Guide/Interfaces/sys_components_tegra_can.html">DriveOS 5.2 문서</a><span class="g g-sec">📄</span>. AUTOSAR·게이트웨이 통합을 NVIDIA가 제공한다는 언급은 없음 <span class="g g-warn">⚠️</span>.</li></ul></div>
+<div class="t1"><h5>Tier-1이 해야 할 일</h5><ul>
+<li>차량 OS·E/E 아키텍처 통합: Mercedes는 MB.OS, JLR은 자체 OS를 DRIVE 위·옆에서 운영 <a class="cite" href="https://media.jaguarlandrover.com/news/2022/02/jaguar-land-rover-announces-partnership-nvidia">JLR</a><a class="cite" href="https://group.mercedes-benz.com/technology/autonomous-driving/driving/mb-drive-assist-pro.html">Mercedes</a><span class="g g-ok">✅</span>. LG는 자사 IVI를 Hyperion과 통합 <a class="cite" href="https://www.prnewswire.com/news-releases/lg-teams-with-nvidia-to-shape-the-future-with-map-mobility--ai-infra--physical-ai-302793797.html">PR Newswire</a><span class="g g-sec">📄</span>.</li>
+<li>신호 DB(DBC/ARXML) 정합, SOME/IP·DDS 미들웨어, SecOC, 조향·제동·파워트레인 ECU 인터페이스와 안전 핸드셰이크, UDS/DoIP 진단·DTC <span class="g g-warn">⚠️</span>.</li></ul></div>
+</div>
+
+<h3 id="s2-5">5. AV 기능 계층</h3>
+<p>DRIVE AV를 라이선스하든 자체 스택을 올리든, "어떤 조건에서 어떤 기능을 켜고 어떻게 넘겨주는가"와 규제 매핑은 남는다. Magna 발표의 요지가 정확히 이것이다.</p>
+<div class="todo">
+<div class="nv"><h5>NVIDIA가 주는 것</h5><ul>
+<li>DRIVE AV 상용 스택: "코어 주행용 AI E2E 스택 + Halos 위에 구축된 병렬 클래식 안전 스택(중복성·가드레일)" <a class="cite" href="https://blogs.nvidia.com/blog/drive-av-software-mercedes-benz-cla/">NVIDIA 블로그</a><a class="cite" href="https://www.autonomousvehicleinternational.com/news/ai-sensor-fusion/nvidia-drive-av-software-to-support-l2-driver-assistance-in-the-mercedes-benz-cla.html">AVI</a><span class="g g-ok">✅</span>. 첫 양산은 Mercedes CLA(MB.DRIVE ASSIST PRO) <span class="g g-ok">✅</span>. 상세는 3장.</li>
+<li>Alpamayo 오픈 모델·AlpaSim: "연구·실험·평가 목적", "인증된 AV 스택의 대체물 아님" <a class="cite" href="https://github.com/NVlabs/alpasim">NVlabs/alpasim</a><span class="g g-src">🔍</span>.</li>
+<li>Toyota·Hyundai처럼 "Orin/Thor + 안전 인증 DriveOS"만 채택하고 ADAS 앱은 자체 개발하는 경우도 있음 <a class="cite" href="https://techcrunch.com/2025/01/06/toyotas-next-generation-cars-will-be-built-with-nvidia-supercomputers-and-operating-system/">TechCrunch Toyota</a><a class="cite" href="https://www.hyundaimotorgroup.com/en/news/hyundai-motor-group-nvidia-blackwell-ai-factory">HMG 2025-10-31</a><span class="g g-ok">✅</span>. HMG는 2026-03-16 "L2 이상 NVIDIA 자율주행 기술을 일부 모델에 통합"으로 확대 <a class="cite" href="https://www.hyundaimotorgroup.com/en/news/hyundai-motor-kia-and-nvidia-expand-strategic-partnership-for-next-generation-autonomous-driving-technology">HMG</a><span class="g g-ok">✅</span>.</li></ul></div>
+<div class="t1"><h5>Tier-1이 해야 할 일 (DRIVE AV를 라이선스하든, 자체 스택을 올리든 공통)</h5><ul>
+<li>기능 정의·상태 기계: ACC·LKA·AEB·TJA·HWP·APA 각 기능의 활성 조건, ODD 관리, 핸드오버·MRM 전략 <span class="g g-warn">⚠️</span>.</li>
+<li>규제 매핑: UN R79(조향)·R152(AEB)·R157(ALKS)·R155(CSMS)·R156(SUMS), GSR2, Euro NCAP/KNCAP, 중국 GB. NVIDIA는 DRIVE AV에 대해 TÜV Rheinland의 "UNECE 복잡 전자 시스템 안전 평가"를 받았다고 밝혔지만 형식승인 자체는 OEM 몫 <a class="cite" href="https://nvidianews.nvidia.com/news/nvidia-drive-hyperion-platform-achieves-critical-automotive-safety-and-cybersecurity-milestones-for-av-development">NVIDIA 뉴스룸 2025-01</a><span class="g g-sec">📄</span>.</li>
+<li>지역 튜닝: 한국 표지판·차선·도로 구조·운전 문화, 지역 지도·측위 소스 <span class="g g-warn">⚠️</span>.</li>
+<li>DRIVE AV를 쓰더라도 "시스템 통합·검증·안전 승인·배포"가 남는다는 것이 Magna 발표의 요지 <span class="g g-sec">📄</span>.</li></ul></div>
+</div>
+
+<h3 id="s2-6">6. AI 모델 사이클 (3장·7장 직결)</h3>
+<p>NVIDIA는 세 대의 컴퓨터와 오픈 모델·도구를 준다. 그러나 데이터 자체, 데이터를 모을 법적 근거, 자사 센서·ODD에 맞춘 재학습, 그리고 "이 모델이 안전하다"는 논거는 주지 않는다.</p>
+<div class="todo">
+<div class="nv"><h5>NVIDIA가 주는 것</h5><ul>
+<li>"세 대의 컴퓨터": DGX(학습)·Omniverse+Cosmos(시뮬)·DRIVE AGX(차량) <a class="cite" href="https://blogs.nvidia.com/blog/drive-av-software-mercedes-benz-cla/">NVIDIA 블로그</a><a class="cite" href="https://www.nvidia.com/en-us/ai-trust-center/halos/autonomous-vehicles/">Halos AV 페이지</a><span class="g g-ok">✅</span>. Cosmos 모델·Curator·데이터셋 공개 범위는 7장.</li>
+<li>Alpamayo 계열 오픈 가중치(연구용)와 AlpaSim, Cosmos-RL 등 후처리 도구(3장·7장).</li></ul></div>
+<div class="t1"><h5>Tier-1이 해야 할 일</h5><ul>
+<li><b>데이터 확보와 법적 근거</b>: 자사 플릿 수집 체계, 개인정보(GDPR·개인정보보호법) 처리, 데이터 소유권 계약(OEM vs Tier-1) <span class="g g-warn">⚠️</span>.</li>
+<li><b>큐레이션·라벨링 운영</b>: Cosmos Curator·Reason 같은 도구를 써도 라벨 정책, 품질 관리, 지역 데이터 보강은 자체 몫 <span class="g g-warn">⚠️</span>(7장 2절).</li>
+<li><b>파인튜닝·증류·양자화·온보드 최적화</b>: 오픈 모델을 쓰면 자사 센서 구성·ODD에 맞춘 재학습과 Thor 예산 내 최적화가 필요(3장 2.5절) <span class="g g-warn">⚠️</span>.</li>
+<li><b>모델 검증과 AI 안전 논거</b>: SOTIF·PAS 8800 기반 논거 작성. 세계 모델 시뮬 결과를 인증 근거로 쓸 수 있는지는 미정 <span class="g g-warn">⚠️</span>(7장 한계).</li>
+<li><b>학습 인프라 비용</b>: DGX 자체 구축 또는 클라우드. HMG는 Blackwell GPU 5만 장 규모 AI 팩토리를 발표 <span class="g g-ok">✅</span>.</li></ul></div>
+</div>
+
+<h3 id="s2-7">7. 시뮬레이션·검증</h3>
+<p>Omniverse·NuRec·Cosmos·AlpaSim은 도구다. 어떤 시나리오를 얼마나 돌려야 충분한지, 그 기준과 시나리오 자산은 우리가 만든다.</p>
+<div class="todo">
+<div class="nv"><h5>NVIDIA가 주는 것</h5><ul><li>Omniverse 기반 AV 시뮬 블루프린트, NuRec 신경 재구성, Cosmos 세계 모델, AlpaSim(7장·3장 시뮬 연계).</li></ul></div>
+<div class="t1"><h5>Tier-1이 해야 할 일</h5><ul>
+<li>시나리오 DB(OpenSCENARIO 등)·ODD 커버리지 정의, 자사 센서 모델(레퍼런스 외 센서), HIL/SIL 환경, 회귀 테스트 체계 <span class="g g-warn">⚠️</span>.</li>
+<li>실차 검증 마일리지·기준(NCAP 프로토콜, 규제 시험) <span class="g g-warn">⚠️</span>.</li>
+<li>Magna·Bosch가 "밸리데이션"을 서비스로 파는 것 자체가 NVIDIA 도구만으로 완결되지 않음을 시사 <span class="g g-ok">✅</span>.</li></ul></div>
+</div>
+
+<h3 id="s2-8">8. 안전·보안·인증 통합</h3>
+<p>NVIDIA는 부품 평가와 검사 랩까지 준다. 그러나 검사 랩은 "인증에 대비시키는" 기관이지 인증 기관이 아니고, 아이템 수준 안전 케이스와 형식승인은 우리 몫이다.</p>
+<div class="todo">
+<div class="nv"><h5>NVIDIA가 주는 것</h5><ul>
+<li>부품 평가: Orin SoC SEooC(ASIL D 체계적/ASIL B 랜덤), DriveOS 6.0 ASIL D(Orin 기준; 2025-01 "인증 릴리스 대기" → 이후 "인증"), Thor-X SoC "ASIL D 평가", ISO 21434 <b>프로세스</b> 인증(TÜV SÜD) <a class="cite" href="https://www.eenewseurope.com/en/nvidia-certifies-drive-os-to-asil-d-but-on-orin/">eeNews</a><a class="cite" href="https://www.nvidia.com/en-us/ai-trust-center/halos/autonomous-vehicles/">Halos AV</a><span class="g g-ok">✅</span>. DriveOS 7/Thor의 인증 상태는 미확인 <span class="g g-warn">⚠️</span>(2장 담당).</li>
+<li>Halos AI Systems Inspection Lab: ISO/IEC 17020 인정(ANAB, 2026-06-22), 범위 ISO 26262·21448·21434·PAS 8800·TR 5469. "파트너의 Halos 통합을 TÜV Rheinland·UL·TÜV SÜD·exida·SGS·CertX 등 제3자 인증에 대비시키는" <b>검사 기관이지 인증 기관이 아님</b> <a class="cite" href="https://anab.ansi.org/anab-accredits-nvidia-halos-ai-inspection-lab-advancing-independent-assurance-for-physical-ai-safety/">ANAB</a><span class="g g-ok">✅</span>. 랩 자체는 CES 2025 출범 <a class="cite" href="https://blogs.nvidia.com/blog/drive-ai-lab-ces/">NVIDIA 블로그</a><span class="g g-sec">📄</span>.</li></ul></div>
+<div class="t1"><h5>Tier-1이 해야 할 일</h5><ul>
+<li>아이템 정의·HARA·기능/기술 안전 개념·안전 케이스(ISO 26262 Part 3~4), SEooC 사용 가정 검증. Intertek: "안전 매뉴얼은 OEM이 SEooC를 어떻게 통합·구성·시험·검증해야 하는지 설명하는 권위 문서" <a class="cite" href="https://www.intertek.com/blog/2026/01-15-exploring-safety-elements-out-of-context/">Intertek</a><span class="g g-sec">📄</span>. NVIDIA 안전 매뉴얼 원문은 NVONLINE 게이트 뒤로 추정 <span class="g g-warn">⚠️</span>.</li>
+<li>SOTIF(ISO 21448) 분석, PAS 8800 AI 안전 논거, TARA·CSMS(R155)·SUMS(R156), 툴 자격(TensorRT·CUDA 등 TCL). 툴 자격 관련 NVIDIA 공개 자료는 찾지 못함 <span class="g g-warn">⚠️</span>.</li>
+<li>형식승인 절차(KATRI 등 지역 기관) <span class="g g-warn">⚠️</span>.</li></ul></div>
+</div>
+
+<h3 id="s2-9">9. HMI·UX</h3>
+<p>DRIVE AV 범위에 ADAS HMI는 없다. 운전자에게 상태를 알리고 개입을 요구하는 방식은 OEM 브랜드 영역이자 NCAP 평가 대상이다.</p>
+<div class="todo">
+<div class="nv"><h5>NVIDIA가 주는 것</h5><ul><li>DRIVE AV 범위에 ADAS HMI는 포함되지 않음(코크핏은 DRIVE IX 별도 제품, 3장 범위 밖) <span class="g g-warn">⚠️</span>.</li></ul></div>
+<div class="t1"><h5>Tier-1이 해야 할 일</h5><ul><li>클러스터·HUD·센터 디스플레이의 ADAS 상태 표시, 경고 전략, DMS 기반 운전자 개입 관리, 음향 <span class="g g-warn">⚠️</span>. Mercedes CLA의 Euro NCAP 5성은 HMI를 포함한 차량 수준 평가 <a class="cite" href="https://blogs.nvidia.com/blog/drive-av-mercedes-benz-cla-euro-ncap-safety-award">NVIDIA 블로그</a><span class="g g-sec">📄</span>.</li></ul></div>
+</div>
+
+<h3 id="s2-10">10. 양산·운영</h3>
+<p>OTA·플릿 모니터링·서비스 진단은 NVIDIA 제공 범위 설명에 나타나지 않는다. 라이선스 컴플라이언스와 수익 구조도 우리가 정의해야 한다.</p>
+<div class="todo">
+<div class="nv"><h5>NVIDIA가 주는 것</h5><ul><li>OTA 클라이언트·캠페인, 플릿 모니터링·섀도 모드, 모델 버전·롤백, 서비스 툴·A/S 진단, 부품번호·SW 구성관리는 NVIDIA 제공 범위 설명에 나타나지 않음 <span class="g g-warn">⚠️</span>. Mercedes·Uber 등이 고객 대면 서비스를 소유 <span class="g g-sec">📄</span>.</li></ul></div>
+<div class="t1"><h5>Tier-1이 해야 할 일</h5><ul>
+<li>위 항목 전부.</li>
+<li>SBOM·라이선스 컴플라이언스: Alpamayo 코드 Apache-2.0·가중치 OpenMDW-1.1 <span class="g g-src">🔍</span>, Cosmos는 세대별 NOML/OpenMDW(7장), DriveOS 내 Linux/GPL 구성 요소, 수출 통제 검토 <span class="g g-warn">⚠️</span>.</li>
+<li>비즈니스 모델: Mercedes 2020 계약은 "미래 기능 구매·구독의 반복 수익을 양사가 공유"하는 구조로 알려졌고 조건은 비공개 <a class="cite" href="https://nvidianews.nvidia.com/news/mercedes-benz-and-nvidia-to-build-software-defined-computing-architecture-for-automated-driving-across-future-fleet">NVIDIA 뉴스룸 2020</a><a class="cite" href="https://techcrunch.com/2020/06/23/mercedes-benz-nvidia-partner-to-bring-software-defined-vehicles-to-market-in-2024/">TechCrunch 2020</a><span class="g g-ok">✅</span>. Tier-1은 OEM–NVIDIA 수익 공유 구조 안에서 자기 몫을 정의해야 함 <span class="g g-warn">⚠️</span>.</li></ul></div>
+</div>
+
+<h3 id="s2-11">11. 프로세스·조직</h3>
+<p>NVIDIA의 프로세스 인증은 NVIDIA 것이다. 우리 조직의 ASPICE·ISO 26262 프로세스와 CUDA·데이터·시뮬·안전 역량은 따로 갖춰야 한다.</p>
+<div class="todo">
+<div class="nv"><h5>NVIDIA가 주는 것</h5><ul><li>NVIDIA 파트너 채널: DRIVE 개발자 프로그램(NGC)과 NVONLINE 파트너 포털, 하드웨어 앱 지원, 커스터머 서포트 엔지니어 <span class="g g-ok">✅</span>. NRE·유닛 라이선스 구조는 비공개 <span class="g g-warn">⚠️</span>. NVIDIA 프로세스 인증(TÜV SÜD)은 NVIDIA 것이다.</li></ul></div>
+<div class="t1"><h5>Tier-1이 해야 할 일</h5><ul>
+<li>ASPICE·ISO 26262 프로세스는 Tier-1 자체 프로세스가 필요 <span class="g g-warn">⚠️</span>.</li>
+<li>사내 역량: CUDA/TensorRT 최적화, 데이터 엔지니어링, 시뮬 엔지니어링, 안전·보안 엔지니어링. Bosch 발표의 역할 분담("NVIDIA는 AI 스택, Bosch는 통합·검증·도메인 지식")이 조직 설계의 참고 <span class="g g-ok">✅</span>.</li>
+<li>OEM과의 책임 분담: MB.DRIVE는 "Mercedes와 NVIDIA가 파트너십으로 개발"이라고만 공개되어 엔지니어 분담은 비공개 <span class="g g-warn">⚠️</span>.</li></ul></div>
+</div>
+<div class="oneline"><b>한 줄 정리.</b> 11개 계층 중 NVIDIA가 완결해 주는 것은 없다. 아래층(1~3)은 도구와 지원을 받아 우리가 만들고, 중간층(4~8)은 NVIDIA 제공이 얇거나 없으며, 위층(9~11)은 전부 우리 몫이다. 세부는 <a href="appendix-a-tier1-workscope.md">md 원본 A.2</a>.</div>
+
+<h2 id="s3">3. 어디서 차별화가 생기나</h2>
+<div class="q"><b>이 절의 질문</b> 11개 계층을 다 해야 한다면, 어디에 힘을 실어야 경쟁사와 달라지나?</div>
+<p>두 축으로 보면 답이 나온다. 하나는 NVIDIA가 얼마나 채워 주는가(제공도), 다른 하나는 양산에 얼마나 필수인가다. 모두 필수이지만 제공도는 크게 다르다. 제공도가 낮고 필수인 곳, 즉 기능 계층·데이터 사이클·검증 체계·안전 케이스가 Tier-1이 파는 것이 된다.</p>
+<figure><img src="images/appendix-a-tier1-workmap.svg" alt="Tier-1 작업 지도"><figcaption><b>그림 1. NVIDIA 제공 범위(회색)와 Tier-1 책임(노랑·빨강) 레이어 지도.</b> 왼쪽은 차량 안 스택, 오른쪽은 개발·검증·운영. 노랑은 NVIDIA가 도구와 지원을 주되 구현은 우리가 하는 층, 빨강은 NVIDIA 제공 밖이거나 Tier-1 책임이 명시된 층이다. 실선은 확인, 점선은 추정. 자체 작성.</figcaption></figure>
+<div class="tbl"><table>
+<tr><th>영역</th><th>NVIDIA 제공도</th><th>양산 필수도</th><th>Tier-1 차별화 가능성</th><th>비고</th></tr>
+<tr><td>SoC·레퍼런스 보드·OS</td><td>높음</td><td>필수</td><td>낮음</td><td>모두 같은 Thor·DriveOS를 쓴다</td></tr>
+<tr><td>ECU 설계·브링업·세이프티 MCU</td><td>중간(도구·지원)</td><td>필수</td><td>중간</td><td>원가·열·신뢰성에서 차이</td></tr>
+<tr><td>센서 HAL·캘리브레이션</td><td>중간(SAL 프레임워크)</td><td>필수</td><td>중간</td><td>자사 센서 구성 시 필수</td></tr>
+<tr><td>차량 신호·액추에이터 정합</td><td>낮음</td><td>필수</td><td>중간</td><td>OEM E/E별 반복 작업</td></tr>
+<tr><td>AV 기능 계층·ODD·규제 매핑</td><td>중간(DRIVE AV 라이선스 시)~낮음</td><td>필수</td><td><b>높음</b></td><td>지역·OEM 특화가 제품 가치</td></tr>
+<tr><td>데이터 사이클·AI 안전 논거</td><td>중간(도구)</td><td>필수</td><td><b>높음</b></td><td>데이터와 논거는 대체 불가</td></tr>
+<tr><td>시뮬·검증 체계</td><td>중간(Omniverse/Cosmos)</td><td>필수</td><td>높음</td><td>시나리오·기준이 자산</td></tr>
+<tr><td>안전 케이스·인증·형식승인</td><td>중간(SEooC·검사랩)</td><td>필수</td><td><b>높음</b></td><td>Magna가 "안전 승인"을 서비스로 파는 이유</td></tr>
+<tr><td>HMI·UX</td><td>없음</td><td>필수</td><td>중간</td><td>OEM 브랜드 영역</td></tr>
+<tr><td>OTA·운영</td><td>없음</td><td>필수</td><td>중간</td><td>수익 공유 구조와 연결</td></tr>
+</table></div>
+<div class="oneline"><b>한 줄 정리.</b> 칩·OS·SDK는 모두 같은 것을 쓰므로 차별화가 없다. 차별화는 기능 계층, 데이터 사이클, 검증 체계, 안전 케이스에서 생기며, 그것이 Tier-1이 파는 것이다.</div>
+
+<h2 id="s4">4. 실제 Tier-1은 무엇을 하나</h2>
+<div class="q"><b>이 절의 질문</b> 위 지도가 맞다면, 실제 Tier-1들은 NVIDIA 위에서 무엇을 만든다고 공개했나?</div>
+<div class="tbl"><table>
+<tr><th>회사</th><th>NVIDIA 위에서 만드는 것(공개)</th><th>출처</th></tr>
+<tr><td>Bosch</td><td>Thor를 자사 컴퓨트·ECU 아키텍처에 통합, "안전 전문성·고성능 ECU·ADAS 노하우로 양산 배포", 통합·검증·도메인 지식</td><td><a href="https://us.bosch-press.com/pressportal/us/en/press-release-28736.html">Bosch 2025-10-01</a> <span class="g g-ok">✅</span></td></tr>
+<tr><td>Magna</td><td>Hyperion 호환 ECU, DRIVE AV 스택 "시스템 통합·검증·밸리데이션·안전 승인·배포", L2++/L3/L4 런칭 서비스. 2025-03에는 Thor 통합 프로그램(데모 Q4 2025, L2~L4)</td><td><a href="https://www.magna.com/stories/news-press-release/2026/magna-to-offer-drive-hyperion-compatible-ecus-and-tier-1-integration-services-for-nvidia-drive-av">Magna 2026-01-05</a> <span class="g g-sec">📄</span></td></tr>
+<tr><td>Continental</td><td>Aurora Driver 하드웨어 양산화 + 독립 2차(폴백) 시스템, 2027 양산. Thor 양산 시스템 공급사 목록에도 포함</td><td><a href="https://ir.aurora.tech/news-events/press-releases/detail/112/aurora-continental-and-nvidia-partner-to-deploy-driverless-trucks-at-scale">Aurora IR</a> <span class="g g-ok">✅</span></td></tr>
+<tr><td>Desay SV</td><td>IPU03(Xavier, XPeng P7) → IPU04(Orin, "Li Auto·Xpeng·GAC·Great Wall·Nissan 등 20개 이상 OEM") → IPU14(Thor-U, "원칩 콕핏·주행 통합, L3, 일부 L4", GAC Hyptec L4 2025 양산). 2020년부터 NVIDIA 협업</td><td><a href="https://en.desaysv.com/newsDetails/544.html">Desay SV</a> <span class="g g-ok">✅</span></td></tr>
+<tr><td>Lenovo</td><td>듀얼 Thor L4 도메인 컨트롤러 AD1, WeRide GXR 로보택시 탑재("100% 자동차 등급 HPC 3.0"), Nuro·SWM 협업</td><td><a href="https://news.lenovo.com/pressroom/press-releases/lenovo-works-with-swm-to-develop-next-generation-robotaxi-on-nvidia-drive-agx-thor/">Lenovo</a> <span class="g g-ok">✅</span></td></tr>
+<tr><td>Quanta · Foxconn</td><td>Quanta: Thor 양산 시스템 공급사(2025-08), CES 2026 Hyperion 생태계. Foxconn: "Orin 기반 ECU의 Tier-1 제조사, Thor ECU도 제조 예정"(2023-10), Stellantis 로보택시 하드웨어 통합</td><td><a href="https://blogs.nvidia.com/blog/foxconn-nvidia-electric-vehicle/">NVIDIA 블로그</a> <span class="g g-ok">✅</span></td></tr>
+<tr><td>ZF</td><td>ProAI 슈퍼컴퓨터 플랫폼(NVIDIA 옵션), 2019 DRIVE AutoPilot "선호 파트너", CES 2026 Hyperion Tier-1 목록. Thor 기반 OEM 프로그램은 미확인</td><td><a href="https://www.eenewseurope.com/en/nvidia-drive-hyperion-ecosystem-expands-ces-2026/">eeNews CES 2026</a> <span class="g g-sec">📄</span> <span class="g g-warn">⚠️</span></td></tr>
+<tr><td>LG전자·LG이노텍</td><td>자사 IVI를 Hyperion(듀얼 Thor)과 통합, 통신 모듈·센싱·램프. IVI/ADAS 통합 컨트롤러는 aiMotive와 개발</td><td><a href="https://www.prnewswire.com/news-releases/lg-teams-with-nvidia-to-shape-the-future-with-map-mobility--ai-infra--physical-ai-302793797.html">PR Newswire</a> <span class="g g-sec">📄</span></td></tr>
+<tr><td>Hyundai Mobis · HL Klemove · Aptiv · Valeo · Pegatron · Wistron · Flex</td><td>NVIDIA DRIVE 특화 프로그램 공개 자료를 찾지 못함(부재 ≠ 없음). Sony Honda Mobility AFEELA는 Qualcomm 기반</td><td><span class="g g-warn">⚠️</span></td></tr>
+</table></div>
+<p><b>해석.</b> 컴퓨트 ECU 제조사(Desay SV·Lenovo·Quanta·Foxconn)는 1~3층(하드웨어·BSP·센서)을, AD 시스템 Tier-1(Bosch·Magna·Continental)은 4~8층(차량 정합·기능·데이터·검증·안전 승인)을 사업화하고 있다. 한 회사가 전 층을 다 하는 사례는 공개 자료에서 확인되지 않는다. CES 2026 Hyperion 생태계 명단은 "Bosch, Magna, ZF 등 Tier-1·통합사와 Aeva, AUMOVIO, Astemo, Arbe, Hesai, Omnivision, Quanta, Sony"이며, 이점은 "OEM이 공통 레퍼런스 아키텍처 대비 검증된 ECU·센서 스위트를 조달할 수 있다"는 것이다 <span class="g g-sec">📄</span>.</p>
+<div class="oneline"><b>한 줄 정리.</b> 실제 시장은 "하드웨어 층을 파는 회사"와 "통합·검증·안전 승인 층을 파는 회사"로 나뉘어 있고, 3절의 차별화 지도와 일치한다.</div>
+
+<h2 id="s5">5. 세 가지 결론과 다음 과제</h2>
+<p>3장·7장·부록 A를 합쳐 세 문장으로 줄이면 아래와 같다.</p>
+<div class="qa">
+  <div class="item"><div class="qq">결론 1. NVIDIA의 "풀스택"은 두뇌(오픈)와 완제품(라이선스)이 분리돼 있다.</div>Alpamayo는 누구나 받을 수 있는 teacher 모델이고, 차에 들어가는 것은 그것을 줄이고 규칙 스택·센서·인증과 묶은 DRIVE AV다. 오픈 모델을 받는 것과 양산 스택을 갖는 것은 전혀 다른 일이며, NVIDIA 스스로 오픈 모델을 "주행 스택이 아니다"라고 명시한다(3장).</div>
+  <div class="item"><div class="qq">결론 2. 2026년 9월의 현실은 "양산 1건, 나머지는 목표"다.</div>Mercedes CLA(L2++)만이 풀스택 DRIVE AV 양산이고, L4는 2027~2028 목표이며, Thor 양산차는 자체 소프트웨어를 얹은 Zeekr 9X뿐이다. Cosmos는 도구로서 파트너 통합 단계이지 인증 근거로 쓰인 사례가 없다(7장). 성숙도 판단은 이 구분을 유지해야 한다.</div>
+  <div class="item"><div class="qq">결론 3. Tier-1의 일은 줄지 않고 종류가 바뀐다.</div>BSP·HAL·차량 정합·HMI·인증은 Android 때와 같이 남고, 데이터 사이클과 AI 안전 논거가 추가된다. 차별화는 칩이나 OS가 아니라 기능 계층·데이터·검증 체계·안전 케이스에서 생기며, Magna와 Bosch가 파는 서비스가 정확히 그 목록이다.</div>
+</div>
+<h4>다음 조사 과제</h4>
+<ul>
+  <li><b>원문 재확인.</b> 이번 세션에서 검색 요약(<span class="g g-sec">📄</span>)에 의존한 NVIDIA 뉴스룸·블로그·논문 인용을 원문으로 확인한다. 특히 CLA 탑재 칩, Alpamayo 파생 모델의 CLA 포함 여부, Cosmos 3 파라미터 해석, Drive-Dreams의 정량 효과.</li>
+  <li><b>2장과의 접합.</b> DriveOS 7/Thor 인증 상태, Halos 3계층과 3장의 런타임 안전 구조를 맞춘다.</li>
+  <li><b>5장과의 접합.</b> DriveOS LLM SDK·TensorRT와 Alpamayo student 모델의 온보드 경로, Cosmos 3 NIM 배포를 맞춘다.</li>
+  <li><b>Tier-1 실무 검증.</b> 이 부록의 <span class="g g-warn">⚠️</span> 항목(하이퍼바이저 파티션, HSM, gPTP, EOL, SecOC, 툴 자격 등)을 실제 프로그램 경험자와 대조한다.</li>
+</ul>
+
+<h2 id="s6">6. 아직 확인 못 한 것</h2>
+<div class="tbl"><table>
+<tr><th>항목</th><th>상태</th><th>확인 방법</th></tr>
+<tr><td>Thor 개발 키트 세이프티 MCU 부품 번호</td><td><span class="g g-warn">⚠️</span></td><td>Thor Hardware Quick Start Guide PDF</td></tr>
+<tr><td>DriveOS 7 / Thor의 ISO 26262 인증 상태</td><td><span class="g g-warn">⚠️</span></td><td>2장 담당·Halos 페이지 갱신일</td></tr>
+<tr><td>DriveOS LTS·패치 정책</td><td><span class="g g-warn">⚠️</span></td><td>NVONLINE 파트너 문서</td></tr>
+<tr><td>NVIDIA 안전 매뉴얼의 파트너 책임 문구</td><td><span class="g g-warn">⚠️</span></td><td>NVONLINE 안전 매뉴얼</td></tr>
+<tr><td>TensorRT/CUDA 툴 자격(TCL)</td><td><span class="g g-warn">⚠️</span></td><td>NVIDIA 안전 보고서·TÜV 범위</td></tr>
+<tr><td>Mercedes 수익 공유 비율·NRE</td><td>비공개 <span class="g g-warn">⚠️</span></td><td>—</td></tr>
+<tr><td>Toyota가 DRIVE AV를 쓰는지</td><td><span class="g g-warn">⚠️</span></td><td>후속 발표</td></tr>
+<tr><td>DriveOS 6.0 ASIL D "대기" vs "인증" 시점</td><td>출처 상충</td><td>Halos 페이지 날짜 확인</td></tr>
+<tr><td>형식승인에서 TÜV Rheinland UNECE 평가의 정확한 범위(R157 등)</td><td><span class="g g-warn">⚠️</span></td><td>원문 보도자료</td></tr>
+<tr><td>디자인 윈 파이프라인 최신 수치(2022 $11B → 2023 $14B 이후 없음; Q2 FY27 "자동차 수직 시장 $8B TTM"은 데이터센터 매출 혼합)</td><td><span class="g g-warn">⚠️</span></td><td>NVIDIA IR</td></tr>
+</table></div>
+
+<h2 id="sources">출처</h2>
+<p>본문의 인용은 모두 둥근 칩으로 링크되어 있다. 통합 목록(128건, 유형·날짜·확인 사실·등급)은 <a href="reference/references.md">reference/references.md</a>, 그림 출처는 <a href="reference/images.md">reference/images.md</a>, 이 부록의 사실 목록 원본은 <a href="appendix-a-tier1-workscope.md">appendix-a-tier1-workscope.md</a>에 있다. 가장 많이 기댄 출처는 <a href="https://developer.nvidia.com/docs/drive/drive-os/6.0.6/public/drive-os-linux-sdk/common/topics/intro_sdk/GettingStarted1.html">DriveOS PDK 문구</a> ✅, <a href="https://developer.nvidia.com/docs/drive/drive-os/7.0.3/public/drive-os-linux-sdk/platform-customization/customizing_driveos_for_different_board.html">커스텀 보드 절차</a> 📄, <a href="https://blogs.nvidia.com/blog/nvidia-drive-safety-milestones">Orin SEooC</a> ✅, <a href="https://anab.ansi.org/anab-accredits-nvidia-halos-ai-inspection-lab-advancing-independent-assurance-for-physical-ai-safety/">ANAB 검사랩 인정</a> ✅, <a href="https://www.magna.com/stories/news-press-release/2026/magna-to-offer-drive-hyperion-compatible-ecus-and-tier-1-integration-services-for-nvidia-drive-av">Magna 2026-01</a> 📄, <a href="https://us.bosch-press.com/pressportal/us/en/press-release-28736.html">Bosch 2025-10</a> ✅, <a href="https://ir.aurora.tech/news-events/press-releases/detail/112/aurora-continental-and-nvidia-partner-to-deploy-driverless-trucks-at-scale">Aurora·Continental</a> ✅, <a href="https://en.desaysv.com/newsDetails/544.html">Desay SV</a> ✅다.</p>
+<p class="src-note">작성일 2026-09-02 · 브랜치 <code>claude/nvidia-fullstack-research-outline-ouyd5t</code> · 함께 읽기: <a href="report-03-autonomous-driving-stack.html">3장 자율주행 스택</a> · <a href="report-07-physical-ai-cosmos.html">7장 Physical AI / Cosmos</a></p>
+</div>
+</main>
+</div>
+<script>
+(function(){
+  var links=[].slice.call(document.querySelectorAll('nav.side a[href^="#"]'));
+  var map={}; links.forEach(function(a){map[a.getAttribute('href').slice(1)]=a;});
+  var targets=Object.keys(map).map(function(id){return document.getElementById(id);}).filter(Boolean);
+  var current=null;
+  function setActive(id){ if(current===id) return; links.forEach(function(a){a.classList.remove('active');}); var a=map[id]; if(a){a.classList.add('active'); var r=a.getBoundingClientRect(), n=document.getElementById('side').getBoundingClientRect(); if(r.top<n.top+40||r.bottom>n.bottom-40){a.scrollIntoView({block:'center'});}} current=id; }
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting) setActive(e.target.id); }); },{rootMargin:'0px 0px -75% 0px',threshold:0});
+    targets.forEach(function(t){io.observe(t);});
+  }
+})();
+</script>
+</body>
+</html>

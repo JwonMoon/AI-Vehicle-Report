@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="690" viewBox="0 0 1240 690" font-family="Helvetica, Arial, 'Noto Sans KR', sans-serif" font-size="12.5">
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#555"/></marker>
+  </defs>
+  <rect id="bg" width="1240" height="690" fill="#ffffff"/>
+  <text x="20" y="28" font-size="18" font-weight="bold" fill="#222">NVIDIA 자율주행 스택의 계층과 3-computer 속 위치 (2026-09 기준)</text>
+
+  <!-- three computers: column headings (text + rule, not blocks) -->
+  <text x="20" y="88" font-size="14.5" font-weight="bold" fill="#222">DGX — 학습 (데이터센터)</text>
+  <line x1="20" y1="97" x2="380" y2="97" stroke="#222" stroke-width="2"/>
+  <text x="420" y="88" font-size="14.5" font-weight="bold" fill="#222">OVX — Omniverse + Cosmos 시뮬레이션</text>
+  <line x1="420" y1="97" x2="780" y2="97" stroke="#222" stroke-width="2"/>
+  <text x="820" y="88" font-size="14.5" font-weight="bold" fill="#222">DRIVE AGX — 차량</text>
+  <line x1="820" y1="97" x2="1220" y2="97" stroke="#222" stroke-width="2"/>
+
+  <!-- DGX column: Alpamayo ← 학습 레시피 ← Cosmos Reason -->
+  <rect x="30" y="125" width="340" height="70" fill="#dbe9ff" stroke="#3b6fd6"/>
+  <text x="200" y="148" text-anchor="middle" font-weight="bold" fill="#1d3f86">Alpamayo (오픈 teacher 모델)</text>
+  <text x="200" y="166" text-anchor="middle" fill="#333">1 (10B) → 1.5 (10B) → 2 Super (34B)</text>
+  <text x="200" y="184" text-anchor="middle" fill="#333">Cosmos-Reason 백본 + 디퓨전 action expert</text>
+
+  <rect x="30" y="237" width="340" height="74" fill="#f5f5f5" stroke="#999"/>
+  <text x="200" y="260" text-anchor="middle" font-weight="bold" fill="#333">학습 레시피: SFT → RL (GRPO, Cosmos-RL)</text>
+  <text x="200" y="279" text-anchor="middle" fill="#333">학습 데이터 80k h (1) → 110k h (2 Super)</text>
+  <text x="200" y="298" text-anchor="middle" fill="#333">+ Physical AI AV 데이터셋 1,727 h</text>
+
+  <rect x="30" y="341" width="340" height="60" fill="#f5f5f5" stroke="#999"/>
+  <text x="200" y="364" text-anchor="middle" font-weight="bold" fill="#333">Cosmos Reason 1 → 2 → Cosmos 3 Reasoner</text>
+  <text x="200" y="384" text-anchor="middle" fill="#333">VLM 백본 · 자동 라벨러 · 크리틱</text>
+
+  <!-- OVX column: AlpaSim / Data Factory ← NuRec·Transfer -->
+  <rect x="430" y="125" width="340" height="70" fill="#f5f5f5" stroke="#999"/>
+  <text x="600" y="148" text-anchor="middle" font-weight="bold" fill="#333">AlpaSim (폐루프 평가) · AlpaGym (폐루프 RL)</text>
+  <text x="600" y="166" text-anchor="middle" fill="#333">렌더러: NuRec 기본 / OmniDreams 옵션</text>
+  <text x="600" y="184" text-anchor="middle" fill="#333">Apache-2.0, 연구·개발 전용</text>
+
+  <rect x="430" y="237" width="340" height="74" fill="#f5f5f5" stroke="#999"/>
+  <text x="600" y="260" text-anchor="middle" font-weight="bold" fill="#333">Data Factory</text>
+  <text x="600" y="279" text-anchor="middle" fill="#333">Cosmos Curator · Cosmos Dataset Search</text>
+  <text x="600" y="298" text-anchor="middle" fill="#333">플릿 데이터 → 큐레이션 → 라벨</text>
+
+  <rect x="430" y="341" width="340" height="60" fill="#f5f5f5" stroke="#999"/>
+  <text x="600" y="364" text-anchor="middle" font-weight="bold" fill="#333">Omniverse NuRec · Cosmos Transfer / Dreams</text>
+  <text x="600" y="384" text-anchor="middle" fill="#333">재구성 · 합성 데이터 · 시나리오 생성</text>
+
+  <!-- AGX column: layer stack -->
+  <rect x="830" y="125" width="380" height="44" fill="#f5f5f5" stroke="#999"/>
+  <text x="1020" y="143" text-anchor="middle" font-weight="bold" fill="#333">L5 OEM 앱 · HMI · 차량 OS (예: MB.OS)</text>
+  <text x="1020" y="160" text-anchor="middle" fill="#333">OEM / Tier-1 몫</text>
+
+  <rect x="830" y="175" width="380" height="90" fill="#c9dcff" stroke="#3b6fd6" stroke-width="2"/>
+  <text x="1020" y="194" text-anchor="middle" font-weight="bold" fill="#1d3f86">L3~L4 DRIVE AV (상용 듀얼 스택)</text>
+  <rect x="842" y="205" width="176" height="48" fill="#ffffff" stroke="#3b6fd6"/>
+  <text x="930" y="224" text-anchor="middle" fill="#1d3f86" font-weight="bold">E2E AI 스택</text>
+  <text x="930" y="242" text-anchor="middle" fill="#333">증류된 Alpamayo VLA</text>
+  <rect x="1022" y="205" width="176" height="48" fill="#ffffff" stroke="#3b6fd6"/>
+  <text x="1110" y="224" text-anchor="middle" fill="#1d3f86" font-weight="bold">클래식 안전 스택</text>
+  <text x="1110" y="242" text-anchor="middle" fill="#333">Halos 규칙 기반 가드레일</text>
+
+  <rect x="830" y="271" width="380" height="56" fill="#f5f5f5" stroke="#999"/>
+  <text x="1020" y="289" text-anchor="middle" font-weight="bold" fill="#333">L2 DriveWorks SDK</text>
+  <text x="1020" y="305" text-anchor="middle" fill="#333">SAL · 캘리브레이션 · 에고모션 · DNN 프레임워크</text>
+  <text x="1020" y="321" text-anchor="middle" fill="#333">+ CUDA · TensorRT · DriveOS LLM SDK</text>
+
+  <rect x="830" y="333" width="380" height="44" fill="#eeeeee" stroke="#999"/>
+  <text x="1020" y="351" text-anchor="middle" font-weight="bold" fill="#333">L1 DriveOS 7 (하이퍼바이저 · QNX/Linux · Halos)</text>
+  <text x="1020" y="368" text-anchor="middle" fill="#333">ASIL D (DriveOS 6.0 on Orin) · Thor-X 평가</text>
+
+  <rect x="830" y="383" width="380" height="44" fill="#eeeeee" stroke="#999"/>
+  <text x="1020" y="401" text-anchor="middle" font-weight="bold" fill="#333">L0 DRIVE AGX Thor × 2 + Hyperion 10 센서</text>
+  <text x="1020" y="418" text-anchor="middle" fill="#333">카메라 14 · 레이더 9 · 라이다 1 · 초음파 12</text>
+
+  <!-- flows (solid = confirmed, dashed = inferred) -->
+  <!-- Cosmos Reason → 학습 레시피: pretrained backbone goes into training -->
+  <line x1="200" y1="341" x2="200" y2="311" stroke="#555" marker-end="url(#arr)"/>
+  <text x="208" y="330" fill="#555" font-size="10.5">사전학습 백본으로 입력</text>
+  <!-- 학습 레시피 → Alpamayo: training produces the model -->
+  <line x1="200" y1="237" x2="200" y2="195" stroke="#555" marker-end="url(#arr)"/>
+  <text x="208" y="220" fill="#555" font-size="10.5">학습 산출 (모델 가중치)</text>
+  <!-- Data Factory → 학습 레시피: curated training data -->
+  <line x1="430" y1="274" x2="370" y2="274" stroke="#555" marker-end="url(#arr)"/>
+  <text x="400" y="266" text-anchor="middle" fill="#555" font-size="10.5">학습</text>
+  <text x="400" y="289" text-anchor="middle" fill="#555" font-size="10.5">데이터</text>
+  <!-- NuRec·Transfer → Data Factory: synthetic / reconstructed data feeds curation -->
+  <line x1="600" y1="341" x2="600" y2="311" stroke="#555" marker-end="url(#arr)"/>
+  <text x="608" y="330" fill="#555" font-size="10.5">합성 · 재구성 데이터</text>
+  <!-- AlpaSim → Alpamayo: closed-loop RL feedback -->
+  <line x1="430" y1="150" x2="380" y2="150" stroke="#555" marker-end="url(#arr)"/>
+  <text x="405" y="141" text-anchor="middle" fill="#555" font-size="10.5">폐루프</text>
+  <text x="405" y="163" text-anchor="middle" fill="#555" font-size="10.5">RL</text>
+  <!-- Alpamayo → E2E AI stack: distillation, routed through the gaps between blocks -->
+  <polyline points="370,185 405,185 405,216 805,216 805,229 830,229" fill="none" stroke="#555" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#arr)"/>
+  <text x="440" y="209" fill="#555" font-size="11.5">증류 · 양자화 → 차량용 student 모델</text>
+  <text x="440" y="229" fill="#555" font-size="10.5">(점선 = 추정 경로 · NVIDIA 공식 표현 "teacher" 🔍 · 결합 세부는 미공개)</text>
+  <!-- NuRec·Transfer → DRIVE AV: simulation-based validation (inferred) -->
+  <polyline points="770,371 805,371 805,250 830,250" fill="none" stroke="#555" stroke-dasharray="6,4" marker-end="url(#arr)"/>
+  <text x="800" y="328" text-anchor="end" fill="#555" font-size="10.5">검증 (추정)</text>
+
+  <!-- maturity strip -->
+  <rect x="20" y="455" width="1200" height="217" fill="#fafafa" stroke="#ccc"/>
+  <text x="35" y="480" font-weight="bold" fill="#222">현재 위치(성숙도) — ① 연구 → ② 오픈 공개 → ③ 파트너 시범 → ④ 1개 양산차 → ⑤ 다수 양산</text>
+  <text x="35" y="504" fill="#333" font-size="12">• Alpamayo 오픈 모델: ② 2 Super 상용 가중치 2026-08-04 (OpenMDW-1.1) — 양산 탑재 직접 증거 없음 ⚠️</text>
+  <text x="35" y="524" fill="#333" font-size="12">• DRIVE AV L2++: ④ Mercedes-Benz CLA (미국 2026, 첫 풀스택 양산) ✅</text>
+  <text x="47" y="541" fill="#333" font-size="12">DRIVE AV L4: ③ Uber 2027 H1 · Stellantis SOP 2028 · Mercedes S-Class</text>
+  <text x="35" y="561" fill="#333" font-size="12">• DriveWorks · DriveOS (Orin 세대): ⑤ 다수 양산 — Volvo EX90, JLR, Toyota 등</text>
+  <text x="47" y="578" fill="#333" font-size="12">DriveOS 7 on Thor: 개발자 출하 단계 · 자체 스택 양산 1건 (Zeekr 9X)</text>
+  <text x="35" y="598" fill="#333" font-size="12">• Hyperion 10 (2×Thor): ③ Nuro/Lucid 시험 운행 · Waabi/Volvo 트럭 · Wayve/Nissan 프로토타입</text>
+  <text x="47" y="615" fill="#333" font-size="12">DRIVE AV로 구동되는 상업 서비스는 아직 없음</text>
+  <text x="35" y="635" fill="#333" font-size="12">• AlpaSim / AlpaGym: ② 오픈소스 (2025-10 / 2026-06)</text>
+  <text x="35" y="661" fill="#777" font-size="11.5">출처: 본문 각 절의 인라인 인용 참조. 자체 작성 (research/nvidia-fullstack).</text>
+</svg>

@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>7장 Physical AI / Cosmos — 세계 모델과 자율주행 개발 | NVIDIA 차량용 풀스택 SW 조사</title>
+<style>
+:root{
+  --bg:#f6f7f5; --paper:#ffffff; --ink:#1f2421; --muted:#5f6b63; --line:#dfe4df;
+  --accent:#76b900; --accent-ink:#3f6a00; --accent-soft:#eef7dd;
+  --ok:#2e7d32; --ok-bg:#e6f4ea; --src:#1565c0; --src-bg:#e3f0fc; --sec:#8d6e00; --sec-bg:#fff6d6; --warn:#c62828; --warn-bg:#fde8e8;
+  --card:#fbfcfa; --note:#f3f0ff; --note-ink:#4a3a9c; --sidebar-w:280px;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#141715; --paper:#1c201d; --ink:#e7ebe6; --muted:#9aa59d; --line:#2e352f;
+    --accent:#8fd400; --accent-ink:#b9ea4c; --accent-soft:#233016;
+    --ok:#7ad38a; --ok-bg:#1c3021; --src:#8ab8ff; --src-bg:#1a2a44; --sec:#e6c35a; --sec-bg:#3a3110; --warn:#ff8a80; --warn-bg:#3d1c1c; --card:#20251f; --note:#26223a; --note-ink:#c9bfff; }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans KR","Pretendard","Apple SD Gothic Neo","Noto Sans KR",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.75;word-break:keep-all}
+a{color:var(--src);text-decoration:none} a:hover{text-decoration:underline}
+code{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.88em;background:var(--accent-soft);padding:.05em .35em;border-radius:4px}
+.layout{display:grid;grid-template-columns:var(--sidebar-w) minmax(0,1fr)}
+nav.side{position:sticky;top:0;height:100vh;overflow-y:auto;border-right:1px solid var(--line);background:var(--paper);padding:18px 14px 40px;font-size:13px}
+nav.side .brand{font-weight:700;color:var(--accent-ink);margin-bottom:4px;font-size:14px}
+nav.side .brand-sub{color:var(--muted);font-size:12px;margin-bottom:12px}
+nav.side .nav-ch{margin:14px 0 4px;font-weight:700;border-top:1px solid var(--line);padding-top:10px}
+nav.side a.nav-h2{display:block;padding:3px 6px;border-radius:5px;color:var(--ink);font-weight:600}
+nav.side a.nav-h3{display:block;padding:2px 6px 2px 18px;border-radius:5px;color:var(--muted);font-size:12.5px}
+nav.side a.active{background:var(--accent-soft);color:var(--accent-ink)}
+nav.side .other{margin-top:16px;padding-top:10px;border-top:1px solid var(--line);font-size:12.5px}
+nav.side .other a{display:block;padding:2px 6px;color:var(--src)}
+nav.side .legend{margin-top:14px;padding-top:10px;border-top:1px solid var(--line);color:var(--muted);font-size:12px;line-height:1.9}
+main{padding:0 0 80px}
+.wrap{max-width:58rem;margin:0 auto;padding:0 36px}
+@media (max-width:1100px){ .layout{grid-template-columns:1fr} nav.side{display:none} .wrap{padding:0 18px} }
+.hero{background:linear-gradient(135deg,#0f1a05 0%,#243c07 55%,#3f6a00 100%);color:#f2f7ea;padding:56px 0 40px;margin-bottom:28px}
+.hero .kicker{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#c9dfa6;margin-bottom:10px}
+.hero h1{font-size:30px;margin:0 0 10px;line-height:1.3}
+.hero .sub{color:#dbe8c4;font-size:16px;max-width:46rem}
+.hero .facts{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13.5px;color:#dbe8c4;margin-top:18px}
+.hero .facts b{color:#fff} .hero .facts a{color:#fff;text-decoration:underline}
+.hero .g{background:rgba(255,255,255,.14);color:#fff}
+h2{font-size:22px;margin:46px 0 12px;scroll-margin-top:16px}
+h2::before{content:"";display:inline-block;width:10px;height:10px;background:var(--accent);border-radius:2px;margin-right:10px}
+h3{font-size:18px;margin:32px 0 8px;scroll-margin-top:16px}
+h4{font-size:15.5px;margin:22px 0 6px;color:var(--accent-ink)}
+p{margin:.6em 0} ul,ol{padding-left:1.4em} li{margin:.3em 0}
+strong{font-weight:700}
+.q{background:var(--paper);border:1px solid var(--line);border-left:5px solid var(--accent);border-radius:8px;padding:10px 16px;margin:12px 0 16px;font-size:15px}
+.q b{color:var(--accent-ink)}
+.oneline{background:var(--accent-soft);border-radius:8px;padding:12px 16px;margin:18px 0 8px;font-size:15.5px;border-left:5px solid var(--accent)}
+.oneline b{color:var(--accent-ink)}
+.analogy{background:var(--note);color:var(--ink);border-radius:8px;padding:12px 16px;margin:14px 0;font-size:15px;border-left:5px solid var(--note-ink)}
+.analogy b{color:var(--note-ink)}
+.term{background:var(--paper);border:1px dashed var(--line);border-radius:8px;padding:10px 14px;margin:12px 0;font-size:14px;color:var(--muted)}
+.term b{color:var(--ink)}
+.warn{background:var(--warn-bg);border-left:5px solid var(--warn);border-radius:8px;padding:10px 16px;margin:14px 0;font-size:15px}
+.constraint{background:var(--sec-bg);border-left:5px solid var(--sec);padding:12px 16px;border-radius:8px;font-size:14.5px;margin:0 0 24px}
+details.ev{margin:12px 0 20px;border:1px solid var(--line);border-radius:8px;background:var(--paper)}
+details.ev>summary{cursor:pointer;padding:9px 14px;font-weight:600;color:var(--accent-ink);font-size:14px;list-style:none}
+details.ev>summary::before{content:"▸ ";} details.ev[open]>summary::before{content:"▾ ";}
+details.ev>*:not(summary){padding:0 14px 6px}
+details.ev .tbl{margin:8px 0 12px;border:none}
+.g{display:inline-block;font-size:.78em;line-height:1;padding:.18em .32em;border-radius:5px;vertical-align:.1em;margin:0 .05em}
+.g-ok{background:var(--ok-bg);color:var(--ok)} .g-src{background:var(--src-bg);color:var(--src)} .g-sec{background:var(--sec-bg);color:var(--sec)} .g-warn{background:var(--warn-bg);color:var(--warn)}
+a.cite{display:inline-block;font-size:.74em;line-height:1.35;padding:.05em .45em;border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--src);white-space:nowrap;max-width:22em;overflow:hidden;text-overflow:ellipsis;vertical-align:middle;margin:0 .1em}
+a.cite:hover{border-color:var(--src);text-decoration:none}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:14px 0}
+.stat{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.stat .n{font-size:22px;font-weight:700;color:var(--accent-ink);line-height:1.2}
+.stat .l{font-size:12.5px;color:var(--muted)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin:14px 0 18px}
+.card{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:8px;padding:10px 12px;font-size:14px}
+.card-k{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-ink);font-weight:700;margin-bottom:4px}
+.qa{display:grid;gap:10px;margin:14px 0}
+.qa .item{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 16px}
+.qa .item .qq{font-weight:700;color:var(--accent-ink);margin-bottom:4px}
+.timeline{list-style:none;padding:0;margin:14px 0;border-left:3px solid var(--accent)}
+.timeline li{position:relative;padding:4px 0 12px 18px;font-size:15px}
+.timeline li::before{content:"";position:absolute;left:-8px;top:12px;width:12px;height:12px;border-radius:50%;background:var(--accent);border:2px solid var(--paper)}
+.timeline .d{font-weight:700;color:var(--accent-ink);margin-right:8px;font-variant-numeric:tabular-nums}
+.tbl{overflow-x:auto;margin:14px 0 20px;border:1px solid var(--line);border-radius:8px;background:var(--paper)}
+table{border-collapse:collapse;width:100%;font-size:13.5px;line-height:1.55}
+th{position:sticky;top:0;background:var(--accent-soft);color:var(--accent-ink);text-align:left;padding:8px 10px;border-bottom:2px solid var(--accent)}
+td{padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:nth-child(even) td{background:rgba(118,185,0,.04)}
+td:first-child{font-weight:600}
+figure{margin:20px 0;text-align:center}
+figure img{max-width:100%;height:auto;border:1px solid var(--line);border-radius:8px;background:#fff}
+figcaption{font-size:13px;color:var(--muted);margin-top:6px;text-align:left}
+figcaption b{color:var(--ink)}
+.scale{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin:10px 0 16px;font-size:12.5px;text-align:center}
+.scale div{padding:8px 4px;border-radius:6px;background:var(--paper);border:1px solid var(--line);color:var(--muted)}
+.scale div b{display:block;color:var(--accent-ink);font-size:16px}
+.tier{margin:18px 0 6px;padding:8px 14px;border-radius:8px;background:var(--paper);border:1px solid var(--line);border-left:5px solid var(--accent);font-size:15px}
+.tier b{color:var(--accent-ink)}
+.todo{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0 18px}
+.todo>div{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-size:14px}
+.todo>div h5{margin:0 0 6px;font-size:13px;letter-spacing:.06em;text-transform:uppercase}
+.todo .nv h5{color:var(--muted)} .todo .t1 h5{color:var(--warn)}
+.todo ul{margin:0;padding-left:1.2em}
+@media (max-width:760px){ .todo{grid-template-columns:1fr} .scale{grid-template-columns:repeat(2,1fr)} }
+.src-note{color:var(--muted);font-size:13px;margin-top:30px}
+@media print{ nav.side{display:none} .layout{display:block} .hero{background:#243c07;-webkit-print-color-adjust:exact} a.cite{border:none;padding:0} .tbl{overflow:visible;border:none} details.ev{display:block} details.ev>summary{display:none} details.ev>*:not(summary){display:block} }
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="side" id="side">
+  <div class="brand">NVIDIA 풀스택 SW 조사</div>
+  <div class="brand-sub">7장 · Physical AI / Cosmos</div>
+  <a class="nav-h2" href="#top">표지</a>
+  <a class="nav-h2" href="#summary">3분 요약</a>
+  <a class="nav-h2" href="#howto">읽기 전에</a>
+  <a class="nav-h2" href="#s0">0. Physical AI와 세계 모델</a>
+  <a class="nav-h2" href="#s1">1. Cosmos</a>
+  <a class="nav-h3" href="#s1-0">1.0 Cosmos란 무엇인가</a>
+  <a class="nav-h3" href="#s1-1">1.1 1세대 (CES 2025)</a>
+  <a class="nav-h3" href="#s1-2">1.2 2세대 (GTC 2025~)</a>
+  <a class="nav-h3" href="#s1-3">1.3 2.5세대 (2025 하반기)</a>
+  <a class="nav-h3" href="#s1-4">1.4 Cosmos 3 (2026-05)</a>
+  <a class="nav-h3" href="#s1-5">1.5 비교표와 라이선스</a>
+  <a class="nav-h2" href="#s2">2. 데이터 파이프라인</a>
+  <a class="nav-h3" href="#s2-1">2.1 Cosmos Curator</a>
+  <a class="nav-h3" href="#s2-2">2.2 공개 데이터셋</a>
+  <a class="nav-h3" href="#s2-3">2.3 자동 라벨링과 합성 데이터</a>
+  <a class="nav-h3" href="#s2-4">2.4 데이터 플라이휠</a>
+  <a class="nav-h2" href="#s3">3. Omniverse와 역할 구분</a>
+  <a class="nav-h3" href="#s3-0">3.0 Omniverse란 무엇인가</a>
+  <a class="nav-h3" href="#s3-1">3.1 Omniverse 쪽</a>
+  <a class="nav-h3" href="#s3-2">3.2 Cosmos 쪽</a>
+  <a class="nav-h3" href="#s3-3">3.3 둘을 잇는 방법</a>
+  <a class="nav-h3" href="#s3-4">3.4 역할 구분표</a>
+  <a class="nav-h2" href="#s4">4. 활용 패턴 4가지</a>
+  <a class="nav-h3" href="#s4-1">A 합성 데이터·증강</a>
+  <a class="nav-h3" href="#s4-2">B 폐루프 평가</a>
+  <a class="nav-h3" href="#s4-3">C 정책 학습·RL</a>
+  <a class="nav-h3" href="#s4-4">D 추론 VLM 백본</a>
+  <a class="nav-h3" href="#s4-5">누가 쓰고 있나</a>
+  <a class="nav-h3" href="#s4-6">한계</a>
+  <a class="nav-h2" href="#s5">5. 성숙도 한눈에</a>
+  <a class="nav-h2" href="#s6">6. 아직 확인 못 한 것</a>
+  <a class="nav-h2" href="#s7">7. 자사 관점: LG전자 VS</a>
+  <a class="nav-h3" href="#s7-1">특이사항</a>
+  <a class="nav-h3" href="#s7-2">접점 지도</a>
+  <a class="nav-h3" href="#s7-3">협업 고려사항</a>
+  <a class="nav-h3" href="#s7-4">결정 항목</a>
+  <a class="nav-h2" href="#sources">출처</a>
+  <div class="other">다른 보고서<a href="report-03-autonomous-driving-stack.html">3장 자율주행 스택</a><a href="report-appendix-a-tier1.html">부록 A Tier-1이 해야 할 일</a><a href="README.md">폴더 안내</a></div>
+  <div class="legend">검증 등급<br><span class="g g-ok">✅</span> 두 출처 교차검증<br><span class="g g-src">🔍</span> 1차 출처 원문 확인<br><span class="g g-sec">📄</span> 검색 요약·2차 출처만<br><span class="g g-warn">⚠️</span> 미확인·추정</div>
+</nav>
+<main>
+<div class="hero" id="top"><div class="wrap">
+  <div class="kicker">리서치 보고서 · 팀 목차 7장 · 2026-09-02</div>
+  <h1>Physical AI / Cosmos — 세계 모델은 자율주행 개발을 어떻게 바꾸나</h1>
+  <div class="sub">3장이 "차 안"의 이야기였다면 이 장은 "차를 만드는 공장", 즉 학습 컴퓨터와 시뮬레이션 컴퓨터의 이야기다. Cosmos가 무엇이고 세대별로 어떻게 바뀌었으며, Omniverse와 무엇을 나눠 맡고, 자율주행 개발에 실제로 어떻게 쓰이는지를 처음 읽는 사람도 따라갈 수 있게 정리했다.</div>
+  <div class="facts"><span><b>범위</b> 7.1 Cosmos 세대 · 7.2 데이터 파이프라인 · 7.3 Omniverse와의 역할 구분 · 7.4 활용 패턴 (NeMo·CUDA 일반은 4장, 추론 엔진은 5장)</span><span><b>근거</b> 문장 끝 출처 칩과 등급 <span class="g g-ok">✅</span><span class="g g-src">🔍</span><span class="g g-sec">📄</span><span class="g g-warn">⚠️</span></span><span><b>조사 원본(사실 목록)</b> <a href="07-physical-ai-cosmos.md">07-physical-ai-cosmos.md</a></span><span><b>함께 읽기</b> <a href="report-03-autonomous-driving-stack.html">3장</a> · <a href="report-appendix-a-tier1.html">부록 A</a></span></div>
+</div></div>
+<div class="wrap">
+
+<h2 id="summary">3분 요약</h2>
+<div class="qa">
+  <div class="item"><div class="qq">Cosmos는 무엇인가?</div>수천만 시간의 영상을 학습해 "이 장면 다음에 세상이 어떻게 변할지"를 비디오로 만들어 내는 <b>세계 모델</b>이다. 쉽게 말해 데이터로 학습한 시뮬레이터다. 예측(Predict)·변환(Transfer)·추론(Reason) 세 모델로 시작해 2026년 5월 <b>Cosmos 3</b> 하나로 합쳐졌다 <span class="g g-src">🔍</span>.</div>
+  <div class="item"><div class="qq">Omniverse와는 무엇이 다른가?</div>Omniverse는 측량해서 그린 정밀 도면이고, Cosmos는 그 도면 위에 그림을 그리는 화가다. 기하·물리·정답 라벨·재현성처럼 <b>정확해야 하는 것은 Omniverse</b>가, 날씨·조명·지역처럼 <b>많아야 하는 것은 Cosmos</b>가 맡는다. NVIDIA 자신도 폐루프 평가의 기본값을 생성이 아닌 재구성(NuRec)에 둔다 <span class="g g-src">🔍</span>.</div>
+  <div class="item"><div class="qq">자율주행 개발에 어떻게 쓰나?</div>네 가지 패턴이다. A 라벨·시뮬 렌더를 넣고 사실적인 변주 영상을 얻는 <b>합성 데이터</b>, B 정책의 행동을 되먹이는 <b>폐루프 평가</b>, C 시뮬 롤아웃으로 정책을 고치는 <b>강화학습</b>, D 라벨러·채점자·주행 모델의 두뇌가 되는 <b>추론 백본</b>. 3장의 Alpamayo는 C와 D의 직접 사용자다.</div>
+  <div class="item"><div class="qq">자사(LG전자 VS)와는 어디서 만나나?</div>차가 아니라 <b>개발 컴퓨터 쪽</b>에서 만난다. Curator·Reason·Transfer·NuRec은 "데이터 공장의 설비"로 빌려 쓰고, 원재료(플릿 데이터)·품질 기준(라벨·검증 논거)·공장 운영(재수집 판단)은 우리 몫이다. 차량용 HPC 위의 Cosmos는 아직 근거가 없다 <span class="g g-warn">⚠️</span>. 세대 고정·Omniverse 의존 분리·센서 정합이 첫 결정이다(7절).</div>
+  <div class="item"><div class="qq">지금 어디까지 왔나?</div>모델은 공개(②)됐고 Foretellix·CARLA·Uber 같은 파트너 통합(③)이 진행 중이다. 그러나 <b>자율주행에서 정량 효과가 공개된 사례는 없고</b>, 세계 모델 시뮬 결과가 인증 근거로 쓰인 사례도 없다. NVIDIA 스스로 "부정확한 3D 구조, 비현실적 물리"를 한계로 적었다 <span class="g g-src">🔍</span>. 12개월에 4세대가 바뀌었으므로 세대 교체와 라이선스를 계획에 넣어야 한다.</div>
+</div>
+
+<h2 id="howto">읽기 전에</h2>
+<p><b>등급 표기.</b> 사실 문장 끝에 출처 칩과 등급을 붙였다. <span class="g g-ok">✅</span>는 독립된 두 출처가 일치, <span class="g g-src">🔍</span>는 1차 출처 원문을 직접 읽음, <span class="g g-sec">📄</span>는 검색 요약이나 2차 보도로만 확인, <span class="g g-warn">⚠️</span>는 미확인이거나 추정이다. 숫자가 많은 근거는 "근거 상세 펼치기"로 접어 두었다.</p>
+<div class="constraint"><b>조사 제약.</b> 조사 세션의 네트워크 정책 때문에 nvidia.com·arxiv.org·huggingface.co·주요 언론사 원문에 직접 접근할 수 없었다. NVIDIA 공식 발표와 논문 인용은 검색 요약(<span class="g g-sec">📄</span>)이고, GitHub 저장소(README·코드·LICENSE·docs)만 원문(<span class="g g-src">🔍</span>)으로 확인했다. Cosmos는 GitHub 공개가 충실해 모델 구성·크기·라이선스 대부분을 원문으로 확인했지만, 논문의 정량 결과는 읽지 못했다. 전체 출처 목록은 <a href="reference/references.md">reference/references.md</a>.</div>
+<h4>이 문서에 필요한 용어 7개</h4>
+<div class="card-grid">
+  <div class="card"><div class="card-k">Physical AI</div>화면 속 텍스트가 아니라 물리 세계에서 움직이는 기계(로봇·자율주행차)를 위한 AI. NVIDIA가 Cosmos를 만든 이유다.</div>
+  <div class="card"><div class="card-k">세계 모델 (WFM)</div>World Foundation Model. 영상을 학습해 다음 장면을 예측·생성하는 모델. "데이터로 학습한 시뮬레이터"라고 이해하면 된다.</div>
+  <div class="card"><div class="card-k">세 대의 컴퓨터</div>학습은 DGX, 시뮬레이션·합성 데이터는 OVX(Omniverse+Cosmos), 차량 안 실행은 DRIVE AGX가 맡는다는 NVIDIA의 개발 틀. 이 장은 가운데 컴퓨터 이야기다.</div>
+  <div class="card"><div class="card-k">NuRec / 3DGUT</div>실제 주행 로그를 3D 장면으로 재구성해 새 시점·궤적으로 다시 재생하는 기술(NuRec). 그 핵심 렌더링 기법이 3D 가우시안 스플래팅을 왜곡 카메라·롤링 셔터까지 확장한 3DGUT다.</div>
+  <div class="card"><div class="card-k">DiT / ControlNet</div>DiT는 디퓨전 모델의 노이즈 제거 네트워크를 트랜스포머로 만든 구조로 Cosmos 생성 모델의 공통 백본. ControlNet은 "이 구조를 지켜라"는 조건을 생성 모델에 주입하는 부속 네트워크.</div>
+  <div class="card"><div class="card-k">폐루프 평가</div>모델이 낸 행동이 다음 장면에 반영되는 시뮬레이션 시험. 녹화 영상에 정답을 대 보는 오픈루프보다 실제 주행에 가깝다.</div>
+  <div class="card"><div class="card-k">NOML / OpenMDW</div>Cosmos 1~2.5세대 가중치의 NVIDIA Open Model License(조건부)와 Cosmos 3·Alpamayo의 OpenMDW-1.1(제한 없음). 어느 세대를 쓰느냐에 따라 컴플라이언스가 달라진다.</div>
+</div>
+
+<h2 id="s0">0. Physical AI와 세계 모델을 먼저 쉬운 말로</h2>
+<div class="q"><b>이 절의 질문</b> NVIDIA가 말하는 Physical AI와 세계 기반 모델(WFM)은 무엇이고, 왜 자율주행에 필요하다고 하는가?</div>
+<p>Physical AI를 가르치려면 실제 세계의 데이터가 엄청나게 필요하고, 위험한 상황일수록 데이터가 적다. NVIDIA의 답이 <b>세계 기반 모델</b>이다. CES 2025 발표는 이렇게 설명한다. "Physical AI 모델은 개발 비용이 크고 방대한 실세계 데이터와 테스트가 필요하다. Cosmos WFM은 기존 모델을 학습·평가하기 위한 대량의 포토리얼·물리 기반 합성 데이터를 쉽게 생성하는 방법을 제공한다" <a class="cite" href="https://nvidianews.nvidia.com/news/nvidia-launches-cosmos-world-foundation-model-platform-to-accelerate-physical-ai-development">뉴스룸 2025-01-06</a><span class="g g-sec">📄</span>. Cosmos 자체의 정의는 GitHub에 있다. "로봇·자율주행차·스마트 인프라 등을 위한 Physical AI를 구축할 수 있게 하는 세계 모델·데이터셋·도구의 오픈 플랫폼" <a class="cite" href="https://github.com/NVIDIA/Cosmos">NVIDIA/Cosmos README</a><span class="g g-src">🔍</span>. 출시 당시 구성은 "생성형 세계 기반 모델, 고급 토크나이저, 가드레일, 가속 비디오 처리 파이프라인"이었다 <span class="g g-sec">📄</span>.</p>
+<p>모델은 세 갈래다. Predict1 README는 "Cosmos WFM의 세 주요 분기는 cosmos-predict, cosmos-transfer, cosmos-reason"이라고 정의한다 <a class="cite" href="https://github.com/nvidia-cosmos/cosmos-predict1">cosmos-predict1</a><span class="g g-src">🔍</span>. 각각 무엇을 넣으면 무엇이 나오는지만 기억하면 이 장의 나머지가 읽힌다.</p>
+<div class="card-grid">
+  <div class="card"><div class="card-k">Predict (예측)</div>텍스트·이미지·비디오(+행동)를 넣으면 <b>다음에 일어날 장면</b>을 비디오로 만든다. "이 차가 이렇게 움직이면 앞으로 어떻게 될까"를 그리는 모델.</div>
+  <div class="card"><div class="card-k">Transfer (변환)</div>깊이·세그멘테이션·엣지·라이다·HD맵 같은 <b>구조 정보</b>를 넣으면 그 구조를 지키는 <b>사실적인 영상</b>을 만든다. 도면에 채색하는 모델.</div>
+  <div class="card"><div class="card-k">Reason (추론)</div>영상을 보고 <b>말로 이해하고 판단</b>하는 언어 모델. 라벨을 달고, 생성 결과가 물리적으로 말이 되는지 채점하며, 3장 Alpamayo의 두뇌 백본이 된다.</div>
+</div>
+<p><b>세 대의 컴퓨터 속 위치.</b> NVIDIA의 설명은 이렇다. "AV 개발은 세 대의 서로 다른 컴퓨터로 가능해진다. 데이터센터에서 AI 스택을 학습하는 DGX, 시뮬레이션과 합성 데이터 생성을 위해 OVX에서 도는 Omniverse, 그리고 안전을 위해 실시간 센서 데이터를 처리하는 차량 내 AGX 컴퓨터." 그리고 "3-computer 솔루션에 Cosmos가 더해지면 개발자는 수천 마일의 사람 주행을 수십억 마일의 가상 주행으로 바꾸는 데이터 플라이휠을 얻는다" <a class="cite" href="https://blogs.nvidia.com/blog/three-computer-cosmos-ces/">NVIDIA 블로그 2025-01</a><span class="g g-sec">📄</span>. 로봇용 설명도 같은 구조(DGX / Omniverse+OVX / Jetson AGX)다 <span class="g g-sec">📄</span>.</p>
+<div class="analogy"><b>비유로 이해하기.</b> 비행 조종사 훈련을 생각하면 된다. 실제 비행(플릿 데이터)은 비싸고 위험하니 시뮬레이터에서 수천 시간을 탄다. Omniverse는 정밀하게 만든 물리 시뮬레이터이고, Cosmos는 "실제 비행 영상 수천만 시간을 본 AI가 즉석에서 만들어 주는 시뮬레이터"다. 후자는 만들기 쉽고 다양하지만 물리를 정확히 지킨다는 보장은 없다. 이 차이가 3절의 핵심이다.</div>
+<figure><img src="images/7-0-cosmos-map-v2.svg" alt="Cosmos와 Omniverse 요약 지도"><figcaption><b>그림 1. Cosmos와 Omniverse의 위치와 역할.</b> 왼쪽 학습 컴퓨터에 Reason·Curator·학습 도구가, 가운데 시뮬레이션 컴퓨터에 Omniverse(주황, 정밀 도면)와 Transfer·Predict(초록, 도면 위에 채색)가 놓이고, 2026-05의 Cosmos 3가 모델들을 하나로 합쳤다. 오른쪽 차량·로봇 열의 Alpamayo는 3장 범위(회색), Cosmos 3 Edge는 차량 적용이 미확인이라 점선이다. 화살표 라벨이 각 관계의 뜻이며, 실선은 출처로 확인, 점선은 추정. 자체 작성.</figcaption></figure>
+<details class="ev"><summary>근거 상세 펼치기 — 기술별 위치·역할·성숙도 카드</summary>
+<div class="tbl"><table>
+<tr><th>기술</th><th>3-computer 위치</th><th>담당 역할</th><th>현재 위치 (성숙도)</th><th>다음 이정표</th></tr>
+<tr><td>Cosmos Predict</td><td>OVX(시뮬)·DGX(학습)</td><td>텍스트/이미지/비디오(+행동) → 미래 비디오</td><td>② Predict2.5(2B/14B) 공개, AV 7카메라 멀티뷰 체크포인트 <span class="g g-src">🔍</span> → Cosmos 3 Generator로 흡수</td><td>Cosmos 3 FP8/NVFP4 "coming soon" <span class="g g-src">🔍</span></td></tr>
+<tr><td>Cosmos Transfer</td><td>OVX</td><td>깊이·세그·엣지·라이다·HD맵·world-scenario 조건 → 포토리얼 비디오</td><td>② Transfer2.5-2B, Distilled Edge(2026-02) <span class="g g-src">🔍</span>; ③ Foretellix·CARLA·Oxa 통합 <span class="g g-ok">✅</span></td><td>Cosmos 3 Transfer 컨트롤 <span class="g g-src">🔍</span></td></tr>
+<tr><td>Cosmos Reason</td><td>DGX</td><td>영상+텍스트 → 물리 상식·행동 추론(라벨러·크리틱·플래너 백본)</td><td>② Reason2 32B(2026-04-29) <span class="g g-src">🔍</span> → Cosmos 3 Reasoner; ③ Alpamayo 백본으로 채택 <span class="g g-src">🔍</span></td><td>—</td></tr>
+<tr><td>Cosmos 3</td><td>DGX/OVX/AGX(Edge)</td><td>추론기+생성기 통합, AV 9D 행동 조건</td><td>② 2026-05-31 공개(OpenMDW-1.1) <span class="g g-ok">✅</span>, Edge 4B는 Jetson Thor 대상 <span class="g g-src">🔍</span></td><td>Cosmos 3 Edge SIGGRAPH 2026-07 <span class="g g-sec">📄</span></td></tr>
+<tr><td>Cosmos Curator</td><td>DGX</td><td>영상 분할·필터·중복제거·캡셔닝·샤딩</td><td>② 오픈소스(Xenna 기반) <span class="g g-src">🔍</span></td><td>—</td></tr>
+<tr><td>Omniverse (Sensor RTX · NuRec)</td><td>OVX</td><td>물리 기반 센서 렌더·정답 라벨·신경 재구성</td><td>③ NuRec가 Isaac Sim 5.0·CARLA 0.9.16·AlpaSim에 통합 <span class="g g-src">🔍</span>; 3DGRUT 오픈소스 <span class="g g-src">🔍</span>; ovrtx는 프리릴리스·독점 라이선스 <span class="g g-src">🔍</span></td><td>NuRec Fixer(2026) <span class="g g-sec">📄</span></td></tr>
+<tr><td>Physical AI AV 데이터셋</td><td>DGX</td><td>1,727시간 실주행 + NuRec 장면 + 합성 시나리오</td><td>② 공개(게이트, NVIDIA AV Dataset License) <span class="g g-src">🔍</span></td><td>—</td></tr>
+</table></div>
+</details>
+<div class="oneline"><b>한 줄 정리.</b> Cosmos는 "데이터로 학습한 시뮬레이터"이고, 예측·변환·추론 세 모델로 시작해 2026년 Cosmos 3 하나로 합쳐졌다. NVIDIA는 이를 세 컴퓨터 중 시뮬레이션 컴퓨터에 놓는다.</div>
+
+<h2 id="s1">1. Cosmos: 무엇이고 어떻게 변해 왔나</h2>
+<div class="q"><b>이 절의 질문</b> Cosmos는 정확히 무엇이고, 2025년 1월부터 2026년 9월까지 어떻게 변했으며, 지금 무엇을 써야 하나?</div>
+<h3 id="s1-0">1.0 Cosmos란 무엇인가: 개념부터</h3>
+<p>세대 이야기로 들어가기 전에 Cosmos라는 이름이 가리키는 범위를 먼저 정한다. Cosmos는 모델 하나의 이름이 아니라 NVIDIA가 2025년 1월 CES에서 내놓은 <b>Physical AI용 세계 모델 플랫폼</b>의 이름이다. 저장소 정의를 다시 쓰면 "로봇·자율주행차·스마트 인프라 등을 위한 Physical AI를 구축할 수 있게 하는 세계 모델·데이터셋·도구의 오픈 플랫폼"이다 <a class="cite" href="https://github.com/NVIDIA/Cosmos">NVIDIA/Cosmos README</a><span class="g g-src">🔍</span>. 한 문장으로 줄이면, <b>수천만 시간의 영상을 학습해 "이 장면 다음에 세상이 어떻게 변할지"를 그려 내는 모델과, 그 모델을 만들고 쓰는 도구의 묶음</b>이다.</p>
+<p>플랫폼 안에는 여섯 부류가 들어 있다. 이 장 전체에서 이 이름들이 반복되므로 표로 정리한다.</p>
+<div class="tbl"><table>
+<tr><th>부류</th><th>무엇인가</th><th>무엇을 넣으면 무엇이 나오나</th><th>이 장에서</th></tr>
+<tr><td>Predict (예측 모델)</td><td>비디오 세계 모델. 세계 모델의 본체</td><td>텍스트 · 이미지 · 비디오(+행동) → 다음 장면 비디오</td><td>1.1~1.4, 패턴 B</td></tr>
+<tr><td>Transfer (변환 모델)</td><td>구조를 지키며 외형을 바꾸는 생성 모델</td><td>깊이 · 세그멘테이션 · 엣지 · 라이다 · HD맵 도면 → 사실적 비디오</td><td>1.2~1.3, 3절, 패턴 A</td></tr>
+<tr><td>Reason (추론 모델)</td><td>영상을 보고 말로 판단하는 비전-언어 모델(VLM)</td><td>비디오 + 질문 → 설명 · 판단 · 라벨</td><td>1.2~1.3, 패턴 D</td></tr>
+<tr><td>Tokenizer · Guardrail</td><td>영상을 토큰으로 압축하는 부품과, 입력·출력을 거르는 안전 필터</td><td>비디오 ↔ 토큰 / 부적절한 프롬프트·출력 차단</td><td>1.1</td></tr>
+<tr><td>Curator · Framework · RL · Evaluator</td><td>데이터를 다듬고(Curator), 모델을 학습·후학습하고(Framework, Cosmos-RL), 생성 결과를 채점하는(Evaluator) 도구</td><td>원시 영상 → 학습 데이터 / 모델 → 파인튜닝 모델 / 생성물 → 점수</td><td>2절, 패턴 C</td></tr>
+<tr><td>데이터셋</td><td>Physical AI 데이터셋 묶음. 자율주행은 7카메라 1,700시간대</td><td>학습·평가용 실주행 클립, NuRec 재구성 장면, 합성 시나리오</td><td>2.2</td></tr>
+</table></div>
+<p>세 모델은 2025년에는 따로 나왔고(Predict1 → Transfer1·Reason1 → 2.5세대), 2026년 5월 <b>Cosmos 3</b>에서 하나의 모델로 합쳐졌다. 그래서 이 장의 세대 이야기는 "따로 → 하나로"의 이야기다. 실행 위치는 세 대의 컴퓨터로 나뉜다. Reason과 도구는 학습 컴퓨터(DGX), Predict·Transfer는 시뮬레이션 컴퓨터(OVX), Cosmos 3 Edge(4B)는 Jetson·Thor 같은 엣지 장치가 대상이다 <span class="g g-src">🔍</span>. 받는 곳은 GitHub(<code>nvidia-cosmos</code> 조직과 <code>NVIDIA/Cosmos</code>)와 Hugging Face 가중치, 그리고 NIM 마이크로서비스·build.nvidia.com이며, 라이선스는 1~2.5세대가 NVIDIA Open Model License, Cosmos 3가 OpenMDW-1.1이다 <span class="g g-src">🔍</span>(1.5절).</p>
+<div class="term"><b>잠깐, 이름 정리.</b> 비슷한 이름이 넷 있다. <b>Cosmos</b>는 플랫폼 전체, <b>Cosmos-Drive-Dreams</b>는 Transfer로 자율주행 합성 데이터를 만드는 파이프라인(2025-06, 2.3절), <b>Cosmos-Dreams</b>는 CES 2026의 마케팅명으로 공개 저장소가 없으며(패턴 B), <b>Cosmos Curator</b>는 데이터 정제 도구다(2.1절).</div>
+<div class="warn"><b>Cosmos가 아닌 것.</b> 물리를 계산하는 시뮬레이터 엔진이 아니다(그것은 3절의 Omniverse). 주행 스택도 아니다(그것은 3장의 Alpamayo·DRIVE AV). 그리고 물리적 정확성을 보장하지 않는다. NVIDIA 스스로 "부정확한 3D 구조, 비현실적 물리 동역학"을 한계로 적었다(1.4절) <span class="g g-src">🔍</span>.</div>
+<div class="oneline"><b>한 줄 정리.</b> Cosmos = 세계를 그리는 모델 셋(예측·변환·추론) + 만들고 쓰는 도구(토크나이저·가드레일·큐레이터·학습·평가) + 데이터셋. 2026년부터는 모델 셋이 Cosmos 3 하나다.</div>
+
+<h4>세대 한눈에</h4>
+<p>변화 속도가 빠르다. 2025년 한 해에 1세대(1월), 2세대(3~6월), 2.5세대(10~12월)가 나왔고 2026년 5월 말에 Cosmos 3가 이전 모델을 모두 흡수했다. 이전 저장소는 전부 "유지보수 모드, Cosmos 3로 이관" 상태다 <span class="g g-src">🔍</span>. 파이프라인을 특정 세대에 고정하면 6~12개월 안에 이관 부담이 생긴다는 뜻이다. 아래 네 절은 세대마다 "무엇이 새로 생겼나"를 한 문단으로 말하고, 수치는 표와 접힌 근거로 뺐다.</p>
+<ul class="timeline">
+  <li><span class="d">2025-01-06</span>1세대. CES에서 Predict1·토크나이저·가드레일·Curator 공개. "세계 모델"이라는 도구가 처음 생겼다.</li>
+  <li><span class="d">2025-03-18</span>2세대. GTC에서 Transfer1(도면→사실 영상)과 Reason1(물리 상식 VLM) 등장. 6월 Predict2와 자율주행 파이프라인 Drive-Dreams.</li>
+  <li><span class="d">2025-10-06</span>2.5세대. Predict2.5·Transfer2.5가 작아지고(7B→2B) 통합됐다. 12월 Reason2.</li>
+  <li><span class="d">2026-05-31</span>Cosmos 3. 추론기와 생성기를 한 모델(MoT)로 합치고 라이선스를 OpenMDW-1.1로 바꿨다.</li>
+</ul>
+
+<h3 id="s1-1">1.1 1세대 — CES 2025, 첫 공개</h3>
+<p>2025-01-06 CES에서 논문 "Cosmos World Foundation Model Platform for Physical AI"(arXiv 2501.03575)와 함께 나왔다 <span class="g g-sec">📄</span>. 핵심은 <b>Predict1</b>이다. 영상을 토크나이저로 압축한 뒤 다음 프레임을 만드는데, 디퓨전 방식과 자기회귀 방식 두 계열이 있다. 여기에 영상을 압축하는 <b>토크나이저(Tokenize1)</b>, 부적절한 입력·출력을 거르는 <b>가드레일</b>, 학습 데이터를 다듬는 <b>Curator</b>가 함께 나왔다. 학습 규모는 "약 2,000만 시간 원시 비디오 → 약 1억 클립, 약 1만 H100으로 약 3개월"로 요약된다 <span class="g g-sec">📄</span>. 초기 채택사는 "1X, Agile Robots, Agility, Figure AI, Foretellix, Uber, Waabi, XPENG" <span class="g g-ok">✅</span>.</p>
+<figure><img src="images/7-1-predict1-diagram.png" alt="Cosmos-Predict1 아키텍처"><figcaption><b>그림 2. Cosmos-Predict1의 구조.</b> 영상을 토크나이저로 잠재 토큰으로 바꾼 뒤 디퓨전 또는 자기회귀 모델이 다음 프레임을 만든다. 출처: <a href="https://github.com/nvidia-cosmos/cosmos-predict1">nvidia-cosmos/cosmos-predict1</a>, © NVIDIA.</figcaption></figure>
+<div class="tbl"><table>
+<tr><th>구성 요소</th><th>내용</th><th>근거</th></tr>
+<tr><td>Predict1</td><td>디퓨전(7B/14B Text2World, 7B/14B Video2World, 7B WorldInterpolator) + 자기회귀(4B/12B, 5B/13B Video2World)</td><td><span class="g g-src">🔍</span></td></tr>
+<tr><td>Tokenize1</td><td>연속형(CV8×8×8-720p, 121프레임)·이산형(DV8×16×16-720p, 49프레임) 등 8종, 텍스트 인코더 T5</td><td><span class="g g-src">🔍</span></td></tr>
+<tr><td>가드레일</td><td><code>aegis/</code>, <code>blocklist/</code>, <code>face_blur_filter/</code>, <code>llamaGuard3/</code>, <code>video_content_safety_filter/</code>. "Llama Guard 3는 입력 필터로만 사용, 자체 라이선스 적용"</td><td><span class="g g-src">🔍</span></td></tr>
+<tr><td>AV 확장</td><td>2025-05 단일 영상을 멀티뷰로 만드는 "Cosmos AV Single2MultiView" 추가</td><td><span class="g g-src">🔍</span></td></tr>
+</table></div>
+
+<h3 id="s1-2">1.2 2세대 — GTC 2025 ~ 2025년 중반, 변환과 추론이 생기다</h3>
+<p>2025-03-18 GTC에서 "오픈·완전 커스터마이즈 가능 추론 모델 도입, 세계 생성에 대한 전례 없는 제어"를 내걸고 나왔다 <span class="g g-sec">📄</span>. 채택사는 "Agility Robotics, Figure AI, Foretellix, Skild AI, Uber" <span class="g g-sec">📄</span>. 자율주행에 중요한 것은 셋이다. <b>Transfer1</b>은 세그멘테이션·깊이·엣지·LiDAR·HD맵 같은 도면을 넣으면 그 구조를 지키는 사실적인 영상을 만들고, 여러 도면을 섞어 "장면의 어느 부분에서 어느 조건을 얼마나 강하게 지킬지"를 정할 수 있다. 자율주행용 7B-Sample-AV 모델이 따로 있다 <span class="g g-src">🔍</span>. <b>Reason1</b>은 영상을 보고 물리 상식으로 판단하는 언어 모델로, 나중에 비디오의 물리적 타당성을 채점하는 크리틱 역할까지 맡는다 <span class="g g-src">🔍</span>. <b>Predict2</b>(2025-06-11)는 디퓨전 트랜스포머 기반의 새 예측 모델이고, 같은 시기 자율주행 합성 데이터 파이프라인 <b>Cosmos-Drive-Dreams</b>(2025-06-10)가 나왔다. Drive-Dreams는 2절과 활용 패턴 A에서 자세히 본다.</p>
+<figure><img src="images/7-1-transfer1-diagram.png" alt="Cosmos-Transfer1 아키텍처"><figcaption><b>그림 3. Cosmos-Transfer1의 구조.</b> 깊이·엣지·세그멘테이션 같은 제어 영상이 각각의 ControlNet을 거쳐 "Adaptive Spatiotemporal Control"에서 가중 결합된 뒤 디퓨전 백본에 들어간다. 출처: <a href="https://github.com/nvidia-cosmos/cosmos-transfer1">nvidia-cosmos/cosmos-transfer1</a>, © NVIDIA.</figcaption></figure>
+<div class="tbl"><table>
+<tr><th>모델</th><th>공개</th><th>무엇을 넣으면 무엇이 나오나</th><th>크기·핵심 사실</th></tr>
+<tr><td>Transfer1</td><td>2025-03-18</td><td>세그·깊이·엣지·블러·LiDAR·HDMap 영상(단일 또는 MultiControlNet 혼합) + 텍스트 → 비디오</td><td>7B. AV용 7B-Sample-AV(LiDAR·HDMap 제어, 예시 가중치 HDMap 0.3·LiDAR 0.7), Waymo 변환 툴킷. 2025-05 Single2MultiView(사전학습 6뷰, Waymo 후학습 5뷰), 2025-08 Edge Distilled(36단계→1단계). 코드 Apache-2.0, 모델 NOML <span class="g g-src">🔍</span></td></tr>
+<tr><td>Reason1</td><td>논문 2025-03, 가중치 05-17</td><td>영상·이미지 + 텍스트 → 물리 상식·체화 추론 텍스트(CoT)</td><td>Qwen2.5-VL 기반 7B(56B는 논문만). "물리 상식과 체화 추론 데이터로 SFT·RL 포스트트레이닝" <span class="g g-src">🔍</span>. 2025-06-11 video critic, 2025-08 시공간 추론, 2025-10-28 Cosmos Cookbook. Predict2.5의 텍스트 인코더로 재사용</td></tr>
+<tr><td>Predict2</td><td>2025-06-11</td><td>텍스트 → 이미지; 비디오+텍스트 → 비디오</td><td>DiT. Text2Image 0.6B/2B/14B, Video2World 2B/14B, 후학습 변형 GR00T-Dreams-GR1/DROID·2B-Sample-Action-Conditioned. 2025-07 NATTEN 희소 어텐션 최대 2.6배 가속. 2025-12-03 아카이브 → 2.5로 이관 <span class="g g-src">🔍</span><span class="g g-sec">📄</span></td></tr>
+</table></div>
+<details class="ev"><summary>근거 상세 펼치기 — Transfer1·Reason1 원문 문구와 수치</summary>
+<p>Transfer1 README: "다중 모달 제어 가능 조건부 세계 생성 또는 world2world 변환에 특화된 분기" <span class="g g-src">🔍</span>. 논문(arXiv 2503.14492)은 "시뮬레이션과 실세계 환경 사이의 지각적 간극을 잇는 world-to-world 변환 모델"이라 부른다 <span class="g g-sec">📄</span>. "MultiControlNet으로 여러 조건을 섞고 공간·시간에 걸쳐 각 조건의 강도를 조절" <span class="g g-src">🔍</span>.</p>
+<p>Reason1: HF 카드 "370만 VQA 샘플" <span class="g g-sec">📄</span>. 논문 결과는 물리 상식 56B 60.2%(OpenAI o1 59.9% 대비), 7B는 Qwen2.5-VL-7B 대비 +6.9%, 체화 추론 7B 61.8% <span class="g g-sec">📄</span>. "사람 주석 없이 세계 동역학을 이해하는 CoT 추론" <span class="g g-src">🔍</span>.</p>
+</details>
+<figure><img src="images/7-1-predict2-diagram.png" alt="Cosmos-Predict2 아키텍처"><figcaption><b>그림 4. Cosmos-Predict2의 구조</b>(디퓨전 트랜스포머 기반 text2image / video2world). 출처: <a href="https://github.com/nvidia-cosmos/cosmos-predict2">nvidia-cosmos/cosmos-predict2</a>, © NVIDIA.</figcaption></figure>
+
+<h3 id="s1-3">1.3 2.5세대 — 2025년 하반기, 작아지고 통합되다</h3>
+<p>2025-10-06에 Predict2.5와 Transfer2.5가 같이 나왔다. 방향은 둘이다. 첫째, <b>통합</b>. Predict2.5는 텍스트→세계, 이미지→세계, 비디오→세계를 한 모델로 합치고 Reason1을 텍스트 인코더로 쓴다 <span class="g g-src">🔍</span>. 둘째, <b>소형화</b>. Transfer2.5는 7B에서 2B로 줄었는데 "3.5배 작지만 더 빠르고 선명"하다고 쓴다 <span class="g g-src">🔍</span><span class="g g-sec">📄</span>. 자율주행에 중요한 점은 두 모델 모두 <b>7카메라 멀티뷰 변형</b>을 가졌다는 것이다. Transfer2.5의 AV 변형은 HD맵과 박스의 3D 기하를 렌더한 <b>World Scenario</b> 영상을 조건으로 받는다(3절에서 다시 본다). 12월에는 Qwen3-VL 기반 <b>Reason2</b>가 나왔고, 이것이 3장 Alpamayo 1.5의 백본이다. 이 시기의 도구로는 강화학습 프레임워크 <b>Cosmos-RL</b>과 레시피 모음 <b>Cosmos Cookbook</b>이 있다.</p>
+<div class="tbl"><table>
+<tr><th>모델</th><th>공개</th><th>무엇을 넣으면 무엇이 나오나</th><th>크기·핵심 사실</th></tr>
+<tr><td>Predict2.5</td><td>2025-10-06</td><td>텍스트/이미지/비디오(+행동) → 비디오. T2W·I2W·V2W 통합</td><td>flow 기반, 2B/14B. AV용 <code>2B/auto/multiview</code>(주행 7카메라). 멀티뷰 추론 8 GPU×80GB 이상, 자기회귀 슬라이딩 윈도로 최대 30초. 2026-02-23 로봇 정책 모델 <span class="g g-src">🔍</span><span class="g g-sec">📄</span></td></tr>
+<tr><td>Transfer2.5</td><td>2025-10-06</td><td>깊이/엣지/세그/블러/world-scenario(+7뷰) → 비디오</td><td>2B, Predict2.5 위 multi-ControlNet. AV 변형 <code>2B/auto multiview</code> "기본 7뷰, 7 GPU". 720p@16fps 93프레임 청크, VRAM 65.4GB, B200 92초 vs H20 684초, 증류 모델 7.4~7.8배. 2025-11 합성 LiDAR 레시피, 2026-02-23 Distilled Edge <span class="g g-src">🔍</span></td></tr>
+<tr><td>Reason2</td><td>2025-12-19 (2B/8B), 2026-04-29 (32B)</td><td>영상/이미지 + 텍스트 → 텍스트</td><td>Qwen3-VL 기반. CES 2026 "Physical AI Bench·Physical Reasoning 리더보드 1위 오픈 모델, 256K 토큰" <span class="g g-sec">📄</span>. VRAM 2B 24GB / 8B 32GB <span class="g g-src">🔍</span></td></tr>
+<tr><td>Cosmos-RL</td><td>2025</td><td>정책/롤아웃 replica를 비동기로 돌리는 RL 프레임워크</td><td>FP8 학습·FP4 롤아웃. 현재 유지보수 모드 <a class="cite" href="https://github.com/nvidia-cosmos/cosmos-rl">cosmos-rl</a><span class="g g-src">🔍</span></td></tr>
+<tr><td>Cosmos Cookbook</td><td>2025-10-28</td><td>레시피 모음</td><td>"Reason 1&2로 3D AV 그라운딩 후학습", "GR00T-Dreams에서 Reason 2를 비디오 크리틱으로 리젝션 샘플링", "Transfer 2.5 Sim2Real(CARLA)", "Reason 2 AV 비디오 캡셔닝·VQA 후학습" <a class="cite" href="https://github.com/nvidia-cosmos/cosmos-cookbook">cosmos-cookbook</a><span class="g g-src">🔍</span></td></tr>
+</table></div>
+<details class="ev"><summary>근거 상세 펼치기 — 논문·다운로드 수치</summary>
+<p>Predict2.5 README: "Text2World·Image2World·Video2World를 단일 모델로 통합한 flow 기반 모델, Cosmos-Reason1을 텍스트 인코더로 사용" <span class="g g-src">🔍</span>. 논문은 "World Simulation with Video Foundation Models for Physical AI"(arXiv 2511.00062, Predict2.5+Transfer2.5) <span class="g g-src">🔍</span>. 논문 요약은 2억 큐레이션 클립, RL 포스트트레이닝, 2B가 Wan2.2 5B급 <span class="g g-sec">📄</span>. CoRL 2025 시점 "300만+ 다운로드" <span class="g g-sec">📄</span>. Transfer2.5 README: "Predict2.5 위에 구축, 다중 공간 제어 입력에 조건화된 고품질 세계 시뮬레이션" <span class="g g-src">🔍</span>.</p>
+</details>
+
+<h3 id="s1-4">1.4 Cosmos 3 — 2026년 5월, 하나로 합치다</h3>
+<p>2026-05-31 Hugging Face 공개, 06-01 GTC Taipei 발표 <span class="g g-ok">✅</span>. 이전까지 따로 있던 "말로 생각하는 모델(Reason)"과 "영상을 그리는 모델(Predict·Transfer)"을 한 모델로 합쳤다. README의 정의는 "언어·이미지·비디오·오디오·행동 시퀀스를 통합 Mixture-of-Transformers 아키텍처 안에서 함께 처리·생성하도록 설계된 옴니모달 세계 모델 스위트… VLM·비디오 생성기·세계 시뮬레이터·세계-행동 모델을 단일 프레임워크로 포섭" <span class="g g-src">🔍</span>. 구조는 "추론용 자기회귀 트랜스포머와 멀티모달 생성용 디퓨전 트랜스포머를 결합한 통합 MoT… 둘은 같은 트랜스포머 아키텍처, 멀티모달 어텐션 층, 통합 3D mRoPE를 공유"하며, 쓸 때는 <b>Reasoner</b>(텍스트+시각→텍스트)와 <b>Generator</b>(텍스트/시각/소리/행동→시각/소리/행동) 두 표면으로 나뉜다 <span class="g g-src">🔍</span>. 3장의 Alpamayo 2 Super가 이 Reasoner(Super 32B)를 백본으로 쓴다.</p>
+<figure><img src="images/7-1-cosmos3-architecture.png" alt="Cosmos 3 아키텍처"><figcaption><b>그림 5. Cosmos 3의 Mixture-of-Transformers 구조.</b> 말로 생각하는 자기회귀 추론기(Reasoner)와 영상을 그리는 디퓨전 생성기(Generator)가 같은 어텐션 층과 위치 인코딩을 공유한다. 각 층에 추론용·생성용 두 파라미터 세트가 있어서 "생각하면서 그리는" 한 모델이 된다. 출처: <a href="https://github.com/NVIDIA/Cosmos">NVIDIA/Cosmos</a>, OpenMDW-1.1, © NVIDIA.</figcaption></figure>
+<div class="tbl"><table>
+<tr><th>항목</th><th>내용</th><th>근거</th></tr>
+<tr><td>모델군</td><td><b>Super 64B</b>(H200/B200/GB200, "증류용 teacher"), <b>Nano 16B</b>(RTX Pro 6000/H100/B200), <b>Edge 4B</b>(Jetson AGX Orin/Thor/RTX Pro 6000, 256p/480p, 비디오→비디오 변환 없음). 4-Step 변형은 "17~25배 가속". FP8/NVFP4 "coming soon"</td><td>README <span class="g g-src">🔍</span></td></tr>
+<tr><td>크기 상충</td><td>Cookbook의 NIM 환경변수는 "8B Nano / 32B Super"라 쓴다. 추론기 타워만 센 값으로 추정(MoT 2세트 → 16B/64B). Alpamayo 2 Super "34B = Cosmos 3 Super Reasoner 32B + 약 2B"와 정합</td><td>cookbook <span class="g g-src">🔍</span> / 해석 <span class="g g-warn">⚠️</span></td></tr>
+<tr><td>생성 설정</td><td>256p/480p/720p, 5~300프레임(기본 189 ≈ 7.9초 @24fps), 10~30fps</td><td>README <span class="g g-src">🔍</span></td></tr>
+<tr><td>행동 조건</td><td>"카메라 모션(9D), <b>자율주행차(9D)</b>, 1인칭(57D), 단일 팔 로봇(10D), 양팔(20D), 휴머노이드(29D)"; 소리 스테레오 AAC 48kHz</td><td>README <span class="g g-src">🔍</span></td></tr>
+<tr><td>AV 워크플로</td><td>Forward dynamics(행동 조건 생성), Inverse dynamics("입력 AV 비디오에서 자차 궤적 예측"), Reasoner "Action CoT 주행 장면 사고 사슬", Transfer "엣지·블러·깊이·세그·world-scenario 제어"</td><td>README <span class="g g-src">🔍</span></td></tr>
+<tr><td>가드레일</td><td>Generator는 게이트 <code>nvidia/Cosmos-1.0-Guardrail</code> 필요, 비활성화 가능("라이선스 준수는 사용자 책임")</td><td>README·cookbook <span class="g g-src">🔍</span></td></tr>
+<tr><td>배포</td><td>HF 컬렉션, Diffusers/Transformers(≥5.11), vLLM/vLLM-Omni, TensorRT-LLM, SGLang, NIM(<code>cosmos3-reasoner:1.7.0</code>, <code>Cosmos3-Generator</code>), build.nvidia.com (추론 엔진 일반은 5장)</td><td>README <span class="g g-src">🔍</span></td></tr>
+<tr><td>라이선스</td><td>"소스코드와 모델은 OpenMDW-1.1에 따라 공개"</td><td>README·LICENSE <span class="g g-src">🔍</span></td></tr>
+<tr><td>생태계</td><td>Cosmos Framework(학습·서빙, SFT 레시피, 8×H100), Cosmos Curator, <b>Cosmos Evaluator</b>("세계 생성·추론 출력의 자동 Physical AI 평가 시스템"); Cosmos Coalition "Agile Robots, Black Forest Labs, Generalist, LTX, Runway, Skild AI"</td><td>README <span class="g g-src">🔍</span> / 보도 <span class="g g-sec">📄</span></td></tr>
+<tr><td>학습 데이터</td><td>README 미공개, 기술 리포트 미열람</td><td><span class="g g-warn">⚠️</span></td></tr>
+</table></div>
+<div class="warn"><b>NVIDIA가 스스로 밝힌 한계(원문).</b> "temporal inconsistency, unstable camera or object motion, inaccurate sound-video alignment, imperfect action-state consistency, object morphing, inaccurate 3D structure, and implausible physical dynamics … need additional validation, guardrails, and system-level safety analysis before deployment" <span class="g g-src">🔍</span>. 시간적 불일치, 물체 변형, 부정확한 3D 구조, 비현실적 물리까지 열거하고 "배포 전 추가 검증·가드레일·시스템 수준 안전 분석이 필요"하다고 쓴다.</div>
+<details class="ev"><summary>근거 상세 펼치기 — 보도 표현과 이후 발표</summary>
+<p>보도자료 표현은 "텍스트·이미지·비디오·주변음·행동에 걸쳐 네이티브 시각 추론과 멀티모달 생성을 갖춘 세계 최초의 완전 오픈 옴니모델" <span class="g g-sec">📄</span>. 기술 리포트 "Cosmos 3: Omnimodal World Models for Physical AI"(arXiv 2606.02800)는 "각 디코더 층이 추론용·생성용 두 파라미터 세트를 가짐"이라 쓰고, Artificial Analysis 오픈소스 T2I·I2V 1위와 RoboArena 정책 1위를 주장한다 <span class="g g-sec">📄</span>.</p>
+<p>2026-07 SIGGRAPH에서 "Cosmos 3 Edge 4B를 Jetson·RTX PRO·DGX·GeForce RTX용 실시간 엣지 배포에 최적화해 공개"했다는 보도가 있으나, Edge는 5월 README 표에 이미 있어 GA·최적화 마일스톤으로 해석된다 <a class="cite" href="https://blogs.nvidia.com/blog/siggraph-news-2026/">NVIDIA 블로그</a><a class="cite" href="https://www.techtimes.com/articles/321401/20260723/">TechTimes</a><span class="g g-sec">📄</span><span class="g g-warn">⚠️</span>. Alpamayo 2 Super·AlpaGym·"Cosmos-Dreams"(포토리얼 폐루프 AV 시나리오 생성 세계 모델) 발표도 같은 시기다 <span class="g g-sec">📄</span>.</p>
+</details>
+
+<h3 id="s1-5">1.5 비교표와 라이선스</h3>
+<p>먼저 세 세대를 같은 틀에서 그림으로 비교한다. 세대 사이의 차이가 "무엇을 넣고 무엇이 나오나"의 확장과 모델의 분화·통합이므로, 왼쪽에 입력, 가운데 모델, 오른쪽에 출력을 두는 틀이 그 변화를 가장 잘 드러낸다. 흐린 점선 상자는 그 세대가 아직 다루지 못한 입출력이고, NEW 태그는 그 세대에서 새로 생긴 것이다.</p>
+<figure><img src="images/7-1-cosmos-generations-compare.svg" alt="Cosmos 1 · 2/2.5 · 3 입력·모델·출력 비교"><figcaption><b>그림 6. Cosmos 세 세대의 입력·모델·출력 비교.</b> Cosmos 1은 텍스트·이미지·비디오를 받아 다음 장면 비디오만 만드는 예측 모델이었다. 2·2.5세대에서 제어 도면과 행동이 입력에, 이미지·텍스트(판단)·변주 영상이 출력에 더해지면서 Predict·Transfer·Reason 세 모델로 갈라졌고, 각각 따로 배포됐다. Cosmos 3는 옴니모달 토크나이저 위에 추론기(Reasoner)와 생성기(Generator)를 Mixture-of-Transformers로 묶은 한 모델이 되어 행동·오디오까지 입출력에 들어왔다. 초록 테두리와 NEW 태그는 그 세대에서 새로 생긴 것, 점선 회색은 미지원. 각 저장소 README를 읽고 자체 작성했으며 학습 규모만 검색 요약(📄)이다.</figcaption></figure>
+<p>세대 전체를 한 표로 두면 아래와 같다. 본문 흐름을 위해 접어 두었다.</p>
+<details class="ev"><summary>근거 상세 펼치기 — 세대·모델 비교표</summary>
+<div class="tbl"><table>
+<tr><th>모델</th><th>세대/날짜</th><th>아키텍처</th><th>입력 → 출력</th><th>파라미터</th><th>가중치 라이선스</th><th>배포</th><th>학습 데이터 공개</th></tr>
+<tr><td>Cosmos-Predict1</td><td>Gen1 2025-01-06</td><td>디퓨전(DiT, T5) + 자기회귀(이산 토큰+디퓨전 디코더)</td><td>텍스트/비디오 → 비디오</td><td>디퓨전 7B/14B, AR 4B/12B, 5B/13B</td><td>NVIDIA Open Model License(NOML)</td><td>HF·NGC·GitHub</td><td>약 2,000만h → 약 1억 클립 <span class="g g-sec">📄</span></td></tr>
+<tr><td>Cosmos-Tokenize1</td><td>2025-01</td><td>웨이블릿 공간 인과 비디오 토크나이저(연속·이산)</td><td>비디오/이미지 → 잠재/토큰</td><td>—</td><td>NOML</td><td>HF</td><td>—</td></tr>
+<tr><td>Cosmos-Transfer1</td><td>Gen2 2025-03-18</td><td>7B DiT + (Multi)ControlNet + 시공간 제어 맵</td><td>세그/깊이/엣지/블러/키포인트/LiDAR/HDMap + 텍스트 → 비디오</td><td>7B</td><td>NOML</td><td>HF·GitHub</td><td>비공개</td></tr>
+<tr><td>Cosmos-Reason1</td><td>2025-03 논문 / 05-17 가중치</td><td>VLM(Qwen2.5-VL-7B 후학습, SFT+RL)</td><td>영상/이미지+텍스트 → 텍스트(CoT)</td><td>7B(56B 논문만)</td><td>NOML</td><td>HF·GitHub·NIM</td><td>370만 VQA <span class="g g-sec">📄</span></td></tr>
+<tr><td>Cosmos-Predict2</td><td>2025-06-11</td><td>DiT</td><td>텍스트→이미지; 비디오+텍스트→비디오</td><td>0.6B/2B/14B T2I; 2B/14B V2W</td><td>NOML</td><td>HF·GitHub</td><td>비공개</td></tr>
+<tr><td>Cosmos-Drive-Dreams</td><td>2025-06-10</td><td>Transfer1/Predict1 AV 샘플 위 파이프라인</td><td>HDMap/LiDAR/World-Scenario + 텍스트 → 멀티뷰 비디오</td><td>7B</td><td>데이터셋 상용/비상용 허용 <span class="g g-src">🔍</span></td><td>HF·GitHub</td><td>실클립 5,843 → 합성 81,802 <span class="g g-src">🔍</span></td></tr>
+<tr><td>Cosmos-Predict2.5</td><td>Gen2.5 2025-10-06</td><td>rectified-flow DiT, Reason1 텍스트 인코더, T2W/I2W/V2W 통합</td><td>텍스트/이미지/비디오/행동 → 비디오</td><td>2B/14B</td><td>NOML</td><td>HF·GitHub·Diffusers</td><td>2억 클립 <span class="g g-sec">📄</span></td></tr>
+<tr><td>Cosmos-Transfer2.5</td><td>2025-10-06</td><td>Predict2.5 위 multi-ControlNet</td><td>RGB/깊이/세그/엣지/블러/world-scenario(+7뷰) → 비디오</td><td>2B</td><td>NOML</td><td>HF·GitHub</td><td>비공개</td></tr>
+<tr><td>Cosmos-Reason2</td><td>2025-12-19 (32B 2026-04-29)</td><td>VLM(Qwen3-VL 후학습)</td><td>영상/이미지+텍스트 → 텍스트</td><td>2B/8B/32B</td><td>NOML</td><td>HF·GitHub·NIM</td><td>비공개</td></tr>
+<tr><td><b>Cosmos 3</b></td><td>2026-05-31</td><td>MoT: AR 추론기 + 디퓨전 생성기, 3D mRoPE 공유</td><td>텍스트/이미지/비디오/행동(+소리) → 텍스트/이미지/비디오/소리/행동</td><td>Super 64B / Nano 16B / Edge 4B(추론기만 32B/8B)</td><td><b>OpenMDW-1.1</b></td><td>HF·Diffusers/Transformers/vLLM/TRT-LLM/SGLang·NIM</td><td>비공개 <span class="g g-warn">⚠️</span></td></tr>
+</table></div>
+</details>
+<p><b>라이선스는 두 갈래다.</b> 1~2.5세대의 NVIDIA Open Model License(NOML)는 원문을 열람하지 못했지만 검색 요약 기준으로 상용 사용·파생 모델 허용, 출력물 소유권 주장 없음, 귀속 불요이되, "모델에 포함된 기술적 제한·안전 가드레일을 우회·비활성화·약화"하면서 유사 가드레일을 두지 않으면 종료되고 사용자 면책 의무(8조)가 있다 <span class="g g-sec">📄</span>. 제3자 분석은 제품·UI에 "Built on NVIDIA Cosmos" 표시 요구와 경쟁 모델 서비스 제한을 들어 "완전 오픈은 아님"이라 평한다 <a class="cite" href="https://shujisado.org/2025/12/19/nvidia-open-model-license-a-corporate-risk-analysis/">shujisado</a><span class="g g-sec">📄</span>. 반면 Cosmos 3와 Alpamayo의 OpenMDW-1.1은 3장에서 원문을 확인한 대로 제한이 없다 <span class="g g-src">🔍</span>. 어느 세대를 쓰느냐에 따라 컴플라이언스가 달라진다는 뜻이다.</p>
+<div class="oneline"><b>한 줄 정리.</b> 2025년 세 세대(예측·변환·추론 분리, 점점 작고 빠르게) → 2026-05 Cosmos 3(하나의 옴니모델, 제한 없는 라이선스). 지금 새로 시작한다면 Cosmos 3이고, 이전 세대는 유지보수 모드다. 세부는 <a href="07-physical-ai-cosmos.md">md 원본 7.1</a>.</div>
+
+<h2 id="s2">2. 데이터 파이프라인: 공장 라인으로 보기</h2>
+<div class="q"><b>이 절의 질문</b> 수집한 영상이 학습 데이터가 되기까지 어떤 공정을 거치고, Cosmos는 그중 어디를 자동화하나?</div>
+<div class="term"><b>개념 먼저.</b> <b>데이터 파이프라인</b>은 차가 모아 온 원시 영상을 모델이 배울 수 있는 형태로 바꾸는 공정의 연쇄다. <b>큐레이션</b>은 쓸 만한 장면만 고르고 중복을 빼고 설명을 붙이는 일, <b>라벨링</b>은 각 장면에 정답(무엇이 어디에 있고 왜 그렇게 운전했는지)을 다는 일, <b>합성 데이터</b>는 실제로 찍지 않은 장면을 시뮬레이션이나 생성 모델로 만들어 보태는 일이다. 이 셋을 학습·평가와 이어 한 바퀴 돌게 만든 것이 <b>데이터 플라이휠</b>이다. Cosmos는 이 공정에서 큐레이션(Curator), 라벨링(Reason), 합성(Transfer), 평가(Evaluator)에 붙는다.</div>
+
+<h3 id="s2-1">2.1 Cosmos Curator: 영상을 학습용으로 다듬는 라인</h3>
+<p>플릿에서 모은 영상은 그대로 학습에 쓸 수 없다. 장면 단위로 자르고, 정지 화면이나 저품질을 걸러내고, 무엇이 찍혔는지 글로 적고, 중복을 빼야 한다. Cosmos Curator가 이 공정을 GPU 위에서 자동으로 돌린다. 정의는 "고급 AI 모델과 분산 컴퓨팅으로 비디오 콘텐츠를 처리·분석·조직하는 강력한 비디오 큐레이션 시스템… GPU 가속 스트리밍 파이프라인에 최적화된 프레임워크 위에 구축되었고, 그 프레임워크는 Cosmos-Xenna로 별도 오픈소스화" <a class="cite" href="https://github.com/NVIDIA/cosmos-curator">cosmos-curator README</a><span class="g g-src">🔍</span>.</p>
+<figure><img src="images/7-2-cosmos-curator-pipelines.png" alt="Cosmos Curator 파이프라인"><figcaption><b>그림 7. Cosmos Curator의 세 파이프라인.</b> 분할·주석(split-annotate), 중복 제거(dedup), 샤딩(shard). 출처: <a href="https://github.com/NVIDIA/cosmos-curator">NVIDIA/cosmos-curator</a>, © NVIDIA.</figcaption></figure>
+<ol>
+  <li><b>다운로드·디코딩·분할.</b> 긴 영상을 장면 단위로 자른다. "TransNetV2 기반 샷 전환 분할" 또는 고정 길이 분할.</li>
+  <li><b>트랜스코딩.</b> H264 mp4로 통일.</li>
+  <li><b>필터링.</b> "모션·미학" 필터로 정지 화면이나 저품질을 걸러내고, 인공 텍스트 필터, VLM 기반 의미 필터·분류기를 거친다.</li>
+  <li><b>임베딩.</b> InternVideo2 기본, Cosmos-Embed1(224p/336p/448p), OpenAI 호환 API.</li>
+  <li><b>캡셔닝.</b> VLM(로컬 vLLM 또는 OpenAI/Gemini API)이 장면을 글로 설명하고, 캡션 보강, SAM3 추적 + 이벤트별 캡션, SeedVR2 초해상 옵션.</li>
+  <li><b>중복 제거.</b> "임베딩의 K-Means 군집화와 의미 중복 제거."</li>
+  <li><b>샤딩.</b> T5(t5_xxl) 텍스트 임베딩 + webdataset으로 "Cosmos 파인튜닝용 학습 준비 완료" 상태로 묶는다.</li>
+</ol>
+<p>속도는 NVDEC/NVENC로 "디코딩·트랜스코딩 3배 가속"(NeMo Curator 문서), NeMo Curator 비디오 파이프라인이 "베이스라인 대비 89배, H100 2,000장으로 720p 비디오 약 100만 시간을 하루에 처리"(arXiv 2503.12964)로 요약된다 <span class="g g-sec">📄</span>. NVIDIA DRIVE 페이지는 "Cosmos Curator는 대량 센서 데이터를 필터·주석·중복 제거하며 Cosmos Reason VLM을 활용해 데이터 처리 파이프라인을 수개월에서 수일로 단축"이라고 쓴다 <a class="cite" href="https://developer.nvidia.com/drive">developer.nvidia.com/drive</a><span class="g g-sec">📄</span>. 기본 캡셔닝 모델은 문서에 명시되지 않았고 메타데이터 필드명(<code>qwen_rejection_stage</code> 등)으로 Qwen 계열로 추정된다 <span class="g g-warn">⚠️</span>. NeMo Curator 일반은 4장 담당이다.</p>
+
+<h3 id="s2-2">2.2 공개 데이터셋: 무엇을 받아 볼 수 있나</h3>
+<p>NVIDIA는 자기 플릿으로 모은 주행 데이터의 일부를 공개한다. 3장 Alpamayo의 학습·평가에 쓰인 것도 이 데이터셋이다. 핵심은 <code>PhysicalAI-Autonomous-Vehicles</code>로, 25개국 2,500개 이상 도시에서 7카메라·LiDAR·레이더로 기록한 약 1,700시간이다. 여기서 파생된 NuRec 재구성 장면과 합성 시나리오 세트, 그리고 Drive-Dreams 파이프라인의 실클립·합성 클립이 함께 공개돼 있다.</p>
+<div class="tbl"><table>
+<tr><th>데이터셋</th><th>내용</th><th>근거</th></tr>
+<tr><td>Physical AI Dataset (GTC 2025-03)</td><td>"로봇 학습용 32만 궤적 15TB + OpenUSD 자산 최대 1,000개(SimReady 포함)". AV 클립은 "미국 1,000개 도시·유럽 24개국의 20초 클립, 곧 공개"</td><td><a href="https://blogs.nvidia.com/blog/open-physical-ai-dataset">NVIDIA 블로그</a> <span class="g g-sec">📄</span></td></tr>
+<tr><td><code>nvidia/PhysicalAI-Autonomous-Vehicles</code></td><td>"25개국 2,500개 이상 도시에서 계획된 수집 주행으로 기록된 1,700시간"; 306,152클립; 20초 클립; <b>7카메라</b>(front_wide_120, front_tele_30, cross_left/right_120, rear_left/right_70, rear_tele_30; f-theta 렌즈 모델), 128채널 회전 LiDAR, 레이더 9; NVIDIA AV Dataset License(게이트)</td><td>HF 카드 <span class="g g-sec">📄</span> / <a href="https://github.com/NVlabs/physical_ai_av">physical_ai_av wiki</a> <span class="g g-src">🔍</span></td></tr>
+<tr><td>파생 세트</td><td><code>-NCore</code>, <code>-NuRec</code>(26.01: 729장면, 26.04: 1,606장면, 약 1.5TB), <code>PhysicalAI-WorldModel-Synthetic-Autonomous-Driving-Scenarios</code>, <code>PhysicalAI-Autonomous-Vehicle-Cosmos-Drive-Dreams</code></td><td>3장 <span class="g g-src">🔍</span><span class="g g-sec">📄</span></td></tr>
+<tr><td>Cosmos-Drive-Dreams 데이터</td><td>"NVIDIA가 수집한 10초 클립 5,843개의 라벨(HDMap·BBox·LiDAR)과 합성 비디오 81,802개… 121프레임, 비·눈·안개 등"; 약 3TB(합성 700GB); "상용/비상용 사용 준비 완료"</td><td><a href="https://github.com/nv-tlabs/Cosmos-Drive-Dreams">nv-tlabs/Cosmos-Drive-Dreams</a> <span class="g g-src">🔍</span></td></tr>
+</table></div>
+<p>3장의 "1,727시간 / 310,895클립"과 HF 카드의 "1,700시간 / 306,152클립"은 데이터셋 성장이나 표기 차이로 보인다 <span class="g g-warn">⚠️</span>. Physical AI Dataset 전체는 포럼 기준 누적 1,000만 다운로드를 넘겼다 <span class="g g-sec">📄</span>.</p>
+
+<h3 id="s2-3">2.3 자동 라벨링과 합성 데이터: 사람 손을 줄이는 두 방법</h3>
+<p>학습 데이터 제작에서 가장 비싼 것은 사람이 다는 라벨이다. Cosmos는 두 방향으로 이를 줄인다. <b>Reason이 라벨을 달고 채점하며, Transfer가 데이터를 불린다.</b></p>
+<p><b>Reason으로 라벨링·채점.</b> Reason1은 2025-06-11부터 "비디오의 물리적 타당성 판단"(video critic)을 지원한다 <span class="g g-src">🔍</span>. Cookbook에는 "GR00T-Dreams에서 Cosmos Reason 2를 비디오 크리틱으로 리젝션 샘플링" <span class="g g-src">🔍</span>과 "Cosmos Reason 2 같은 비디오-언어 모델은 강력한 자동 라벨러… (주행 결정, 핵심 요소, 인과 설명) 구조화 주석 생성"(AV 캡셔닝·VQA 레시피) <span class="g g-sec">📄</span>이 있다. Physical AI Data Factory Blueprint는 "Cosmos Evaluator(Cosmos Reason 기반)가 생성 데이터를 자동 채점·검증·필터링해 물리 정확성과 학습 준비도를 보장"하며 사용자로 "FieldAI, Hexagon Robotics, Linker Vision, Milestone Systems, RoboForce, Skild AI, Teradyne Robotics, Uber"를 든다 <a class="cite" href="https://nvidianews.nvidia.com/news/nvidia-announces-open-physical-ai-data-factory-blueprint-to-accelerate-robotics-vision-ai-agents-and-autonomous-vehicle-development">뉴스룸</a><span class="g g-sec">📄</span>(발표 시점 GTC DC 2025 vs GTC 2026 상충 <span class="g g-warn">⚠️</span>). 3장에서 본 Alpamayo의 인과 사슬 라벨도 이 방식으로 만들어졌다. "Alpamayo-R1은 Cosmos-Reason을 백본으로 채택, 24.7K 큐레이션 비디오 VQA 샘플 통합"이고 의도된 용도에 "추론 기반 자동 라벨링 도구"가 들어 있으며 <span class="g g-src">🔍</span><span class="g g-sec">📄</span>, Alpamayo 2 Super의 자동 라벨 태스크와 <code>alpamayo-coc-autolabeler</code> 저장소가 있다 <span class="g g-src">🔍</span>.</p>
+<p><b>Transfer로 불리기.</b> Cosmos-Drive-Dreams 파이프라인은 다섯 단계다. (1) HDMap/LiDAR 깊이/World Scenario 조건 영상 렌더 → (2) Qwen3 VLM으로 프롬프트를 여러 변주로 확장 → (3) Transfer1-7B-Sample-AV로 정면 121프레임 생성 → (4) Single2MultiView로 멀티뷰 확장 → (5) VLM 필터링("coming soon") <span class="g g-src">🔍</span>. Cookbook의 "Transfer 2.5 Sim2Real for Simulator Videos"(CARLA 증강) <span class="g g-src">🔍</span>, Data Factory의 "실제·시뮬 입력을 증폭해 환경·조명 조건 전반의 희귀·롱테일 시나리오 포착" <span class="g g-sec">📄</span>도 같은 패턴이다.</p>
+<p><b>그래서 얼마나 좋아지나.</b> 솔직히 자율주행 쪽 수치는 확보하지 못했다. Drive-Dreams 논문은 "3D 차선 검출·3D 객체 검출·주행 정책 학습에서 롱테일 완화·일반화 향상"을 주장하지만 구체 수치는 arXiv 차단으로 읽지 못했다 <span class="g g-warn">⚠️</span>. 로봇 쪽은 Cosmos Policy "RoboCasa 71.1%(Predict2 대비 +4%)"가 있다 <span class="g g-src">🔍</span>. 벤더 블로그의 비용 추정("클립 1만 개 GPU 비용 1~1.5만 달러 vs 실수집 50만 달러 이상")은 근거가 약하다 <span class="g g-sec">📄</span><span class="g g-warn">⚠️</span>.</p>
+
+<h3 id="s2-4">2.4 데이터 플라이휠: 전체 루프</h3>
+<p>공정을 하나로 이으면 수집 → 큐레이션 → 라벨링 → 재구성 → 합성 → 학습 → 평가 → 갭 식별 → 재수집의 고리가 된다. NVIDIA가 "플라이휠"이라 부르는 것이다. 아래 그림과 표는 이 고리에서 Cosmos와 Omniverse가 어디에 붙는지를 보여준다. 흰 상자, 즉 수집 체계와 "무엇이 부족한가"를 판단해 다시 모으는 운영은 NVIDIA가 주지 않는다.</p>
+<figure><img src="images/7-2-data-flywheel-v2.svg" alt="데이터 플라이휠"><figcaption><b>그림 8. AV 데이터 플라이휠의 여덟 단계와 각 단계에 붙는 도구.</b> 회색 상자가 단계이고 그 안의 색 상자가 그 단계를 맡는 도구다. 큐레이션·라벨링·합성·학습·평가에는 Cosmos(초록)가, 재구성에는 Omniverse NuRec(주황)이 붙고, 플릿 수집과 갭 기반 재수집(흰색)은 NVIDIA가 주지 않아 우리가 갖춰야 한다. 화살표 라벨이 단계 사이에 흐르는 것이며, NuRec 재구성 장면이 폐루프 평가의 기본 렌더가 되는 경로를 주황 선으로 따로 그렸다. 실선은 출처로 확인, 점선은 추정. 자체 작성.</figcaption></figure>
+<figure><img src="images/7-2-drive-dreams-teaser.png" alt="Cosmos-Drive-Dreams 티저"><figcaption><b>그림 9. NVIDIA 자신이 그린 플라이휠.</b> Cosmos-Drive-Dreams 티저의 "Cosmos WFM으로 확장 → 다운스트림 학습 → 데이터 갭 평가 → 큐레이션" 순환과, 다양성(도쿄·열대우림·사이버펑크)·멀티뷰·코너케이스(근접 충돌·도로 위 얼룩말·급정거)·LiDAR 생성 예. 출처: <a href="https://github.com/nv-tlabs/Cosmos-Drive-Dreams">nv-tlabs/Cosmos-Drive-Dreams</a>, Apache-2.0, © NVIDIA.</figcaption></figure>
+<div class="tbl"><table>
+<tr><th>루프 단계</th><th>붙는 Cosmos / Omniverse 구성 요소</th><th>근거</th></tr>
+<tr><td>플릿 수집</td><td>(Tier-1/OEM 몫) → Physical AI AV 데이터셋 형식(7카메라 f-theta, LiDAR, 레이더)</td><td><span class="g g-src">🔍</span></td></tr>
+<tr><td>큐레이션</td><td>Cosmos Curator(분할·필터·중복제거·캡셔닝), Cosmos Dataset Search(희귀 시나리오 검색)</td><td><span class="g g-src">🔍</span><span class="g g-sec">📄</span></td></tr>
+<tr><td>라벨링</td><td>Cosmos Reason(자동 라벨·CoC), 사람 개입</td><td><span class="g g-src">🔍</span></td></tr>
+<tr><td>재구성</td><td>Omniverse NuRec(실로그 → 상호작용 3D 장면)</td><td><span class="g g-sec">📄</span><span class="g g-src">🔍</span></td></tr>
+<tr><td>합성·증폭</td><td>Cosmos Transfer(Omniverse/NuRec/라벨 렌더 → 포토리얼 변주), Drive-Dreams</td><td><span class="g g-src">🔍</span></td></tr>
+<tr><td>학습</td><td>DGX + Cosmos-RL/Cosmos Framework(3장 Alpamayo 레시피)</td><td><span class="g g-src">🔍</span></td></tr>
+<tr><td>평가</td><td>AlpaSim(NuRec 기본 / OmniDreams 옵션), Cosmos Evaluator(Reason 크리틱)</td><td><span class="g g-src">🔍</span><span class="g g-sec">📄</span></td></tr>
+<tr><td>갭 식별 → 재수집</td><td>Drive-Dreams 티저의 "Evaluate for Data Gap → Curate Dataset"</td><td><span class="g g-src">🔍</span></td></tr>
+</table></div>
+<div class="oneline"><b>한 줄 정리.</b> Cosmos는 큐레이션·라벨링·합성·평가 공정을 자동화하지만, 수집 체계와 "무엇이 부족한가"를 판단해 다시 모으는 운영은 사용자 몫이다. <a href="report-appendix-a-tier1.html">부록 A</a>에서 다시 만난다.</div>
+
+<h2 id="s3">3. Omniverse: 무엇이고 Cosmos와 무엇을 나눠 맡나</h2>
+<div class="q"><b>이 절의 질문</b> Omniverse는 무엇이고, 둘 다 "시뮬레이션"인데 Cosmos와 무엇이 다르며, NVIDIA는 어떻게 나눠 쓰라고 하는가?</div>
+<h3 id="s3-0">3.0 Omniverse란 무엇인가: 개념부터</h3>
+<p>Omniverse는 Cosmos보다 오래된 NVIDIA의 <b>3D 시뮬레이션·디지털 트윈 플랫폼</b>이다. 장면을 계산으로 만든다는 점에서 데이터로 학습한 Cosmos와 출발이 다르다. 공통 데이터 모델은 Pixar가 만든 3D 장면 기술 형식 <b>OpenUSD</b>이고, 그림은 <b>RTX 광선 추적</b>으로 그린다. 자율주행용 설명이 이를 압축한다. "물리적으로 정확한 센서 시뮬레이션을 가능하게 하는 마이크로서비스… OpenUSD 프레임워크 위에 RTX 광선 추적·신경 렌더링" <span class="g g-ok">✅</span>. 앱을 만드는 프레임워크 Omniverse Kit는 클로즈드 소스다 <span class="g g-src">🔍</span>.</p>
+<p>자율주행 개발자가 실제로 마주치는 것은 플랫폼 전체가 아니라 그 위의 몇 가지 부품이다. 이 장에서 쓰는 이름을 표로 정리한다.</p>
+<div class="tbl"><table>
+<tr><th>부품</th><th>무엇인가</th><th>자율주행에서 하는 일</th><th>개방성</th></tr>
+<tr><td>Sensor RTX / ovrtx</td><td>카메라·레이더·라이다를 광선 추적으로 물리 시뮬레이션하는 마이크로서비스·라이브러리</td><td>센서가 "보는" 것을 물리 법칙대로 계산</td><td>ovrtx 0.4 프리릴리스, NVIDIA Software License(오픈소스 아님) <span class="g g-src">🔍</span></td></tr>
+<tr><td>Replicator</td><td>렌더 결과에서 깊이·법선·세그멘테이션 같은 정답 라벨을 함께 뽑는 합성 데이터 도구</td><td>라벨이 붙은 학습 데이터 생성. 2022 자료 기준 결정론적 <span class="g g-sec">📄</span></td><td>Isaac Sim 안에 포함 <span class="g g-src">🔍</span></td></tr>
+<tr><td>NuRec (+ 3DGRUT)</td><td>실주행 로그를 3D 가우시안 장면으로 재구성해 새 시점·궤적으로 다시 재생하는 라이브러리</td><td>"그 날 그 도로"를 가상에서 다르게 달려 보기. AlpaSim의 기본 렌더러</td><td>3DGRUT 오픈소스(Apache-2.0), 재구성 서비스는 NVIDIA 제공 <span class="g g-src">🔍</span></td></tr>
+<tr><td>Blueprint for AV simulation</td><td>위 부품을 묶은 참조 워크플로(CES 2025)</td><td>실센서 데이터로 디지털 트윈 구축, 재생, 새 정답 생성, 폐루프 테스트 <span class="g g-ok">✅</span></td><td>자가 서비스 다운로드 미확인 <span class="g g-warn">⚠️</span></td></tr>
+<tr><td>Isaac Sim</td><td>로봇용 Omniverse 앱. NuRec와 Cosmos Transfer용 Replicator 라이터 포함</td><td>로봇 쪽 대응물. 자율주행은 AlpaSim·CARLA가 같은 NuRec을 쓴다</td><td>Isaac Sim 5.0 오픈소스 <span class="g g-src">🔍</span></td></tr>
+<tr><td>DRIVE Sim</td><td>옛 자율주행 시뮬레이터 이름</td><td>2026 자료에서는 언급 없음. 어휘가 Blueprint + Sensor RTX로 바뀜</td><td>단종 선언 없음 <span class="g g-warn">⚠️</span></td></tr>
+</table></div>
+<p>세 대의 컴퓨터 속 위치는 Cosmos의 Predict·Transfer와 같은 시뮬레이션 컴퓨터(OVX)다. 같은 자리에 있으면서 하는 일이 다르다는 것이 이 절의 주제다. Omniverse는 <b>계산한다</b>. 도로의 기하, 물체의 위치, 빛이 튀는 경로를 물리 법칙으로 풀고, 그 부산물로 "이 픽셀은 무엇"이라는 정답 라벨을 낸다. Cosmos는 <b>학습한 대로 그린다</b>. 물리를 풀지 않고 수천만 시간의 영상에서 배운 분포를 따라 그리므로, 다양하지만 정확성을 보장하지 않는다.</p>
+<div class="oneline"><b>한 줄 정리.</b> Omniverse = OpenUSD + RTX 위의 물리 시뮬레이션 플랫폼. 자율주행에서는 Sensor RTX(센서 물리), Replicator(정답 라벨), NuRec(실주행 재구성)이 쓰이고, 열려 있는 것은 3DGRUT 정도다.</div>
+
+<div class="analogy"><b>비유로 이해하기.</b> Omniverse는 <b>측량해서 그린 정밀 도면</b>이다. 도로의 기하, 물체의 위치, 광선이 튀는 물리를 정확히 계산하고, 그 결과로 "이 픽셀은 차, 저 픽셀은 차선"이라는 정답 라벨까지 낸다. Cosmos는 <b>그 도면 위에 그림을 그리는 화가</b>다. 비 오는 밤, 안개 낀 아침, 도쿄 거리처럼 외형을 무한히 바꿔 그리지만, 도면이 틀리면 그림도 틀리고 화가가 물리를 완벽히 지킨다는 보장은 없다. NVIDIA의 분담은 정확히 이것이다.</div>
+<figure><img src="images/7-3-omniverse-cosmos-pipeline-v2.svg" alt="Omniverse × Cosmos 결합"><figcaption><b>그림 10. Omniverse 출력이 Cosmos Transfer의 조건 입력이 되는 구조.</b> 실주행 로그·3D 자산·시나리오 정의가 Omniverse(NuRec, Sensor RTX, World Scenario 렌더)를 거쳐 깊이·세그·HD맵 영상이 되고, Cosmos Transfer가 이를 조건으로 사실적인 변주 영상을 만든다. 라벨은 Omniverse 쪽에서 나온 것이 그대로 따라간다. 화살표 라벨이 각 연결의 뜻이고, 주황은 Omniverse, 초록은 Cosmos, 흰색·회색은 입력원과 산출물이다. 실선은 출처로 확인, 점선은 추정. 자체 작성.</figcaption></figure>
+
+<h3 id="s3-1">3.1 Omniverse 쪽: 물리 기반 렌더, 정답 라벨, 신경 재구성</h3>
+<p>Omniverse가 자율주행 개발에 주는 것은 세 가지다. 첫째, <b>Sensor RTX</b>가 카메라·레이더·라이다를 광선 추적으로 물리적으로 시뮬레이션한다. 둘째, 그 렌더 과정에서 깊이·세그멘테이션 같은 <b>정답 라벨</b>이 공짜로 나오고, 같은 입력이면 같은 결과가 나오는 결정론이 있다. 셋째, <b>NuRec</b>이 실제 주행 로그를 3D 장면으로 재구성해서, 원래 궤적과 다른 시점·다른 행동으로 다시 재생할 수 있게 한다. 이 셋째가 폐루프 평가의 기본 렌더러가 된다.</p>
+<div class="card-grid">
+  <div class="card"><div class="card-k">전체 그림 속 위치</div>시뮬레이션 컴퓨터(OVX), L4 시뮬 층.</div>
+  <div class="card"><div class="card-k">담당 역할</div>OpenUSD 장면과 RTX 광선 추적으로 센서를 물리적으로 시뮬레이션하고 정답 라벨을 낸다. NuRec은 실로그를 3D 장면으로 재구성해 새 시점·궤적으로 재생한다.</div>
+  <div class="card"><div class="card-k">현재 위치 (성숙도)</div>③ NuRec가 Isaac Sim 5.0(2025-08)·CARLA 0.9.16(2025-09)·AlpaSim에 통합 <span class="g g-src">🔍</span>; 3DGRUT 오픈소스(Apache-2.0) <span class="g g-src">🔍</span>; NRE 컨테이너 26.04·nurec-skills(2026-04-30)·Instant NuRec(2026-07)·NuRec Fixer(DiffusionHarmonizer) 공개 <span class="g g-src">🔍</span>; Sensor RTX 라이브러리 ovrtx는 0.4 프리릴리스·독점 라이선스 <span class="g g-src">🔍</span>; Omniverse Kit는 클로즈드 <span class="g g-src">🔍</span>.</div>
+  <div class="card"><div class="card-k">다음 이정표</div>Isaac Sim 6.0의 USD ParticleField 표준화(NuRec 전용 USDZ 폐기 예정) <span class="g g-src">🔍</span>; NRE 컨테이너 26.04 이후 갱신 주기와 Instant NuRec의 동적 객체 지원은 미공개 <span class="g g-warn">⚠️</span>.</div>
+</div>
+<ul>
+  <li><b>Sensor RTX.</b> "물리적으로 정확한 센서 시뮬레이션을 가능하게 하는 마이크로서비스… OpenUSD 프레임워크 위에 RTX 광선 추적·신경 렌더링"(CVPR 2024 발표) <span class="g g-ok">✅</span>; CES 2025 조기 접근 "카메라·레이더·라이다" <span class="g g-sec">📄</span>. 오픈 라이브러리 형태 <b>ovrtx</b>는 "카메라·라이다·레이더 등 센서의 물리적으로 정확한 시뮬레이션", "RL in-the-loop 초당 수만 프레임부터 실시간 포토리얼 뷰포트까지"를 표방하며 0.4 프리릴리스, NVIDIA Software License(오픈소스 아님)다 <a class="cite" href="https://github.com/NVIDIA-Omniverse/ovrtx">NVIDIA-Omniverse/ovrtx</a><span class="g g-src">🔍</span>.</li>
+  <li><b>정답 라벨과 결정론.</b> 2022 DRIVE Sim/Replicator 블로그는 "RTX 렌더러가 RGB 카메라와 깊이·법선·세그멘테이션 정답 센서를 물리 기반 광선 추적으로 시뮬레이션… 시간 정확·결정론적이라 반복 생성 가능"하며 LED 플리커·모션 블러·롤링 셔터·라이다 빔 발산·도플러 효과를 반영한다고 썼다 <span class="g g-sec">📄</span>. 2025~26 Blueprint/ovrtx에 대해 결정론을 재확인한 문장은 찾지 못했다 <span class="g g-warn">⚠️</span>.</li>
+  <li><b>NuRec.</b> "실센서 데이터를 받아 OpenUSD로 상호작용 시뮬레이션을 재구성·렌더링하는 에이전트 친화적 3D 가우시안 스플래팅 라이브러리 집합" <a class="cite" href="https://developer.nvidia.com/omniverse/nurec">NuRec 페이지</a><span class="g g-sec">📄</span>; "Isaac Sim(로봇)과 AlpaSim·CARLA(자율주행) 두 영역 지원" <span class="g g-sec">📄</span>. 오픈소스 코어는 <b>3DGRUT</b>(3DGRT SIGGRAPH Asia 2024 + 3DGUT CVPR 2025)로 "왜곡 카메라와 롤링 셔터 같은 시간 의존 효과를 래스터화 프레임워크 안에서 지원"하고 1차 광선 래스터·2차 광선 광선추적 하이브리드이며 USD/NuRec USDZ/PLY로 내보낸다. 2026-01 ISP 지원, 2026-06 v2.0 <a class="cite" href="https://github.com/nv-tlabs/3dgrut">nv-tlabs/3dgrut</a><span class="g g-src">🔍</span>. 단, <b>재구성 서비스 자체는 CARLA에서 NVIDIA Docker 서비스로 호출되므로 소스가 아니다</b> <span class="g g-src">🔍</span><span class="g g-warn">⚠️</span>.</li>
+  <li><b>DRIVE Sim의 현재.</b> 개발자 페이지는 남아 있으나 2025~26 제품 언어는 "Omniverse Blueprint for AV simulation + Sensor RTX API"다. 공식 단종·개명 선언은 없다 <span class="g g-warn">⚠️</span>.</li>
+  <li><b>Blueprint for AV simulation</b>(CES 2025): "Sensor RTX API 등 API·서비스로 실센서 데이터에서 디지털 트윈을 구축·강화하고, 동적 물체의 물리·행동을 모델링하며, 물리적으로 정확하고 다양한 센서 데이터를 생성… 주행 데이터 재생, 새 정답 생성, 폐루프 테스트" <a class="cite" href="https://nvidianews.nvidia.com/news/nvidia-expands-omniverse-with-generative-physical-ai">Omniverse 뉴스룸</a><span class="g g-ok">✅</span>. 자가 서비스 오픈소스 다운로드는 확인되지 않았다 <span class="g g-warn">⚠️</span>.</li>
+</ul>
+<p>NuRec은 하나의 프로그램이 아니라 <b>다섯 단계의 파이프라인</b>이다(그림 11). ① 센서 로그를 오픈 데이터 표준 <b>NCore V4</b>로 바꾼다(변환기 내장: NVIDIA PAI·Waymo·nuScenes·PandaSet·COLMAP) <a class="cite" href="https://github.com/NVIDIA/ncore">NVIDIA/ncore</a><span class="g g-src">🔍</span>. ② 독점 NGC 컨테이너 <b>NRE</b>(Neural Reconstruction Engine)가 세그·깊이·ego 마스크 같은 보조 데이터를 만든 뒤, 3DGUT(왜곡 카메라를 다루는 래스터) 또는 3DGRT(광선 추적) 가우시안으로 장면을 학습한다. 다른 차량의 센서 리그로 궤적과 렌더를 옮기는 "carline adaptation"도 여기 있다. ③ 결과는 <b>USDZ 장면</b>(가우시안 + 리그 궤적 + 객체 트랙 + OpenDRIVE 맵)으로 나온다. ④ <b>serve-grpc</b> 렌더 서비스가 시뮬레이터의 "이 위치·이 시각" 요청에 RGB 프레임이나 LiDAR 스윕을 돌려주고, 객체 삽입·삭제·교체도 이 단계에서 한다. ⑤ 그 프레임을 CARLA·Isaac Sim·AlpaSim이 받는다 <a class="cite" href="https://github.com/NVIDIA/nurec-skills">NVIDIA/nurec-skills</a><span class="g g-src">🔍</span>. 2026년에 세 가지가 더 붙었다. <b>Instant NuRec</b>(2026-07, Apache-2.0)은 학습 없이 피드포워드 한 번으로 10~20초 클립을 약 1.5초에 3D 가우시안으로 만들며, NRE 학습의 초기값으로 쓸 수 있다 <a class="cite" href="https://github.com/NVIDIA/instant-nurec">NVIDIA/instant-nurec</a><span class="g g-src">🔍</span>. <b>NuRec Fixer</b>는 Cosmos-Predict2 0.6B 위에 만든 <b>DiffusionHarmonizer</b>로 공개되어 렌더 프레임의 잔상·깜빡임·삽입 객체의 조명 불일치를 정리한다 <span class="g g-src">🔍</span>. <b>Asset Harvester</b>(오픈)는 주행 클립의 희소 시점에서 객체별 3D 가우시안 자산을 뽑아 장면에 넣는다 <span class="g g-src">🔍</span>. 열린 것과 닫힌 것의 경계도 분명하다. NCore·3DGRUT·Instant NuRec·Asset Harvester·Harmonizer 코드는 Apache-2.0이지만, 재구성 엔진 NRE와 차량별 레시피는 NGC 키가 필요한 독점 컨테이너이고, 데이터셋은 게이트다 <span class="g g-src">🔍</span>. Isaac Sim 6.0부터는 NuRec 전용 USDZ 대신 표준 USD <code>ParticleField</code>가 권장되고 USDZ는 폐기 예정이다 <a class="cite" href="https://github.com/nv-tlabs/3dgrut">nv-tlabs/3dgrut</a><span class="g g-src">🔍</span>. NVIDIA의 공식 아키텍처 도식은 docs.nvidia.com/nurec에 있으나 접근할 수 없어, 위 문서를 읽고 직접 그렸다.</p>
+<figure><img src="images/7-3-nurec-architecture.svg" alt="Omniverse NuRec 파이프라인"><figcaption><b>그림 11. Omniverse NuRec 파이프라인.</b> 왼쪽에서 오른쪽으로 센서 로그 → NCore V4 표준 → NRE 재구성(보조 데이터 생성 → 3DGUT/3DGRT 학습 → carline adaptation) → USDZ 장면 → serve-grpc 렌더 서비스 → 시뮬레이터(CARLA·Isaac Sim·AlpaSim). Instant NuRec은 학습을 건너뛰는 빠른 초기화, Asset Harvester는 객체 삽입, NuRec Fixer(DiffusionHarmonizer, 초록 = Cosmos 기반)는 렌더 프레임 후처리다. 왼쪽 아래에 오픈·독점·게이트 경계를 적었다. 화살표 라벨이 각 단계 사이에 흐르는 것이며, 실선은 출처로 확인, 점선은 추정. NVIDIA/nurec-skills·ncore·instant-nurec·3dgrut·CARLA 문서 기반 자체 작성.</figcaption></figure>
+<figure><img src="images/7-3-carla-nurec-api.svg" alt="CARLA–NuRec API"><figcaption><b>그림 12. CARLA 0.9.16의 NuRec 연동 구조.</b> 오픈소스 시뮬레이터 CARLA가 NuRec 서비스를 호출해 재구성 장면을 렌더한다. 출처: <a href="https://github.com/carla-simulator/carla/blob/ue4-dev/Docs/nvidia_nurec.md">carla-simulator/carla</a>, MIT, © CARLA.</figcaption></figure>
+<div class="term"><b>잠깐, 용어.</b> <b>OpenUSD</b>는 Pixar가 만든 3D 장면 기술 형식으로 Omniverse의 공통 데이터 모델이다. <b>3D 가우시안 스플래팅</b>은 장면을 수백만 개의 작은 타원체(가우시안)로 표현해 빠르게 렌더하는 신경 재구성 기법이고, <b>3DGUT</b>는 이를 어안 렌즈 같은 왜곡 카메라와 롤링 셔터까지 지원하도록 확장한 것(CVPR 2025)이다.</div>
+
+<h3 id="s3-2">3.2 Cosmos 쪽: 생성형 변주와 증폭</h3>
+<div class="card-grid">
+  <div class="card"><div class="card-k">전체 그림 속 위치</div>OVX(Transfer·Predict), DGX(Reason).</div>
+  <div class="card"><div class="card-k">담당 역할</div>Omniverse/NuRec/라벨 렌더를 조건으로 받아 외형·날씨·조명·지역을 변주하고, 비디오 세계 모델로 미래를 롤아웃하며, 물리 타당성을 판단한다.</div>
+  <div class="card"><div class="card-k">현재 위치 (성숙도)</div>② 모델 공개, ③ 파트너 통합(Foretellix·CARLA·Oxa) <span class="g g-ok">✅</span>.</div>
+  <div class="card"><div class="card-k">확인 못 한 문구</div>"simulation vs amplification", "Omniverse produces ground truth, Cosmos multiplies"는 NVIDIA 원문 그대로 찾지 못했다 <span class="g g-warn">⚠️</span>.</div>
+</div>
+<p>역할을 가장 정확히 말하는 것은 Transfer2.5 README의 두 모드다. "<b>Simulation 2 Real Augmentation</b>: 3D 시뮬레이션에서 고충실도를 달성할 필요를 최소화" / "<b>Real 2 Real Augmentation</b>: 센서로 캡처한 RGB 증강" <a class="cite" href="https://raw.githubusercontent.com/nvidia-cosmos/cosmos-transfer2.5/main/README.md">cosmos-transfer2.5</a><span class="g g-src">🔍</span>. 즉 Omniverse가 완벽한 사실감을 낼 필요가 없고, 기하와 라벨만 정확하면 외형은 Cosmos가 채운다는 분담이다. CES 2025 키노트 요약은 "Omniverse와 새 Cosmos WFM이 짝을 이뤄 합성 데이터 증식 엔진을 만든다" <span class="g g-sec">📄</span>, "Omniverse에서 만든 제어된 3D 시나리오로부터 Cosmos가 포토리얼 비디오 생성" <span class="g g-ok">✅</span>이다.</p>
+<details class="ev"><summary>근거 상세 펼치기 — 키노트 3자 요약과 물리 한계 문구</summary>
+<p>GTC 2025 키노트의 제3자 요약은 "Omniverse는 지도와 이미지를 융합해 4D 주행 환경과 디지털 트윈을 만들고, 픽셀별 분류(세그멘테이션)로 Cosmos를 유도" <span class="g g-sec">📄</span><span class="g g-warn">⚠️</span>. 물리 한계는 1.4절 Cosmos 3 README의 한계 목록 <span class="g g-src">🔍</span>과 Cosmos 1.0 논문의 "자기회귀 WFM 생성 비디오에서 물체가 아래에서 예기치 않게 나타나는 실패 사례" <span class="g g-sec">📄</span>에 나온다. 가장 가까운 확인 문구는 "Omniverse에서 만든 정답을 Cosmos Transfer로 포토리얼 비디오로 변환"(GTC 2025 <a class="cite" href="https://nvidianews.nvidia.com/news/nvidia-announces-major-release-of-cosmos-world-foundation-models-and-physical-ai-data-tools">GTC 2025 뉴스룸</a><span class="g g-ok">✅</span>)과 "물리 기반 센서 데이터의 변주를 증폭"(<span class="g g-sec">📄</span>)이다.</p>
+</details>
+
+<h3 id="s3-3">3.3 둘을 잇는 방법: 실제 연결 지점</h3>
+<p>말이 아니라 코드로 확인되는 연결이 여섯 군데 있다. 공통 패턴은 하나다. Omniverse·CARLA·NuRec·라벨 렌더가 <b>구조 영상</b>(세그·깊이·엣지·HD맵)을 내고, Cosmos Transfer가 그것을 조건으로 <b>사실적인 영상</b>을 만든다.</p>
+<div class="tbl"><table>
+<tr><th>패턴</th><th>구체 연결</th><th>근거</th></tr>
+<tr><td>Omniverse Replicator → Transfer</td><td>Isaac Sim 5.0: "Cosmos Transfer 입력에 최적화된 새 Replicator 라이터로 고품질 합성 데이터 생성·내보내기"</td><td><a href="https://github.com/isaac-sim/IsaacSim/discussions/133">IsaacSim 5.0 릴리스</a> <span class="g g-src">🔍</span></td></tr>
+<tr><td>CARLA → Transfer</td><td>"CARLA가 RGB·세그·깊이·엣지 비디오를 생성해 Cosmos Transfer를 제어"; <code>carla_cosmos_gen.py</code>; 왕복 1~2분; H100급 GPU("8×H100 클러스터 권장, 저부하는 H100 1장")</td><td><a href="https://raw.githubusercontent.com/carla-simulator/carla/ue4-dev/Docs/nvidia_cosmos_transfer.md">CARLA docs</a> <span class="g g-src">🔍</span></td></tr>
+<tr><td>NuRec 재구성 + Transfer 변주</td><td>NuRec 페이지: "Omniverse 시뮬레이션을 지시 비디오로 Cosmos Transfer에 입력해 제어 가능한 포토리얼 합성 데이터 생성" <span class="g g-sec">📄</span>; Foretellix: "Sensor RTX가 렌더한 센서 데이터의 다양성을 Cosmos Transfer로 증폭 — 날씨·낙서·더러운 렌즈·새 ODD까지" <span class="g g-sec">📄</span>; NVIDIA 2025-08: Foretellix가 "NuRec·Sensor RTX·Cosmos Transfer 통합" <span class="g g-ok">✅</span></td><td><a href="https://www.foretellix.com/data-automation-toolchain-for-ai-powered-av-development/">Foretellix</a></td></tr>
+<tr><td>라벨 렌더 → Transfer2.5 (Real2Real)</td><td>World Scenario 렌더: "폴리라인·폴리곤·큐보이드 3D 요소"로 도로 지도·차량 박스·차선·신호등을 7카메라에 투영(OpenGL GPU 렌더), Transfer2.5 조건 입력</td><td><a href="https://raw.githubusercontent.com/nvidia-cosmos/cosmos-transfer2.5/main/docs/world_scenario_video_generation.md">world_scenario_video_generation.md</a> <span class="g g-src">🔍</span></td></tr>
+<tr><td>Blueprint</td><td>"Omniverse Blueprint for AV simulation은 Cosmos Transfer로 물리 기반 센서 데이터 변주 증폭"(GTC 2025) <span class="g g-sec">📄</span>; GTC 2025 세션 DD40002 <span class="g g-sec">📄</span></td><td></td></tr>
+<tr><td>CARLA 0.9.16 통합</td><td>NuRec(재구성 주행, 게이트 HF 1.52TB, 시점·카메라 편집·객체 추가·랜덤화) + Cosmos Transfer(스타일·날씨 변주) 동시 통합</td><td><a href="https://raw.githubusercontent.com/carla-simulator/carla/ue4-dev/Docs/nvidia_nurec.md">CARLA NuRec docs</a> <span class="g g-src">🔍</span> <span class="g g-ok">✅</span></td></tr>
+</table></div>
+<figure><img src="images/7-3-transfer25-world-scenario-rendering.png" alt="Transfer2.5 World Scenario 렌더링"><figcaption><b>그림 13. 라벨을 조건 영상으로 바꾸는 두 방식.</b> RDS-HQ 라벨을 HD맵 선+박스(V1)로 그리면 Transfer 1의 조건이 되고, 3D "world scenario"(V3)로 그리면 Transfer 2 AV 모델의 조건이 된다. 출처: <a href="https://github.com/nvidia-cosmos/cosmos-transfer2.5/blob/main/docs/world_scenario_video_generation.md">nvidia-cosmos/cosmos-transfer2.5 docs</a>, © NVIDIA.</figcaption></figure>
+<figure><img src="images/7-3-omnidreams-hdmap-overlay.png" alt="OmniDreams HD맵 오버레이"><figcaption><b>그림 14. AlpaSim의 비디오 세계 모델 렌더러(OmniDreams)가 조건으로 받는 HD맵 2D 렌더 오버레이.</b> 재구성이 아니라 생성으로 장면을 만들 때는 이런 도면이 조건이 된다. 출처: <a href="https://github.com/NVlabs/alpasim/blob/main/docs/VIDEO_MODEL.md">NVlabs/alpasim VIDEO_MODEL.md</a>, Apache-2.0, © NVIDIA.</figcaption></figure>
+
+<h3 id="s3-4">3.4 역할 구분표</h3>
+<div class="tbl"><table>
+<tr><th>축</th><th>Omniverse (Sensor RTX / NuRec)</th><th>Cosmos (Transfer / Predict / Reason)</th><th>근거</th></tr>
+<tr><td>물리 정확도</td><td>광선 추적 기반 센서 물리(빔 발산·도플러·롤링 셔터) <span class="g g-sec">📄</span>; NuRec은 실데이터 재구성이라 기하가 실측 기반 <span class="g g-src">🔍</span></td><td>학습된 근사. NVIDIA 자인 한계: "부정확한 3D 구조, 비현실적 물리 동역학" <span class="g g-src">🔍</span></td><td>1.4절</td></tr>
+<tr><td>다양성·외형</td><td>자산·재질 제작 비용에 종속</td><td>텍스트·조건으로 날씨·조명·지역 무제한 변주("Sim2Real 증강") <span class="g g-src">🔍</span></td><td>Transfer2.5 README</td></tr>
+<tr><td>정답 라벨</td><td>깊이·세그·박스 등 정답 직접 산출 <span class="g g-sec">📄</span></td><td>라벨을 <b>입력</b>으로 받음(Transfer); Reason은 VLM 주석 생성</td><td>2절</td></tr>
+<tr><td>결정론·재현성</td><td>Replicator "시간 정확·결정론적"(2022) <span class="g g-sec">📄</span>; 현행 재확인 없음 <span class="g g-warn">⚠️</span></td><td>확률적 생성. 시드 고정 가능하나 물리 일관성 미보장</td><td><span class="g g-warn">⚠️</span></td></tr>
+<tr><td>비용</td><td>장면 제작 인력 + RTX/OVX 렌더</td><td>H100급 추론(CARLA 왕복 1~2분/클립, 7뷰=7~8 GPU, OmniDreams 48~96GB) <span class="g g-src">🔍</span></td><td>3.3절</td></tr>
+<tr><td>개방성</td><td>3DGRUT 오픈소스; ovrtx·Kit·NuRec 서비스는 독점/게이트 <span class="g g-src">🔍</span></td><td>Gen1~2.5 NOML, Cosmos 3 OpenMDW-1.1 <span class="g g-src">🔍</span></td><td>1.5절</td></tr>
+<tr><td>적합 용도</td><td>규제·인증급 센서 물리 검증(Mcity/MITRE는 Omniverse만 사용 <span class="g g-sec">📄</span>), 폐루프 기본 렌더(AlpaSim 기본=NuRec <span class="g g-src">🔍</span>)</td><td>롱테일·외형 증강, 코너케이스 탐색(Wayve "평가 중" <span class="g g-sec">📄</span>), 라벨링·크리틱</td><td>4절</td></tr>
+</table></div>
+<div class="oneline"><b>한 줄 정리.</b> 정확해야 하는 것(기하·물리·정답 라벨·재현성)은 Omniverse, 많아야 하는 것(외형·날씨·롱테일)은 Cosmos. NVIDIA 자신도 평가의 기본값은 재구성(NuRec)에 둔다.</div>
+
+<h2 id="s4">4. 활용 패턴 4가지: 언제, 누가, 무엇을 조심해서</h2>
+<div class="q"><b>이 절의 질문</b> 자율주행 개발에서 Cosmos를 실제로 어떻게 쓰나? 각 패턴은 어느 정도 검증됐나?</div>
+<div class="term"><b>개념 먼저.</b> 여기서 <b>활용 패턴</b>이란 "Cosmos의 어느 모델을 개발 루프의 어느 자리에 꽂는가"의 유형이다. A <b>합성 데이터</b>는 학습 데이터를 불리는 자리, B <b>폐루프 평가</b>는 모델이 낸 행동의 결과를 되먹여 시험하는 자리, C <b>정책 학습</b>은 그 시험 결과로 모델을 고치는 자리, D <b>추론 백본</b>은 라벨러·채점자·주행 모델의 두뇌로 Reason을 빌려 쓰는 자리다. 각 패턴은 성숙도가 다르므로 "누가 실제로 썼나"를 함께 본다.</div>
+<p>네 패턴을 순서대로 보면 데이터를 만드는 일(A)에서 정책을 평가하고(B) 고치고(C) 그 두뇌를 빌려 쓰는 일(D)로 이어진다. 패턴마다 "언제 쓰나 / 누가 썼나 / 주의점" 세 가지만 답한다.</p>
+
+<h3 id="s4-1">패턴 A — 합성 데이터·증강 (Transfer)</h3>
+<p><b>언제 쓰나.</b> 라벨은 있지만 조건(날씨·조명·지역)이 부족할 때. 도면(라벨·시뮬 렌더)을 넣고 비·눈·안개·밤의 사실적인 영상을 얻는다. <b>성숙도</b>: ② 모델·파이프라인 공개(Drive-Dreams), ③ Foretellix·CARLA·Oxa·Voxel51 통합 <span class="g g-ok">✅</span>.</p>
+<p><b>대표 사례 Cosmos-Drive-Dreams.</b> "AV 용도의 다양하고 도전적인 시나리오를 생성하기 위해 Cosmos WFM 위에 구축된 합성 데이터 생성(SDG) 파이프라인" <span class="g g-src">🔍</span>. 실클립 5,843 → 합성 81,802(121프레임, 비·눈·안개), 4뷰(정면·좌·우·후방) <span class="g g-src">🔍</span>. 파생 모델 5종(AV-Sample, Multiview-AV-Sample, Transfer1-Sample-AV, Single2Multiview, LiDAR-GEN) <span class="g g-src">🔍</span>. 2025-10 LiDAR 토크나이저·디퓨전과 World Scenario 렌더링 추가 <span class="g g-src">🔍</span>. 제3자 TeraSim-World(arXiv 2509.13164)가 "포토리얼·지리 기반 센서 렌더링"에 Cosmos-Drive를 쓴다 <span class="g g-sec">📄</span>.</p>
+<p><b>누가 썼나.</b> Foretellix(Foretify 시나리오 + Sensor RTX + Transfer 변주) <span class="g g-ok">✅</span>; CARLA 0.9.16 <span class="g g-src">🔍</span>; Oxa "Cosmos Transfer를 자체 툴체인 Oxa Foundry에 통합" <span class="g g-sec">📄</span>; Voxel51 "Cosmos Transfer가 만든 데이터를 관리·시각화·정제하는 툴킷(FiftyOne)" <span class="g g-sec">📄</span>.</p>
+<p><b>주의점.</b> 자율주행 다운스트림의 정량 효과 수치는 미확보 <span class="g g-warn">⚠️</span>. 라벨은 입력이므로 라벨의 품질이 결과를 결정한다.</p>
+
+<h3 id="s4-2">패턴 B — 폐루프 평가·세계 모델 시뮬 (Predict / Dreams + NuRec)</h3>
+<p><b>언제 쓰나.</b> 정책이 낸 행동의 결과를 되먹여 평가할 때. 렌더는 NuRec(재구성) 또는 비디오 세계 모델(생성). <b>성숙도</b>: ② AlpaSim 오픈소스(2025-10), "Cosmos-Dreams" 발표(CES 2026) <span class="g g-sec">📄</span>, 공개 저장소 없음 <span class="g g-warn">⚠️</span>.</p>
+<p><b>누가·무엇으로.</b> 대표 도구는 3장에서 본 <b>AlpaSim</b>이다. "실제 센서 데이터·차량 동역학·교통 시나리오를 시뮬레이션해 E2E AV 정책을 폐루프로 테스트"하며 렌더러가 플러그형이라 "NuRec 기본 지원 + FlashDreams를 통한 OmniDreams 비디오 모델 렌더링"을 고를 수 있다 <a class="cite" href="https://github.com/NVlabs/alpasim">NVlabs/alpasim</a><span class="g g-src">🔍</span>. 설계 문서는 "실시간과 매우 정밀한 물리는 비목표"라고 못 박는다 <span class="g g-src">🔍</span>. Oxa는 "Cosmos Predict로 자율주행 시스템 고도화"를 말한다 <span class="g g-sec">📄</span>.</p>
+<details class="ev"><summary>근거 상세 펼치기 — AlpaSim·OmniDreams·Cosmos-Dreams 세부</summary>
+<ul>
+  <li><b>AlpaSim</b>: Python gRPC 마이크로서비스; 지원 정책 Alpamayo-R1·1.5, VaVAM, LTFv6(NAVSIM); 데이터 <code>PhysicalAI-Autonomous-Vehicles-NuRec 26.01</code>. 설계: "월드 상태가 바운딩 박스로 trafficsim에 전달되어 비자차 액터를 구동", 평가 모듈은 루프 밖에서 로그로 메트릭 계산 <span class="g g-src">🔍</span>.</li>
+  <li><b>OmniDreams(비디오 세계 모델 렌더러)</b>: "상태 유지 렌더러… 롤아웃 세션을 열고 청크 단위로 비디오 생성"; "특히 동적·비강체 물체에서 더 나은 시각 품질"; HD맵 렌더+액터 큐보이드 조건; <b>단일 뷰만 지원</b>; VRAM 48GB(FlashDreams)/96GB(Alpamayo1.5); 카메라 오버라이드 시 "생성 비디오가 드리프트·정렬 이탈 가능"; 기반 Cosmos 모델명 미기재 <a class="cite" href="https://raw.githubusercontent.com/NVlabs/alpasim/main/docs/VIDEO_MODEL.md">VIDEO_MODEL.md</a><span class="g g-src">🔍</span>.</li>
+  <li><b>Cosmos-Dreams</b>(CES 2026 마케팅명): "대규모로 희귀·롱테일 주행 시나리오를 시뮬레이션하는 포토리얼 폐루프 AV 시나리오 생성 세계 모델" <span class="g g-sec">📄</span>. nvidia-cosmos 조직에 <code>cosmos-dreams</code> 저장소는 없다(2026-09-02 확인) <span class="g g-src">🔍</span>. AlpaSim의 OmniDreams/FlashDreams가 구현 표면으로 추정된다 <span class="g g-warn">⚠️</span>.</li>
+  <li><b>Predict 멀티뷰</b>: Predict2.5 <code>2B/auto/multiview</code>(7카메라) <span class="g g-src">🔍</span>.</li>
+</ul>
+</details>
+<p><b>주의점.</b> NVIDIA 자신의 폐루프 평가 기본값은 생성이 아니라 <b>재구성(NuRec)</b>이다(저장소 기본값에서 추론) <span class="g g-src">🔍</span>. 생성 렌더러는 단일 뷰이고 드리프트할 수 있다.</p>
+
+<h3 id="s4-3">패턴 C — 정책 학습·강화학습 (Cosmos-RL, AlpaGym)</h3>
+<p><b>언제 쓰나.</b> 시뮬 환경에서 롤아웃을 돌려 정책(VLA)을 강화학습으로 후학습할 때. 3장 Alpamayo 1.5의 강화학습이 이 패턴의 실사용이다. <b>성숙도</b>: ② Cosmos-RL(유지보수)·AlpaGym(2026-06, "초기 활발 개발") <span class="g g-src">🔍</span>.</p>
+<figure><img src="images/7-4-cosmos-rl-infra.svg" alt="Cosmos-RL 구조"><figcaption><b>그림 15. Cosmos-RL의 정책–롤아웃–컨트롤러 분리 구조.</b> 정책 학습과 시뮬 롤아웃을 다른 GPU 무리에서 비동기로 돌린다. 출처: <a href="https://github.com/nvidia-cosmos/cosmos-rl">nvidia-cosmos/cosmos-rl</a>, Apache-2.0, © NVIDIA.</figcaption></figure>
+<ul>
+  <li>Cosmos-RL: 정책/롤아웃 replica 비동기, TP/SP/CP/FSDP/PP 병렬, FP8 학습·FP8/FP4 롤아웃, 단일 컨트롤러·동적 NCCL 그룹 <span class="g g-src">🔍</span>. 3장의 Alpamayo 오픈루프 RL(GRPO, 640 GPU) 레시피가 이를 쓴다 <span class="g g-src">🔍</span>.</li>
+  <li>AlpaGym: AlpaSim=환경, Cosmos-RL=분산 롤아웃·학습, 보상 예 <code>progress_safety</code>, Alpamayo 1.5(10B)만 지원, 처리량 수치 미공개 <span class="g g-src">🔍</span>.</li>
+  <li>로봇 쪽 대응(맥락): GR00T-Dreams는 "Cosmos WFM으로 이미지 1장+언어 지시에서 대량 합성 궤적 생성" → IDM으로 행동 추출 → GR00T N1 파인튜닝 <a class="cite" href="https://github.com/NVIDIA/GR00T-Dreams">NVIDIA/GR00T-Dreams</a><span class="g g-src">🔍</span>; Cosmos Policy "LIBERO 98.33%, RoboCasa 71.1%" <span class="g g-src">🔍</span>. Jetson Thor는 DRIVE Thor와 같은 SoC 계열이다 <span class="g g-sec">📄</span>(1장).</li>
+</ul>
+<p><b>주의점.</b> 자율주행용 폐루프 RL(AlpaGym)은 아직 초기이고 처리량 수치가 없다. 시뮬 환경의 물리·렌더 오류가 보상 오류로 이어진다.</p>
+
+<h3 id="s4-4">패턴 D — 추론 VLM 백본 (Reason)</h3>
+<p><b>언제 쓰나.</b> 라벨러·크리틱·플래너의 두뇌가 필요할 때. <b>성숙도</b>: ③ Alpamayo 1/1.5/2 Super 백본으로 채택(NVIDIA 내부 양산 파이프라인) <span class="g g-src">🔍</span>.</p>
+<ul>
+  <li>백본: Alpamayo "Cosmos-Reason 백본 + action expert" <span class="g g-src">🔍</span>; 세대 매핑 Reason1 → Reason2 → Cosmos 3 Super Reasoner(3장) <span class="g g-src">🔍</span>.</li>
+  <li>크리틱: Reason1 video critic <span class="g g-src">🔍</span>, Reason2 리젝션 샘플링 <span class="g g-src">🔍</span>, Cosmos Evaluator <span class="g g-sec">📄</span>.</li>
+  <li>라벨러: AV 캡셔닝·VQA 레시피 <span class="g g-sec">📄</span>, 3D AV 그라운딩 후학습 레시피 <span class="g g-src">🔍</span>, Curator의 Reason 활용 <span class="g g-sec">📄</span>.</li>
+</ul>
+<p><b>주의점.</b> 백본이 세대마다 바뀐다(Qwen2.5-VL → Qwen3-VL → Cosmos 3 MoT). 파인튜닝 자산이 세대 교체에 묶인다.</p>
+
+<h3 id="s4-5">누가 쓰고 있나</h3>
+<p>공개 진술이 있는 회사만 모았다. 구체적인 문장이 있는 회사와 "채택사 명단"에만 오른 회사는 등급으로 구분했다.</p>
+<div class="tbl"><table>
+<tr><th>회사</th><th>사용 패턴</th><th>공개 진술</th><th>근거</th><th>등급</th></tr>
+<tr><td>Uber</td><td>A·B·D(데이터 팩토리)</td><td>CES 2025 Cosmos+DGX Cloud; GTC DC 2025 "2027년부터 10만 대, Cosmos 기반 공동 AI 데이터 팩토리"; Data Factory Blueprint 사용자. Khosrowshahi: "생성형 AI가 모빌리티의 미래를 이끌 것… NVIDIA와 협력해 안전하고 확장 가능한 자율주행의 일정을 앞당길 수 있다고 확신"</td><td><a href="https://investor.uber.com/news-events/news/press-release-details/2025/Uber-to-Deploy-One-of-the-Worlds-Largest-Networks-of-Autonomous-Vehicles-Powered-by-NVIDIA-AI-Architecture/default.aspx">Uber IR</a> · <a href="https://techcrunch.com/2025/01/07/at-ces-2025-uber-teams-up-with-nvidia-to-scale-autonomous-driving-faster/">TechCrunch 2025-01</a></td><td><span class="g g-ok">✅</span></td></tr>
+<tr><td>Foretellix</td><td>A(+Omniverse)</td><td>Sensor RTX 조기 접근(2024-06) → "Cosmos로 검증·밸리데이션용 시나리오 다양성 확대" → NuRec+Sensor RTX+Transfer 통합(2025-08)</td><td><a href="https://www.foretellix.com/foretellix-nvidia-ai-centric/">Foretellix</a></td><td><span class="g g-ok">✅</span></td></tr>
+<tr><td>CARLA</td><td>A·B(NuRec)</td><td>0.9.16에 NuRec·Cosmos Transfer 통합, "15만 AV 개발자"</td><td>CARLA docs <span class="g g-src">🔍</span></td><td><span class="g g-ok">✅</span></td></tr>
+<tr><td>Wayve</td><td>코너케이스 탐색</td><td>"안전·검증용 엣지·코너케이스 주행 시나리오 탐색 도구로 Cosmos 평가 중"(CES 2025, 2026 재언급); 2026-02 NVIDIA·Uber 등 12억 달러 투자</td><td><a href="https://wayve.ai/thinking/wayve-nvidia-collaboration/">Wayve</a></td><td><span class="g g-sec">📄</span></td></tr>
+<tr><td>Waabi</td><td>A·큐레이션</td><td>"시뮬레이션·데이터 큐레이션에 Cosmos WFM 사용, DRIVE Thor 통합"; 자체 Waabi World 병행. Urtasun: "생성형 AI를 엣지로, 우리 차량에, 대규모로 가져오기 위한 NVIDIA와의 깊은 협력"</td><td><a href="https://waabi.ai/insights/nvidia-drivethor">Waabi</a></td><td><span class="g g-sec">📄</span></td></tr>
+<tr><td>Plus (PlusAI)</td><td>개발·테스트</td><td>"SuperDrive 테스트·개발 가속에 Cosmos WFM 사용", "Cosmos Physical AI 모델을 SuperDrive에 내장"</td><td><a href="https://blogs.nvidia.com/blog/auto-ecosystem-physical-ai/">NVIDIA 블로그</a></td><td><span class="g g-sec">📄</span></td></tr>
+<tr><td>Oxa</td><td>A·B</td><td>"Cosmos Transfer를 Oxa Foundry에 통합", "Cosmos Predict 사용"</td><td>NVIDIA 개발자 블로그</td><td><span class="g g-sec">📄</span></td></tr>
+<tr><td>Voxel51</td><td>데이터 관리</td><td>FiftyOne으로 Transfer 생성 데이터 관리</td><td><a href="https://voxel51.com/gtc-dc-2025">Voxel51</a></td><td><span class="g g-sec">📄</span></td></tr>
+<tr><td>Mcity / MITRE</td><td>Omniverse만(규제급 검증)</td><td>"Sensor RTX API로 물리 기반 센서 시뮬레이션… 32에이커 시험장 디지털 트윈"</td><td><a href="https://blogs.nvidia.com/blog/mitre-digital-proving-ground/">NVIDIA 블로그</a></td><td><span class="g g-ok">✅</span></td></tr>
+<tr><td>XPENG</td><td>초기 채택 명단</td><td>CES 2025 명단, 구체 진술 없음</td><td>보도자료</td><td><span class="g g-sec">📄</span> <span class="g g-warn">⚠️</span></td></tr>
+<tr><td>Li Auto</td><td>명단</td><td>"Cosmos 플랫폼 위에 AV 구축"(2026 스니펫)</td><td>—</td><td><span class="g g-warn">⚠️</span></td></tr>
+<tr><td>Toyota · Aurora · Continental · Zoox · Nuro · Helm.ai · Applied Intuition</td><td>미확인</td><td>플랫폼 일반 설명 또는 자료 없음</td><td>—</td><td><span class="g g-warn">⚠️</span></td></tr>
+</table></div>
+<details class="ev"><summary>근거 상세 펼치기 — 발표 행사별 채택사 명단</summary>
+<p>CES 2025: 1X·Agile Robots·Agility·Figure AI·Foretellix·Fourier·Galbot·Hillbot·IntBot·Neura·Skild AI·Virtual Incision·Waabi·XPENG·Uber. GTC 2025: 1X·Agility·Figure·Skild AI·Agile Robots + AV 쪽 Foretellix·Uber·Waabi·Wayve·Plus·XPENG·Oxa·Voxel51. SIGGRAPH 2025: Amazon·Boston Dynamics·Hexagon·Foretellix·Voxel51. GTC DC 2025: Uber·Stellantis·Lucid·Mercedes·Aurora·Volvo AS·Waabi·Avride·May Mobility·Momenta·Nuro·Pony.ai·Wayve·WeRide·PlusAI·International. 모두 검색 요약 기준이며 Helm.ai·Milestone은 확인되지 않았다 <span class="g g-sec">📄</span><span class="g g-warn">⚠️</span>.</p>
+</details>
+
+<h3 id="s4-6">한계: 도입 전에 알아야 할 것</h3>
+<p>일곱 가지다. 앞의 셋(물리 충실도, 분포 이동, 평가의 순환성)은 기술의 한계이고, 뒤의 넷(비용, 라이선스, 세대 교체, 정량 근거 부족)은 도입 계획의 한계다.</p>
+<div class="tbl"><table>
+<tr><th>한계</th><th>근거</th></tr>
+<tr><td><b>물리 충실도·환각.</b> Cosmos 3 README의 한계 목록(시간 불일치, 물체 변형, 부정확 3D, 비현실 동역학) <span class="g g-src">🔍</span>; Cosmos 1.0 논문 "아래에서 예기치 않게 나타나는 물체" <span class="g g-sec">📄</span>; 제3자 벤치마크 "물리 일관성은 제한적이고 파편적… 시각 사실성과 물리 정확성은 함께 오르지 않는다"(PhysicsMind arXiv 2601.16007, Pebblous 보고서) <span class="g g-sec">📄</span></td><td>1.4절</td></tr>
+<tr><td><b>sim2real·분포 이동.</b> 서베이 "생성 세계 모델과 E2E 정책은 분포 내 성능은 강하나 분포 이동 시 급격히 저하"(arXiv 2501.11260) <span class="g g-sec">📄</span></td><td></td></tr>
+<tr><td><b>평가의 순환성.</b> 세계 모델로 정책을 평가하면 모델 오류가 평가 오류가 된다. NVIDIA 자신도 AlpaSim 기본 렌더러를 재구성(NuRec)으로 두고, OmniDreams는 "단일 뷰, 드리프트 가능"이라 명시 <span class="g g-src">🔍</span>. 인증 근거로의 수용 여부는 미정 <span class="g g-warn">⚠️</span></td><td>패턴 B</td></tr>
+<tr><td><b>컴퓨트 비용.</b> CARLA→Transfer 왕복 1~2분/클립, 8×H100 권장; Transfer2.5 7뷰=7~8 GPU; OmniDreams 48~96GB; Transfer1 실시간은 GB200 NVL72 랙 <span class="g g-src">🔍</span><span class="g g-sec">📄</span></td><td>3.3절</td></tr>
+<tr><td><b>라이선스·개방성.</b> NOML의 가드레일 우회 종료·표시 의무 <span class="g g-sec">📄</span>; ovrtx·Omniverse Kit·NuRec 서비스 독점 <span class="g g-src">🔍</span>; NuRec 데이터셋 게이트 <span class="g g-src">🔍</span>. Cosmos 3는 OpenMDW-1.1로 완화 <span class="g g-src">🔍</span></td><td>1.5절</td></tr>
+<tr><td><b>세대 교체 속도.</b> 12개월 내 4세대, 이전 저장소 유지보수 모드 <span class="g g-src">🔍</span></td><td>1절</td></tr>
+<tr><td><b>정량 근거 부족.</b> AV 다운스트림 개선 수치는 공개 자료에서 확보 불가 <span class="g g-warn">⚠️</span></td><td>2.3절</td></tr>
+</table></div>
+<div class="oneline"><b>한 줄 정리.</b> Cosmos는 데이터를 불리고 라벨을 달고 채점하는 데 강하지만, 물리 정확성과 평가 타당성은 스스로 보장하지 못한다. 그래서 정확해야 하는 곳에는 Omniverse와 재구성을 쓰고, 세대 교체와 라이선스를 계획에 넣어야 한다. 세부는 <a href="07-physical-ai-cosmos.md">md 원본 7.4</a>.</div>
+
+<h2 id="s5">5. 성숙도 한눈에</h2>
+<div class="scale"><div><b>①</b>연구·프리뷰</div><div><b>②</b>오픈 가중치·SDK</div><div><b>③</b>파트너 시범</div><div><b>④</b>1개 이상 양산차</div><div><b>⑤</b>다수 OEM 양산</div></div>
+<div class="tbl"><table>
+<tr><th>기술</th><th>단계</th><th>근거</th><th>다음 이정표</th></tr>
+<tr><td>Cosmos 3 (Super/Nano/Edge)</td><td>②</td><td>2026-05-31 공개, OpenMDW-1.1 <span class="g g-ok">✅</span></td><td>FP8/NVFP4, Edge 최적화(SIGGRAPH 2026-07) <span class="g g-sec">📄</span></td></tr>
+<tr><td>Cosmos Transfer (2.5 → 3)</td><td>②~③</td><td>Foretellix·CARLA·Oxa 통합 <span class="g g-ok">✅</span></td><td>Cosmos 3 Transfer 컨트롤 <span class="g g-src">🔍</span></td></tr>
+<tr><td>Cosmos Reason (2 → 3 Reasoner)</td><td>③</td><td>Alpamayo 백본으로 NVIDIA 내부 채택 <span class="g g-src">🔍</span></td><td>—</td></tr>
+<tr><td>Cosmos Predict / Dreams (폐루프 생성 렌더)</td><td>②</td><td>Predict2.5 멀티뷰 공개, OmniDreams는 단일 뷰 <span class="g g-src">🔍</span>; Cosmos-Dreams 저장소 없음 <span class="g g-warn">⚠️</span></td><td>Cosmos-Dreams 공개 대기</td></tr>
+<tr><td>Cosmos Curator</td><td>②</td><td>오픈소스, Xenna 기반 <span class="g g-src">🔍</span></td><td>—</td></tr>
+<tr><td>Omniverse NuRec / 3DGRUT</td><td>③</td><td>Isaac Sim 5.0·CARLA 0.9.16·AlpaSim 통합 <span class="g g-src">🔍</span></td><td>NuRec Fixer(2026) <span class="g g-sec">📄</span></td></tr>
+<tr><td>Sensor RTX / ovrtx</td><td>②~③</td><td>ovrtx 0.4 프리릴리스(독점 라이선스) <span class="g g-src">🔍</span>; Mcity/MITRE·Foretellix 사용 <span class="g g-ok">✅</span></td><td>—</td></tr>
+<tr><td>Physical AI AV 데이터셋</td><td>②</td><td>게이트 공개, 1,700h+ <span class="g g-src">🔍</span></td><td>NuRec 세트 확장(26.04: 1,606장면)</td></tr>
+<tr><td>Cosmos 기반 인증 근거 활용</td><td>①</td><td>사례 없음 <span class="g g-warn">⚠️</span></td><td>—</td></tr>
+</table></div>
+
+<h2 id="s6">6. 아직 확인 못 한 것</h2>
+<div class="tbl"><table>
+<tr><th>항목</th><th>상태</th><th>확인 방법</th></tr>
+<tr><td>Cosmos 3 파라미터(64B/16B/4B vs 추론기 32B/8B) 해석</td><td>추정 <span class="g g-warn">⚠️</span></td><td>기술 리포트 arXiv 2606.02800</td></tr>
+<tr><td>Cosmos 3 발표일(GTC 2026-03 프리뷰 vs 2026-05-31 공개)</td><td>상충 <span class="g g-warn">⚠️</span></td><td>GitHub/HF 기준 채택</td></tr>
+<tr><td>Cosmos 3 학습 코퍼스</td><td>미공개 <span class="g g-warn">⚠️</span></td><td>기술 리포트</td></tr>
+<tr><td>Data Factory Blueprint 발표 시점(GTC DC 2025 vs GTC 2026)</td><td>상충 <span class="g g-warn">⚠️</span></td><td>뉴스룸 원문</td></tr>
+<tr><td>"Cosmos-Dreams" 실체와 AlpaSim OmniDreams의 관계</td><td>추정 <span class="g g-warn">⚠️</span></td><td>NVIDIA 원문·저장소 공개 대기</td></tr>
+<tr><td>Drive-Dreams VLM 필터링(논문 "있음" vs 저장소 "coming soon")</td><td>상충 <span class="g g-warn">⚠️</span></td><td>논문 원문</td></tr>
+<tr><td>Drive-Dreams·Cosmos 합성 데이터의 AV 정량 효과</td><td>미확보 <span class="g g-warn">⚠️</span></td><td>arXiv 2506.09042 원문</td></tr>
+<tr><td>Omniverse vs Cosmos 역할 키노트 원문 문장</td><td>3자 요약만 <span class="g g-warn">⚠️</span></td><td>키노트 트랜스크립트</td></tr>
+<tr><td>DRIVE Sim 단종 여부</td><td>진술 없음 <span class="g g-warn">⚠️</span></td><td>NVIDIA 제품 페이지</td></tr>
+<tr><td>NuRec 공식 아키텍처 도식·"How NuRec Works" 원문</td><td>차단 <span class="g g-warn">⚠️</span></td><td>docs.nvidia.com/nurec, 개발자 블로그(Accelerating AV Simulation with Neural Reconstruction)</td></tr>
+<tr><td>Blueprint/ovrtx 결정론 재확인</td><td>2022 자료만 <span class="g g-warn">⚠️</span></td><td>Sensor RTX 문서</td></tr>
+<tr><td>NVIDIA Open Model License 정확 조항</td><td>원문 미열람 <span class="g g-warn">⚠️</span></td><td>라이선스 PDF</td></tr>
+<tr><td>Curator 기본 캡셔닝 모델</td><td>미명시 <span class="g g-warn">⚠️</span></td><td>docs</td></tr>
+<tr><td>Physical AI AV 데이터셋 규모 표기(1,700h/306k vs 1,727h/311k)</td><td>표기 차 <span class="g g-warn">⚠️</span></td><td>HF 카드</td></tr>
+<tr><td>XPENG·Li Auto·Toyota 등 구체 사용 진술</td><td>미확인 <span class="g g-warn">⚠️</span></td><td>각사 자료</td></tr>
+</table></div>
+
+<h2 id="s7">7. 자사 관점: LG전자 VS와의 접점과 협업 고려사항</h2>
+<div class="q"><b>이 절의 질문</b> 차량용 HPC와 AI 플랫폼을 개발하는 LG전자 VS사업본부(이하 VS)가 이 장을 읽으면 무엇이 특이하고, Cosmos·Omniverse와 어디서 만나며, 도입·협업할 때 무엇을 따져야 하나?</div>
+<p>이 절은 앞의 조사 결과를 자사 관점으로 다시 읽은 것이다. NVIDIA 쪽 사실은 0~6절의 출처를 그대로 따르고, LG 쪽 사실은 <a href="report-03-autonomous-driving-stack.html#s8">3장 8절</a>에서 쓴 공개 발표 세 건(IVI+Hyperion 통합, LG이노텍 부품, aiMotive 통합 컨트롤러)만 쓴다. VS의 내부 계획은 공개 자료로 알 수 없으므로 그에 기대는 판단은 모두 추정(<span class="g g-warn">⚠️</span>)으로 표시했다. 3장의 자사 관점이 "차 안의 스택"이었다면, 이 절은 "차를 만드는 공장", 즉 학습·시뮬레이션 컴퓨터 쪽의 접점이다.</p>
+
+<h3 id="s7-1">7.1 이 장의 특이사항 여섯 가지</h3>
+<ol>
+  <li><b>Cosmos는 제품이 아니라 개발 도구다.</b> 차에 들어가는 Cosmos는 아직 없다. Cosmos 3 Edge 4B가 Jetson·Thor를 대상으로 하지만 차량 적용은 미확인이다(1.4절). 접점은 차량이 아니라 개발 컴퓨터 쪽에 생긴다.</li>
+  <li><b>12개월에 4세대, 라이선스는 두 갈래.</b> 이전 저장소는 전부 유지보수 모드이고, 1~2.5세대는 NVIDIA Open Model License(가드레일 우회 시 종료·표시 의무), Cosmos 3는 OpenMDW-1.1이다(1.5절). 어느 세대에 파이프라인을 고정하느냐가 곧 컴플라이언스와 이관 비용이다.</li>
+  <li><b>정확해야 하는 것은 Omniverse, 많아야 하는 것은 Cosmos.</b> NVIDIA 자신도 폐루프 평가의 기본값을 생성이 아닌 재구성(NuRec)에 두고, 세계 모델 시뮬 결과가 인증 근거로 쓰인 사례는 없다(3.4절, 4.6절).</li>
+  <li><b>도구는 열렸지만 데이터와 판단은 사용자 몫.</b> Curator·Reason·Transfer가 큐레이션·라벨링·합성을 자동화해도, 수집 체계와 "무엇이 부족한가"를 판단해 다시 모으는 운영은 NVIDIA가 주지 않는다(2.4절). 자율주행 다운스트림의 정량 효과 수치도 공개된 것이 없다(2.3절).</li>
+  <li><b>개방성 편차가 크다.</b> 3DGRUT와 Cosmos 코드는 오픈소스지만, Sensor RTX 라이브러리(ovrtx)·Omniverse Kit·NuRec 재구성 서비스는 독점이고 데이터셋은 게이트다(3.1절). "오픈 플랫폼"이라는 말과 실제 의존 지점은 다르다.</li>
+  <li><b>채택사 명단에 Tier-1이 없다.</b> 공개 진술이 있는 사용자는 Uber·Foretellix·CARLA·Wayve·Waabi·Plus·Oxa·Voxel51 같은 로보택시·시뮬 벤더다(4절). Bosch·Magna 같은 Tier-1의 Cosmos 사용 진술은 찾지 못했다 <span class="g g-warn">⚠️</span>. 선례 없이 시작하는 자리라는 뜻이다.</li>
+</ol>
+
+<h3 id="s7-2">7.2 접점 지도: 세 대의 컴퓨터별로 어디서 만나나</h3>
+<p>0절의 세 대의 컴퓨터에 VS의 두 축, 차량용 HPC와 AI 플랫폼을 얹으면 접점은 컴퓨터마다 다르게 나온다. HPC는 차량 컴퓨터에, AI 플랫폼은 학습·시뮬레이션 컴퓨터에 놓인다.</p>
+<div class="tbl"><table>
+<tr><th>자리</th><th>NVIDIA가 주는 것 (7장 사실)</th><th>VS와의 접점 (추정 <span class="g g-warn">⚠️</span>)</th><th>참고</th></tr>
+<tr><td>학습 컴퓨터 (DGX) — 데이터 공정</td><td>Cosmos Curator(분할·필터·중복 제거·캡셔닝), Reason 자동 라벨러·크리틱, Cosmos-RL·Framework <span class="g g-src">🔍</span></td><td>자사 플릿 데이터의 큐레이션·라벨링 자동화. 라벨 정책·품질 관리·한국 데이터 보강은 자체 몫</td><td>2.1, 2.3절</td></tr>
+<tr><td>학습 컴퓨터 — 기준 데이터</td><td>Physical AI AV 데이터셋(7카메라 f-theta, LiDAR, 레이더 9, 게이트) <span class="g g-src">🔍</span></td><td>사실상의 참조 센서 형식. LG이노텍 카메라 등 자사 센서 구성과의 정합 여부가 모델 재사용성을 결정</td><td>2.2절</td></tr>
+<tr><td>시뮬레이션 컴퓨터 (OVX) — 합성 데이터</td><td>Cosmos Transfer(도면 → 사실화, 7뷰), Drive-Dreams 파이프라인 <span class="g g-src">🔍</span></td><td>자사 센서 구성으로 찍은 도면(HD맵·박스)에서 날씨·조명·지역 변주. 멀티뷰 체크포인트는 7카메라 기준이라 재학습이 필요할 수 있음</td><td>3.3절, 패턴 A</td></tr>
+<tr><td>시뮬레이션 컴퓨터 — 재구성·폐루프</td><td>Omniverse NuRec(실로그 → 3D 장면), AlpaSim(폐루프), OmniDreams 옵션 <span class="g g-src">🔍</span></td><td>자사 플릿 로그를 재구성해 자체 정책을 폐루프로 시험. 재구성 서비스는 NVIDIA 제공이라 의존 지점</td><td>3.1절, 패턴 B, 3장 3절</td></tr>
+<tr><td>시뮬레이션 컴퓨터 — 검증</td><td>Cosmos Evaluator(Reason 기반 채점), Data Factory Blueprint <span class="g g-sec">📄</span></td><td>생성 데이터의 품질 게이트로는 쓸 수 있으나 인증 근거는 아님. 인증용 검증은 Omniverse·실차·자체 SIL/HIL</td><td>2.3절, 4.6절</td></tr>
+<tr><td>차량 컴퓨터 (DRIVE AGX / HPC)</td><td>Cosmos 3 Edge 4B(Jetson·Thor 대상, 차량 적용 미확인) <span class="g g-src">🔍</span><span class="g g-warn">⚠️</span></td><td>자사 HPC 위의 차량 내 세계 모델은 아직 근거 없음. 현재의 차량 접점은 Reason 백본이 들어간 Alpamayo(3장)뿐</td><td>1.4절, 3장 2절</td></tr>
+<tr><td>인프라·비용</td><td>Transfer 7뷰 = 7~8 GPU, CARLA→Transfer 왕복 1~2분/클립, Curator 예시 H100 2,000장 <span class="g g-src">🔍</span><span class="g g-sec">📄</span></td><td>DGX 자체 구축 또는 클라우드. 데이터 사이클을 돌릴 GPU 예산이 협업 규모를 정한다</td><td>3.3절, 4.6절</td></tr>
+</table></div>
+<div class="analogy"><b>비유로 이해하기.</b> 3장에서 VS의 HPC는 "보드+BSP" 자리였다. 이 장에서 AI 플랫폼은 "데이터 공장의 설비"를 빌리는 자리다. 설비(Curator·Transfer·NuRec)는 NVIDIA 것을 쓰되, 원재료(플릿 데이터)와 품질 기준(라벨 정책·검증 논거)과 공장 운영(무엇을 더 모을지)은 우리가 가져야 한다.</div>
+
+<h3 id="s7-3">7.3 협업 시 고려사항</h3>
+<ol>
+  <li><b>세대 기준을 고정한다.</b> 새로 시작한다면 Cosmos 3(OpenMDW-1.1)이 기준이고, 1~2.5세대는 유지보수 모드에 NOML 조건이 붙는다. 다만 자율주행 특화 자산(Transfer2.5 7뷰 auto multiview, Drive-Dreams, Predict2.5 멀티뷰)은 아직 2.5세대에 있으므로, Cosmos 3 Transfer 컨트롤로의 이관 시점을 정해야 한다 <span class="g g-src">🔍</span>.</li>
+  <li><b>Omniverse 의존 지점을 분리한다.</b> 재구성(NuRec 서비스)·센서 물리(ovrtx)는 독점이다. 오픈된 3DGRUT과 CARLA 통합을 대안으로 병행하고, 어느 공정이 NVIDIA 서비스 없이는 멈추는지 표로 남긴다 <span class="g g-src">🔍</span>.</li>
+  <li><b>Cosmos의 자리를 "학습 데이터·탐색"으로 한정한다.</b> 인증 근거는 Omniverse·실차·자체 SIL/HIL로 두고, 세계 모델 시뮬은 롱테일 탐색과 데이터 증강에 쓴다. NVIDIA 자신의 평가 기본값이 재구성이라는 점이 근거다 <span class="g g-src">🔍</span>.</li>
+  <li><b>센서 정합을 먼저 본다.</b> 공개 데이터셋·멀티뷰 체크포인트는 7카메라 f-theta 기준이다. 자사 카메라 구성이 다르면 Transfer·Predict 멀티뷰와 Alpamayo 입력 프로파일을 함께 재학습해야 한다 <span class="g g-warn">⚠️</span>.</li>
+  <li><b>정량 효과는 자체 실험으로 확인한다.</b> 합성 데이터의 자율주행 다운스트림 개선 수치는 공개된 것이 없다. 도입 전에 자사 태스크(차선·객체 검출, 정책)에서 A/B 실험을 설계해야 한다 <span class="g g-warn">⚠️</span>.</li>
+  <li><b>데이터 주권·라이선스.</b> Physical AI 데이터셋은 게이트·NVIDIA AV Dataset License, 가드레일 비활성화는 "라이선스 준수는 사용자 책임"이다. 자사 플릿 데이터를 NVIDIA 도구에 넣을 때의 소유권·개인정보 처리는 계약으로 정한다 <span class="g g-src">🔍</span>.</li>
+  <li><b>컴퓨트 예산을 사이클 단위로 잡는다.</b> 한 번의 생성이 아니라 "수집 → 큐레이션 → 합성 → 학습 → 평가"가 반복되는 비용이다. 7뷰 Transfer와 대형 Reason 추론은 H100급 다수를 요구한다 <span class="g g-src">🔍</span>.</li>
+  <li><b>선례가 없다는 점을 계획에 넣는다.</b> Data Factory Blueprint 사용자와 Cosmos 채택사에 Tier-1은 없다. Uber·Foretellix가 걸어간 길(시나리오·검증 툴체인 통합)이 가장 가까운 참고이며, 데이터 엔지니어링·시뮬 인력을 선행 확보해야 한다 <span class="g g-sec">📄</span><span class="g g-warn">⚠️</span>.</li>
+</ol>
+
+<h3 id="s7-4">7.4 결정 항목 정리</h3>
+<div class="tbl"><table>
+<tr><th>결정 항목</th><th>선택지 또는 확인할 것</th><th>이 장의 근거</th></tr>
+<tr><td>세대 기준</td><td>Cosmos 3(OpenMDW) 기준 + 2.5세대 AV 자산 이관 시점</td><td>1.4, 1.5절</td></tr>
+<tr><td>Cosmos의 역할 범위</td><td>학습 데이터 증강·롱테일 탐색·자동 라벨링까지 / 인증 근거는 제외</td><td>3.4, 4.6절</td></tr>
+<tr><td>재구성·센서 물리 경로</td><td>NuRec 서비스·ovrtx 의존 vs 3DGRUT·CARLA 병행</td><td>3.1, 3.3절</td></tr>
+<tr><td>센서 형식</td><td>7카메라 f-theta 참조 형식 채택 여부, 멀티뷰 모델 재학습 범위</td><td>2.2절, 3장 2.2절</td></tr>
+<tr><td>데이터 공정 소유</td><td>Curator·Reason 도입 후 남는 라벨 정책·품질 관리·재수집 운영 조직</td><td>2.1, 2.4절</td></tr>
+<tr><td>효과 검증</td><td>자사 태스크 A/B 실험 설계(합성 데이터 비율, 롱테일 지표)</td><td>2.3절, 패턴 A</td></tr>
+<tr><td>라이선스·데이터 주권</td><td>NOML vs OpenMDW, AV Dataset License, 가드레일 책임, 플릿 데이터 계약</td><td>1.5절, 2.2절</td></tr>
+<tr><td>인프라·인력</td><td>DGX 구축 vs 클라우드, 사이클당 GPU 예산, 데이터·시뮬 엔지니어</td><td>3.3, 4.6절, 부록 A 6·11층</td></tr>
+</table></div>
+<div class="oneline"><b>한 줄 정리.</b> VS의 AI 플랫폼은 Cosmos·Omniverse를 "데이터 공장의 설비"로 빌려 쓰는 자리이고, 차량용 HPC와의 접점은 아직 없다. 원재료(플릿 데이터), 품질 기준(라벨·검증 논거), 공장 운영(재수집 판단)이 우리 몫이며, 세대 고정·Omniverse 의존 분리·센서 정합이 첫 결정이다. 세부는 <a href="07-physical-ai-cosmos.md">md 원본 7.10</a>과 <a href="report-appendix-a-tier1.html">부록 A</a>.</div>
+
+<h2 id="sources">출처</h2>
+<p>본문의 인용은 모두 둥근 칩으로 링크되어 있다. 통합 목록(128건, 유형·날짜·확인 사실·등급)은 <a href="reference/references.md">reference/references.md</a>, 그림 출처는 <a href="reference/images.md">reference/images.md</a>, 이 장의 사실 목록 원본은 <a href="07-physical-ai-cosmos.md">07-physical-ai-cosmos.md</a>에 있다. 가장 많이 기댄 출처는 <a href="https://github.com/NVIDIA/Cosmos">NVIDIA/Cosmos README·LICENSE</a> 🔍, <a href="https://github.com/nvidia-cosmos/cosmos-transfer1">cosmos-transfer1</a> 🔍, <a href="https://github.com/nvidia-cosmos/cosmos-predict2.5">cosmos-predict2.5</a> 🔍, <a href="https://github.com/nvidia-cosmos/cosmos-transfer2.5">cosmos-transfer2.5</a> 🔍, <a href="https://github.com/nvidia-cosmos/cosmos-reason2">cosmos-reason2</a> 🔍, <a href="https://github.com/NVIDIA/cosmos-curator">cosmos-curator</a> 🔍, <a href="https://github.com/nv-tlabs/Cosmos-Drive-Dreams">Cosmos-Drive-Dreams</a> 🔍, <a href="https://github.com/nv-tlabs/3dgrut">3DGRUT</a> 🔍, <a href="https://github.com/isaac-sim/IsaacSim/discussions/133">Isaac Sim 5.0</a> 🔍, <a href="https://raw.githubusercontent.com/carla-simulator/carla/ue4-dev/Docs/nvidia_nurec.md">CARLA NuRec docs</a> 🔍, <a href="https://github.com/NVIDIA-Omniverse/ovrtx">ovrtx</a> 🔍, <a href="https://nvidianews.nvidia.com/news/nvidia-announces-major-release-of-cosmos-world-foundation-models-and-physical-ai-data-tools">GTC 2025 뉴스룸</a> ✅, <a href="https://blogs.nvidia.com/blog/three-computer-cosmos-ces/">three computers 블로그</a> 📄, <a href="https://developer.nvidia.com/omniverse/nurec">NuRec 페이지</a> 📄, <a href="https://www.foretellix.com/data-automation-toolchain-for-ai-powered-av-development/">Foretellix</a> 📄다.</p>
+<p class="src-note">작성일 2026-09-02 · 브랜치 <code>claude/nvidia-fullstack-research-outline-ouyd5t</code> · 함께 읽기: <a href="report-03-autonomous-driving-stack.html">3장 자율주행 스택</a> · <a href="report-appendix-a-tier1.html">부록 A Tier-1이 해야 할 일</a></p>
+</div>
+</main>
+</div>
+<script>
+(function(){
+  var links=[].slice.call(document.querySelectorAll('nav.side a[href^="#"]'));
+  var map={}; links.forEach(function(a){map[a.getAttribute('href').slice(1)]=a;});
+  var targets=Object.keys(map).map(function(id){return document.getElementById(id);}).filter(Boolean);
+  var current=null;
+  function setActive(id){ if(current===id) return; links.forEach(function(a){a.classList.remove('active');}); var a=map[id]; if(a){a.classList.add('active'); var r=a.getBoundingClientRect(), n=document.getElementById('side').getBoundingClientRect(); if(r.top<n.top+40||r.bottom>n.bottom-40){a.scrollIntoView({block:'center'});}} current=id; }
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting) setActive(e.target.id); }); },{rootMargin:'0px 0px -75% 0px',threshold:0});
+    targets.forEach(function(t){io.observe(t);});
+  }
+})();
+</script>
+</body>
+</html>

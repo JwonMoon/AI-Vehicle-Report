@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="720" viewBox="0 0 1100 720" font-family="Helvetica, Arial, 'Noto Sans KR', sans-serif" font-size="13">
+  <rect width="1100" height="720" fill="#ffffff"/>
+  <text x="20" y="28" font-size="18" font-weight="bold" fill="#222">그림 A-1. NVIDIA 제공 범위(회색)와 Tier-1 책임(색상) 레이어 지도 — 양산 ADAS 기준</text>
+  <text x="20" y="48" fill="#666">실선 = 출처로 확인 · 점선 = 업계 관행에서 추정 · 왼쪽 = 차량 내(AGX) · 오른쪽 = 개발·운영(DGX/OVX/클라우드)</text>
+
+  <!-- column headers -->
+  <text x="290" y="80" text-anchor="middle" font-weight="bold" fill="#222">차량 내 스택 (AGX)</text>
+  <text x="820" y="80" text-anchor="middle" font-weight="bold" fill="#222">개발·검증·운영 (DGX / OVX / 클라우드)</text>
+
+  <!-- Left stack: rows from top (L5) to bottom (L0). Each row: NVIDIA part (grey, left) + Tier-1 part (color, right) -->
+  <!-- L5 HMI/app -->
+  <rect x="20" y="95" width="130" height="52" fill="#eeeeee" stroke="#999"/>
+  <text x="85" y="117" text-anchor="middle" fill="#333" font-size="12">NVIDIA 제공</text>
+  <text x="85" y="134" text-anchor="middle" fill="#777" font-size="11">(없음)</text>
+  <rect x="155" y="95" width="405" height="52" fill="#fde2e2" stroke="#c62828"/>
+  <text x="357" y="115" text-anchor="middle" font-weight="bold" fill="#8e0000">L5 기능 계층 · HMI · 차량 OS (A.2.5, A.2.9)</text>
+  <text x="357" y="133" text-anchor="middle" fill="#333">ACC/LKA/AEB/HWP/APA 상태기계 · ODD · MRM · 규제 매핑 · 클러스터/HUD/DMS</text>
+
+  <!-- L4 DRIVE AV -->
+  <rect x="20" y="155" width="300" height="52" fill="#e0e0e0" stroke="#999"/>
+  <text x="170" y="175" text-anchor="middle" font-weight="bold" fill="#333">L3~L4 DRIVE AV (선택 OEM 라이선스)</text>
+  <text x="170" y="193" text-anchor="middle" fill="#333">E2E AI + 클래식 안전 스택 / 또는 Alpamayo 오픈(연구용)</text>
+  <rect x="325" y="155" width="235" height="52" fill="#fde2e2" stroke="#c62828"/>
+  <text x="442" y="175" text-anchor="middle" font-weight="bold" fill="#8e0000">통합·검증·안전 승인</text>
+  <text x="442" y="193" text-anchor="middle" fill="#333">Magna "system integration… safety approval" ✅</text>
+
+  <!-- L3 vehicle signal -->
+  <rect x="20" y="215" width="130" height="52" fill="#eeeeee" stroke="#999"/>
+  <text x="85" y="237" text-anchor="middle" fill="#333" font-size="12">Tegra CAN 등</text>
+  <text x="85" y="254" text-anchor="middle" fill="#777" font-size="11">저수준 I/F만 📄</text>
+  <rect x="155" y="215" width="405" height="52" fill="#fff3cd" stroke="#b8860b"/>
+  <text x="357" y="235" text-anchor="middle" font-weight="bold" fill="#6b4f00">차량 신호·액추에이터 정합 (A.2.4)</text>
+  <text x="357" y="253" text-anchor="middle" fill="#333">CAN-FD/Ethernet · DBC/ARXML · SecOC · UDS/DoIP · 조향/제동 ECU 핸드셰이크 ⚠️</text>
+
+  <!-- L2 DriveWorks -->
+  <rect x="20" y="275" width="300" height="52" fill="#e0e0e0" stroke="#999"/>
+  <text x="170" y="295" text-anchor="middle" font-weight="bold" fill="#333">L2 DriveWorks SAL · CUDA · TensorRT (바이너리)</text>
+  <text x="170" y="313" text-anchor="middle" fill="#333">플러그인 프레임워크 + 샘플 소스 ✅</text>
+  <rect x="325" y="275" width="235" height="52" fill="#fff3cd" stroke="#b8860b"/>
+  <text x="442" y="295" text-anchor="middle" font-weight="bold" fill="#6b4f00">센서 HAL·캘리브레이션 (A.2.3)</text>
+  <text x="442" y="313" text-anchor="middle" fill="#333">자사 센서 .so 플러그인 🔍 · ISP · gPTP · EOL ⚠️</text>
+
+  <!-- L1 DriveOS -->
+  <rect x="20" y="335" width="300" height="52" fill="#e0e0e0" stroke="#999"/>
+  <text x="170" y="355" text-anchor="middle" font-weight="bold" fill="#333">L1 DriveOS 7 SDK (레퍼런스 보드용)</text>
+  <text x="170" y="373" text-anchor="middle" fill="#333">하이퍼바이저 · QNX/Linux · ASIL D(6.0 on Orin) ✅</text>
+  <rect x="325" y="335" width="235" height="52" fill="#fff3cd" stroke="#b8860b"/>
+  <text x="442" y="355" text-anchor="middle" font-weight="bold" fill="#6b4f00">BSP·OS 적응 (A.2.2)</text>
+  <text x="442" y="373" text-anchor="middle" fill="#333">PDK 계약 ✅ · pinmux/DT 📄 · VM 파티션·HSM 키 ⚠️</text>
+
+  <!-- L0 HW -->
+  <rect x="20" y="395" width="300" height="52" fill="#e0e0e0" stroke="#999"/>
+  <text x="170" y="415" text-anchor="middle" font-weight="bold" fill="#333">L0 Thor SoC · 개발 키트(SKU 10/12) · SEooC 평가</text>
+  <text x="170" y="433" text-anchor="middle" fill="#333">양산 ECU는 Tier-1 공급(Continental·Desay·Lenovo·Magna·Quanta) ✅</text>
+  <rect x="325" y="395" width="235" height="52" fill="#fff3cd" stroke="#b8860b"/>
+  <text x="442" y="415" text-anchor="middle" font-weight="bold" fill="#6b4f00">ECU 설계·세이프티 MCU·폴백 (A.2.1)</text>
+  <text x="442" y="433" text-anchor="middle" fill="#333">전원·열·EMC · AURIX SW · 2차 컴퓨터(Continental) ✅</text>
+
+  <!-- Right column: development/ops -->
+  <!-- Data cycle -->
+  <rect x="590" y="95" width="200" height="72" fill="#e0e0e0" stroke="#999"/>
+  <text x="690" y="117" text-anchor="middle" font-weight="bold" fill="#333">NVIDIA: DGX · Cosmos Curator</text>
+  <text x="690" y="135" text-anchor="middle" fill="#333">Reason 라벨러 · Alpamayo teacher</text>
+  <text x="690" y="153" text-anchor="middle" fill="#333">레시피(SFT/RL/양자화) 🔍</text>
+  <rect x="795" y="95" width="285" height="72" fill="#fde2e2" stroke="#c62828"/>
+  <text x="937" y="117" text-anchor="middle" font-weight="bold" fill="#8e0000">AI 모델 사이클 (A.2.6)</text>
+  <text x="937" y="135" text-anchor="middle" fill="#333">플릿 데이터·법적 근거 · 라벨 정책 · 지역 데이터</text>
+  <text x="937" y="153" text-anchor="middle" fill="#333">파인튜닝·증류 · SOTIF/PAS 8800 논거 · 학습 인프라 비용</text>
+
+  <!-- Simulation -->
+  <rect x="590" y="175" width="200" height="72" fill="#e0e0e0" stroke="#999"/>
+  <text x="690" y="197" text-anchor="middle" font-weight="bold" fill="#333">NVIDIA: Omniverse NuRec · Sensor RTX</text>
+  <text x="690" y="215" text-anchor="middle" fill="#333">Cosmos Transfer/Dreams · AlpaSim</text>
+  <text x="690" y="233" text-anchor="middle" fill="#333">(7장)</text>
+  <rect x="795" y="175" width="285" height="72" fill="#fde2e2" stroke="#c62828"/>
+  <text x="937" y="197" text-anchor="middle" font-weight="bold" fill="#8e0000">시뮬·검증 체계 (A.2.7)</text>
+  <text x="937" y="215" text-anchor="middle" fill="#333">시나리오 DB · 자사 센서 모델 · HIL/SIL · 회귀</text>
+  <text x="937" y="233" text-anchor="middle" fill="#333">실차 검증 마일리지 · NCAP 프로토콜 ⚠️</text>
+
+  <!-- Safety/cert -->
+  <rect x="590" y="255" width="200" height="72" fill="#e0e0e0" stroke="#999"/>
+  <text x="690" y="277" text-anchor="middle" font-weight="bold" fill="#333">NVIDIA: SEooC 평가 · 프로세스 인증</text>
+  <text x="690" y="295" text-anchor="middle" fill="#333">Halos AI Systems Inspection Lab</text>
+  <text x="690" y="313" text-anchor="middle" fill="#333">(ISO/IEC 17020 검사 기관) ✅</text>
+  <rect x="795" y="255" width="285" height="72" fill="#fde2e2" stroke="#c62828"/>
+  <text x="937" y="277" text-anchor="middle" font-weight="bold" fill="#8e0000">안전·보안·인증 통합 (A.2.8)</text>
+  <text x="937" y="295" text-anchor="middle" fill="#333">아이템 정의·HARA·안전 케이스 · SOTIF · TARA/CSMS</text>
+  <text x="937" y="313" text-anchor="middle" fill="#333">툴 자격(TCL) ⚠️ · 제3자 인증 · 형식승인</text>
+
+  <!-- Ops -->
+  <rect x="590" y="335" width="200" height="72" fill="#eeeeee" stroke="#999"/>
+  <text x="690" y="357" text-anchor="middle" font-weight="bold" fill="#333">NVIDIA 제공</text>
+  <text x="690" y="375" text-anchor="middle" fill="#777">(OTA·플릿 운영 범위 설명 없음)</text>
+  <text x="690" y="393" text-anchor="middle" fill="#777">NGC/NVONLINE 배포 채널만 ✅</text>
+  <rect x="795" y="335" width="285" height="72" fill="#fff3cd" stroke="#b8860b"/>
+  <text x="937" y="357" text-anchor="middle" font-weight="bold" fill="#6b4f00">양산·운영 (A.2.10)</text>
+  <text x="937" y="375" text-anchor="middle" fill="#333">OTA 캠페인 · 섀도 모드 · 모델 롤백 · 서비스 진단</text>
+  <text x="937" y="393" text-anchor="middle" fill="#333">SBOM·라이선스(OpenMDW/NOML/GPL) · 수출 통제 ⚠️</text>
+
+  <!-- Process/org -->
+  <rect x="590" y="415" width="490" height="32" fill="#fff3cd" stroke="#b8860b"/>
+  <text x="835" y="436" text-anchor="middle" font-weight="bold" fill="#6b4f00">프로세스·조직 (A.2.11): ASPICE · ISO 26262 프로세스 · CUDA/데이터/안전 역량 · OEM 책임 분담 ⚠️</text>
+
+  <!-- legend / matrix -->
+  <rect x="20" y="470" width="1060" height="220" fill="#fafafa" stroke="#ccc"/>
+  <text x="35" y="495" font-weight="bold" fill="#222">차별화 매트릭스 (A.3)</text>
+  <rect x="35" y="508" width="18" height="12" fill="#e0e0e0" stroke="#999"/><text x="60" y="519" fill="#333">NVIDIA 제공도 높음 — 모든 파트너가 같은 것을 쓴다 (SoC·OS·SDK·평가 인프라)</text>
+  <rect x="35" y="530" width="18" height="12" fill="#fff3cd" stroke="#b8860b"/><text x="60" y="541" fill="#333">NVIDIA가 도구·지원만 제공, 구현은 Tier-1 — 차별화 중간 (ECU·BSP·센서 HAL·차량 정합·운영)</text>
+  <rect x="35" y="552" width="18" height="12" fill="#fde2e2" stroke="#c62828"/><text x="60" y="563" fill="#333">NVIDIA 제공 밖 또는 Tier-1 책임 명시 — 차별화 높음 (기능 계층·데이터 사이클·시뮬 검증 체계·안전 케이스·인증)</text>
+  <text x="35" y="595" fill="#333">실례: 컴퓨트 ECU 제조사(Desay SV·Lenovo·Quanta·Foxconn)는 노란 영역을, AD 시스템 Tier-1(Bosch·Magna·Continental)은 빨간 영역을 사업화 — 한 회사가 전 층을 다 하는 공개 사례 없음.</text>
+  <text x="35" y="617" fill="#333">근거: DriveOS PDK 문서 ✅ · DriveWorks 플러그인 문서 ✅ · Orin SEooC 문구 ✅ · Magna 2026-01-05 📄 · Bosch 2025-10-01 ✅ · Continental/Aurora ✅ · ANAB 2026-06-22 ✅ · NVlabs/alpamayo README 🔍</text>
+  <text x="35" y="650" fill="#777" font-size="12">자체 작성 (research/nvidia-fullstack). ⚠️ 표시는 공개 출처 없이 업계 관행에서 유추한 항목.</text>
+</svg>

@@ -1,0 +1,209 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="810" viewBox="0 0 1240 810" font-family="Helvetica, Arial, 'Noto Sans KR', sans-serif" font-size="12">
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#4a7a00"/></marker>
+    <marker id="arrg" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#bbb"/></marker>
+  </defs>
+  <rect id="bg" width="1240" height="810" fill="#ffffff"/>
+  <text x="20" y="28" font-size="18" font-weight="bold" fill="#222">Alpamayo 1 (R1) vs Alpamayo 2 Super — 입력 · 모델 · 출력 (NVIDIA 공식 도식 형식으로 재구성)</text>
+
+  <!-- ================= Panel A: Alpamayo 1 ================= -->
+  <text x="20" y="66" font-size="14.5" font-weight="bold" fill="#222">Alpamayo 1 (R1) · 10B · 2026-01 공개</text>
+  <line x1="20" y1="75" x2="1220" y2="75" stroke="#222" stroke-width="2"/>
+  <text x="125" y="96" text-anchor="middle" fill="#666" font-size="11">센서 · 프롬프트 입력</text>
+  <text x="275" y="96" text-anchor="middle" fill="#666" font-size="11">토큰</text>
+  <text x="915" y="96" text-anchor="middle" fill="#666" font-size="11">토큰</text>
+  <text x="1070" y="96" text-anchor="middle" fill="#666" font-size="11">출력</text>
+
+  <!-- A inputs -->
+  <rect x="40" y="106" width="170" height="40" fill="#ffffff" stroke="#555"/>
+  <text x="125" y="130" text-anchor="middle" fill="#222">자차 운동 이력</text>
+  <rect x="40" y="158" width="170" height="40" fill="#ffffff" stroke="#555"/>
+  <text x="125" y="176" text-anchor="middle" fill="#222">멀티카메라 영상</text>
+  <text x="125" y="191" text-anchor="middle" fill="#666" font-size="10.5">4대 (전방 위주)</text>
+  <rect x="40" y="210" width="170" height="40" fill="#fafafa" stroke="#bbb" stroke-dasharray="4,3"/>
+  <text x="125" y="234" text-anchor="middle" fill="#999">내비게이션 지시 — 미지원</text>
+  <rect x="40" y="262" width="170" height="40" fill="#fafafa" stroke="#bbb" stroke-dasharray="4,3"/>
+  <text x="125" y="286" text-anchor="middle" fill="#999">VQA 질문 — 미지원</text>
+  <rect x="40" y="314" width="170" height="40" fill="#fafafa" stroke="#bbb" stroke-dasharray="4,3"/>
+  <text x="125" y="338" text-anchor="middle" fill="#999">자동 라벨 프롬프트 — 미지원</text>
+
+  <!-- A input tokens -->
+  <g fill="#76b900">
+    <rect x="258" y="110" width="12" height="9"/><rect x="258" y="122" width="12" height="9"/><rect x="258" y="134" width="12" height="9"/>
+    <rect x="276" y="110" width="12" height="9"/><rect x="276" y="122" width="12" height="9"/><rect x="276" y="134" width="12" height="9"/>
+    <rect x="258" y="162" width="12" height="9"/><rect x="258" y="174" width="12" height="9"/><rect x="258" y="186" width="12" height="9"/>
+    <rect x="276" y="162" width="12" height="9"/><rect x="276" y="174" width="12" height="9"/><rect x="276" y="186" width="12" height="9"/>
+  </g>
+  <g fill="#e6e6e6">
+    <rect x="258" y="214" width="12" height="9"/><rect x="258" y="226" width="12" height="9"/><rect x="258" y="238" width="12" height="9"/>
+    <rect x="258" y="266" width="12" height="9"/><rect x="258" y="278" width="12" height="9"/><rect x="258" y="290" width="12" height="9"/>
+    <rect x="258" y="318" width="12" height="9"/><rect x="258" y="330" width="12" height="9"/><rect x="258" y="342" width="12" height="9"/>
+  </g>
+  <line x1="210" y1="126" x2="252" y2="126" stroke="#4a7a00" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="210" y1="178" x2="252" y2="178" stroke="#4a7a00" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="294" y1="126" x2="336" y2="126" stroke="#4a7a00" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="294" y1="178" x2="336" y2="178" stroke="#4a7a00" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- A model box -->
+  <rect x="340" y="100" width="530" height="262" rx="10" fill="#f7fbef" stroke="#76b900" stroke-width="3"/>
+  <text x="605" y="122" text-anchor="middle" font-size="15" font-weight="bold" fill="#222">Alpamayo 1</text>
+  <rect x="356" y="134" width="130" height="44" fill="#76b900"/>
+  <text x="421" y="160" text-anchor="middle" fill="#fff" font-weight="bold">Motion Encoder</text>
+  <rect x="356" y="188" width="130" height="44" fill="#76b900"/>
+  <text x="421" y="214" text-anchor="middle" fill="#fff" font-weight="bold">Video Encoder</text>
+  <rect x="356" y="242" width="130" height="104" fill="#c9dd9a"/>
+  <text x="421" y="286" text-anchor="middle" fill="#3f5a10" font-weight="bold">Language Encoder</text>
+  <text x="421" y="304" text-anchor="middle" fill="#3f5a10" font-size="10.5">고정 프롬프트만</text>
+  <rect x="500" y="134" width="200" height="212" fill="#76b900"/>
+  <text x="600" y="222" text-anchor="middle" fill="#fff" font-size="15" font-weight="bold">Cosmos-Reason</text>
+  <text x="600" y="242" text-anchor="middle" fill="#fff" font-weight="bold">1세대 VLM 백본</text>
+  <text x="600" y="266" text-anchor="middle" fill="#eef7dd" font-size="11">Chain-of-Causation 추론</text>
+  <rect x="714" y="200" width="140" height="80" fill="#76b900"/>
+  <text x="784" y="232" text-anchor="middle" fill="#fff" font-weight="bold">Action Expert</text>
+  <text x="784" y="250" text-anchor="middle" fill="#eef7dd" font-size="10.5">디퓨전 (flow matching)</text>
+  <text x="784" y="266" text-anchor="middle" fill="#eef7dd" font-size="10.5">VLM 설정 복제 부속 모듈</text>
+  <line x1="700" y1="240" x2="712" y2="240" stroke="#4a7a00" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- A output tokens + outputs -->
+  <g fill="#76b900">
+    <rect x="898" y="110" width="12" height="9"/><rect x="898" y="122" width="12" height="9"/><rect x="898" y="134" width="12" height="9"/>
+    <rect x="916" y="110" width="12" height="9"/><rect x="916" y="122" width="12" height="9"/><rect x="916" y="134" width="12" height="9"/>
+    <rect x="898" y="162" width="12" height="9"/><rect x="898" y="174" width="12" height="9"/><rect x="898" y="186" width="12" height="9"/>
+    <rect x="916" y="162" width="12" height="9"/><rect x="916" y="174" width="12" height="9"/><rect x="916" y="186" width="12" height="9"/>
+  </g>
+  <g fill="#e6e6e6">
+    <rect x="898" y="214" width="12" height="9"/><rect x="898" y="226" width="12" height="9"/><rect x="898" y="238" width="12" height="9"/>
+    <rect x="898" y="266" width="12" height="9"/><rect x="898" y="278" width="12" height="9"/><rect x="898" y="290" width="12" height="9"/>
+    <rect x="898" y="318" width="12" height="9"/><rect x="898" y="330" width="12" height="9"/><rect x="898" y="342" width="12" height="9"/>
+  </g>
+  <line x1="870" y1="126" x2="892" y2="126" stroke="#4a7a00" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="870" y1="178" x2="892" y2="178" stroke="#4a7a00" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="934" y1="126" x2="964" y2="126" stroke="#4a7a00" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="934" y1="178" x2="964" y2="178" stroke="#4a7a00" stroke-width="1.5" marker-end="url(#arr)"/>
+  <rect x="970" y="106" width="200" height="40" fill="#ffffff" stroke="#555"/>
+  <text x="1070" y="130" text-anchor="middle" fill="#222">인과 설명 (Causal Reasoning)</text>
+  <rect x="970" y="158" width="200" height="40" fill="#ffffff" stroke="#555"/>
+  <text x="1070" y="176" text-anchor="middle" fill="#222">궤적 (Trajectory)</text>
+  <text x="1070" y="191" text-anchor="middle" fill="#666" font-size="10.5">6.4초 · 64 웨이포인트</text>
+  <rect x="970" y="210" width="200" height="40" fill="#fafafa" stroke="#bbb" stroke-dasharray="4,3"/>
+  <text x="1070" y="234" text-anchor="middle" fill="#999">VQA 답변 — 미지원</text>
+  <rect x="970" y="262" width="200" height="40" fill="#fafafa" stroke="#bbb" stroke-dasharray="4,3"/>
+  <text x="1070" y="286" text-anchor="middle" fill="#999">메타액션 · 2D 그라운딩 — 미지원</text>
+  <rect x="970" y="314" width="200" height="40" fill="#fafafa" stroke="#bbb" stroke-dasharray="4,3"/>
+  <text x="1070" y="338" text-anchor="middle" fill="#999">자동 라벨 — 미지원</text>
+
+  <text x="40" y="386" fill="#555" font-size="11.5">한 가지 일만 한다: 영상·이력 → 인과 설명 + 궤적. SFT 가중치만 공개, RL 후학습·내비 조건 없음. VLM·expert 파라미터 분할 미공개 ⚠️</text>
+
+  <!-- ================= Panel B: Alpamayo 2 Super ================= -->
+  <text x="20" y="436" font-size="14.5" font-weight="bold" fill="#222">Alpamayo 2 Super · 34B = 32B Reasoner + 2B Expert · 2026-08 상용 가중치</text>
+  <line x1="20" y1="445" x2="1220" y2="445" stroke="#222" stroke-width="2"/>
+  <text x="125" y="466" text-anchor="middle" fill="#666" font-size="11">센서 · 프롬프트 입력</text>
+  <text x="275" y="466" text-anchor="middle" fill="#666" font-size="11">토큰</text>
+  <text x="915" y="466" text-anchor="middle" fill="#666" font-size="11">토큰</text>
+  <text x="1070" y="466" text-anchor="middle" fill="#666" font-size="11">출력</text>
+
+  <!-- B inputs -->
+  <rect x="40" y="476" width="170" height="40" fill="#ffffff" stroke="#555"/>
+  <text x="125" y="500" text-anchor="middle" fill="#222">자차 운동 이력</text>
+  <rect x="40" y="528" width="170" height="40" fill="#ffffff" stroke="#555"/>
+  <text x="125" y="546" text-anchor="middle" fill="#222">멀티카메라 영상</text>
+  <text x="125" y="561" text-anchor="middle" fill="#666" font-size="10.5">6대 (360°)</text>
+  <rect x="40" y="580" width="170" height="40" fill="#ffffff" stroke="#555"/>
+  <text x="103" y="604" text-anchor="middle" fill="#222">내비게이션 지시*</text>
+  <rect x="172" y="584" width="34" height="16" rx="8" fill="#e6f0d2"/><text x="189" y="596" text-anchor="middle" fill="#3f6a00" font-size="8.5" font-weight="bold">1.5+</text>
+  <rect x="40" y="632" width="170" height="40" fill="#ffffff" stroke="#555"/>
+  <text x="103" y="656" text-anchor="middle" fill="#222">VQA 질문*</text>
+  <rect x="172" y="636" width="34" height="16" rx="8" fill="#e6f0d2"/><text x="189" y="648" text-anchor="middle" fill="#3f6a00" font-size="8.5" font-weight="bold">1.5+</text>
+  <rect x="40" y="684" width="170" height="40" fill="#ffffff" stroke="#76b900" stroke-width="2"/>
+  <text x="103" y="708" text-anchor="middle" fill="#222">자동 라벨 프롬프트*</text>
+  <rect x="172" y="688" width="34" height="16" rx="8" fill="#76b900"/><text x="189" y="700" text-anchor="middle" fill="#fff" font-size="8.5" font-weight="bold">NEW</text>
+
+  <!-- B input tokens -->
+  <g fill="#76b900">
+    <rect x="258" y="480" width="12" height="9"/><rect x="258" y="492" width="12" height="9"/><rect x="258" y="504" width="12" height="9"/>
+    <rect x="276" y="480" width="12" height="9"/><rect x="276" y="492" width="12" height="9"/><rect x="276" y="504" width="12" height="9"/>
+    <rect x="258" y="532" width="12" height="9"/><rect x="258" y="544" width="12" height="9"/><rect x="258" y="556" width="12" height="9"/>
+    <rect x="276" y="532" width="12" height="9"/><rect x="276" y="544" width="12" height="9"/><rect x="276" y="556" width="12" height="9"/>
+    <rect x="258" y="584" width="12" height="9"/><rect x="258" y="596" width="12" height="9"/><rect x="258" y="608" width="12" height="9"/>
+    <rect x="276" y="584" width="12" height="9"/><rect x="276" y="596" width="12" height="9"/><rect x="276" y="608" width="12" height="9"/>
+    <rect x="258" y="636" width="12" height="9"/><rect x="258" y="648" width="12" height="9"/><rect x="258" y="660" width="12" height="9"/>
+    <rect x="276" y="636" width="12" height="9"/><rect x="276" y="648" width="12" height="9"/><rect x="276" y="660" width="12" height="9"/>
+    <rect x="258" y="688" width="12" height="9"/><rect x="258" y="700" width="12" height="9"/><rect x="258" y="712" width="12" height="9"/>
+    <rect x="276" y="688" width="12" height="9"/><rect x="276" y="700" width="12" height="9"/><rect x="276" y="712" width="12" height="9"/>
+  </g>
+  <line x1="210" y1="496" x2="252" y2="496" stroke="#4a7a00" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="210" y1="548" x2="252" y2="548" stroke="#4a7a00" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="210" y1="600" x2="252" y2="600" stroke="#4a7a00" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="210" y1="652" x2="252" y2="652" stroke="#4a7a00" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="210" y1="704" x2="252" y2="704" stroke="#4a7a00" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="294" y1="496" x2="336" y2="496" stroke="#4a7a00" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="294" y1="548" x2="336" y2="548" stroke="#4a7a00" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="294" y1="600" x2="336" y2="600" stroke="#4a7a00" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="294" y1="652" x2="336" y2="652" stroke="#4a7a00" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="294" y1="704" x2="336" y2="704" stroke="#4a7a00" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- B model box -->
+  <rect x="340" y="470" width="530" height="262" rx="10" fill="#f7fbef" stroke="#76b900" stroke-width="3"/>
+  <text x="605" y="492" text-anchor="middle" font-size="15" font-weight="bold" fill="#222">Alpamayo 2 Super</text>
+  <rect x="356" y="504" width="130" height="44" fill="#76b900"/>
+  <text x="421" y="530" text-anchor="middle" fill="#fff" font-weight="bold">Motion Encoder</text>
+  <rect x="356" y="558" width="130" height="44" fill="#76b900"/>
+  <text x="421" y="584" text-anchor="middle" fill="#fff" font-weight="bold">Video Encoder</text>
+  <rect x="356" y="612" width="130" height="104" fill="#76b900"/>
+  <text x="421" y="656" text-anchor="middle" fill="#fff" font-weight="bold">Language Encoder</text>
+  <text x="421" y="674" text-anchor="middle" fill="#eef7dd" font-size="10.5">내비 · 질문 ·</text>
+  <text x="421" y="690" text-anchor="middle" fill="#eef7dd" font-size="10.5">태스크 프롬프트</text>
+  <rect x="500" y="504" width="200" height="212" fill="#76b900"/>
+  <text x="600" y="586" text-anchor="middle" fill="#fff" font-size="15" font-weight="bold">Cosmos 3</text>
+  <text x="600" y="606" text-anchor="middle" fill="#fff" font-size="15" font-weight="bold">Super Reasoner</text>
+  <text x="600" y="626" text-anchor="middle" fill="#fff" font-weight="bold">32B VLM 백본</text>
+  <text x="600" y="650" text-anchor="middle" fill="#eef7dd" font-size="11">Chain-of-Causation 추론 · 태스크 5종</text>
+  <rect x="714" y="570" width="140" height="80" fill="#76b900"/>
+  <text x="784" y="598" text-anchor="middle" fill="#fff" font-weight="bold">Action Expert</text>
+  <text x="784" y="616" text-anchor="middle" fill="#eef7dd" font-size="10.5">별도 2B 디퓨전 모델</text>
+  <text x="784" y="632" text-anchor="middle" fill="#eef7dd" font-size="10.5">내비 조건 CFG</text>
+  <line x1="700" y1="610" x2="712" y2="610" stroke="#4a7a00" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- B output tokens + outputs -->
+  <g fill="#76b900">
+    <rect x="898" y="480" width="12" height="9"/><rect x="898" y="492" width="12" height="9"/><rect x="898" y="504" width="12" height="9"/>
+    <rect x="916" y="480" width="12" height="9"/><rect x="916" y="492" width="12" height="9"/><rect x="916" y="504" width="12" height="9"/>
+    <rect x="898" y="532" width="12" height="9"/><rect x="898" y="544" width="12" height="9"/><rect x="898" y="556" width="12" height="9"/>
+    <rect x="916" y="532" width="12" height="9"/><rect x="916" y="544" width="12" height="9"/><rect x="916" y="556" width="12" height="9"/>
+    <rect x="898" y="584" width="12" height="9"/><rect x="898" y="596" width="12" height="9"/><rect x="898" y="608" width="12" height="9"/>
+    <rect x="916" y="584" width="12" height="9"/><rect x="916" y="596" width="12" height="9"/><rect x="916" y="608" width="12" height="9"/>
+    <rect x="898" y="636" width="12" height="9"/><rect x="898" y="648" width="12" height="9"/><rect x="898" y="660" width="12" height="9"/>
+    <rect x="916" y="636" width="12" height="9"/><rect x="916" y="648" width="12" height="9"/><rect x="916" y="660" width="12" height="9"/>
+    <rect x="898" y="688" width="12" height="9"/><rect x="898" y="700" width="12" height="9"/><rect x="898" y="712" width="12" height="9"/>
+    <rect x="916" y="688" width="12" height="9"/><rect x="916" y="700" width="12" height="9"/><rect x="916" y="712" width="12" height="9"/>
+  </g>
+  <line x1="870" y1="496" x2="892" y2="496" stroke="#4a7a00" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="870" y1="548" x2="892" y2="548" stroke="#4a7a00" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="870" y1="600" x2="892" y2="600" stroke="#4a7a00" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="870" y1="652" x2="892" y2="652" stroke="#4a7a00" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="870" y1="704" x2="892" y2="704" stroke="#4a7a00" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="934" y1="496" x2="964" y2="496" stroke="#4a7a00" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="934" y1="548" x2="964" y2="548" stroke="#4a7a00" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="934" y1="600" x2="964" y2="600" stroke="#4a7a00" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="934" y1="652" x2="964" y2="652" stroke="#4a7a00" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="934" y1="704" x2="964" y2="704" stroke="#4a7a00" stroke-width="1.5" marker-end="url(#arr)"/>
+  <rect x="970" y="476" width="200" height="40" fill="#ffffff" stroke="#555"/>
+  <text x="1070" y="500" text-anchor="middle" fill="#222">인과 설명 (Causal Reasoning)</text>
+  <rect x="970" y="528" width="200" height="40" fill="#ffffff" stroke="#555"/>
+  <text x="1070" y="546" text-anchor="middle" fill="#222">궤적 (Trajectory)</text>
+  <text x="1070" y="561" text-anchor="middle" fill="#666" font-size="10.5">6.4초 · 64 웨이포인트 (동일)</text>
+  <rect x="970" y="580" width="200" height="40" fill="#ffffff" stroke="#555"/>
+  <text x="1055" y="604" text-anchor="middle" fill="#222">VQA 답변</text>
+  <rect x="1132" y="584" width="34" height="16" rx="8" fill="#e6f0d2"/><text x="1149" y="596" text-anchor="middle" fill="#3f6a00" font-size="8.5" font-weight="bold">1.5+</text>
+  <rect x="970" y="632" width="200" height="40" fill="#ffffff" stroke="#76b900" stroke-width="2"/>
+  <text x="1050" y="650" text-anchor="middle" fill="#222">메타액션 · 2D 그라운딩</text>
+  <text x="1050" y="665" text-anchor="middle" fill="#666" font-size="10.5">종·횡·차선 판단 / 화면 속 위치</text>
+  <rect x="1132" y="636" width="34" height="16" rx="8" fill="#76b900"/><text x="1149" y="648" text-anchor="middle" fill="#fff" font-size="8.5" font-weight="bold">NEW</text>
+  <rect x="970" y="684" width="200" height="40" fill="#ffffff" stroke="#76b900" stroke-width="2"/>
+  <text x="1050" y="702" text-anchor="middle" fill="#222">자동 라벨 (JSON)</text>
+  <text x="1050" y="717" text-anchor="middle" fill="#666" font-size="10.5">인과 사슬 4단계 주석 생성</text>
+  <rect x="1132" y="688" width="34" height="16" rx="8" fill="#76b900"/><text x="1149" y="700" text-anchor="middle" fill="#fff" font-size="8.5" font-weight="bold">NEW</text>
+
+  <text x="40" y="756" fill="#555" font-size="11.5">한 모델이 다섯 가지 일을 한다: 궤적 · 인과 설명 · 메타액션 · VQA · 2D 그라운딩 · 자동 라벨. 두뇌는 32B로, 시야는 360°로, expert는 독립 2B 모델로.</text>
+  <text x="40" y="784" fill="#777" font-size="11">* 선택 입력. 초록 테두리·NEW = 2 Super에서 새로 생김, 1.5+ = Alpamayo 1.5부터. 점선 회색 = 해당 세대 미지원. 근거: NVlabs/alpamayo · alpamayo2 코드·README 🔍, 형식은 NVIDIA 공식 Alpamayo 2 Super 도식을 따름. 자체 작성.</text>
+</svg>

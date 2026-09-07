@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="560" viewBox="0 0 1000 560" font-family="Helvetica, Arial, 'Noto Sans KR', sans-serif" font-size="13">
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#555"/></marker>
+  </defs>
+  <rect width="1000" height="560" fill="#ffffff"/>
+  <text x="20" y="28" font-size="18" font-weight="bold" fill="#222">그림 7-7. AV 데이터 플라이휠에서 Cosmos / Omniverse 구성 요소가 붙는 지점</text>
+  <text x="20" y="48" fill="#666">실선 = 출처로 확인 · 점선 = 추정 · 초록 = Cosmos · 주황 = Omniverse · 흰색 = Tier-1/OEM 몫</text>
+
+  <!-- ring nodes (clockwise) -->
+  <!-- 1 collect -->
+  <rect x="80" y="90" width="200" height="64" rx="8" fill="#ffffff" stroke="#333" stroke-width="1.5"/>
+  <text x="180" y="114" text-anchor="middle" font-weight="bold" fill="#222">1. 플릿 수집</text>
+  <text x="180" y="132" text-anchor="middle" fill="#333">자사 차량·법적 근거·데이터 소유권</text>
+  <text x="180" y="148" text-anchor="middle" fill="#777" font-size="11">(NVIDIA 제공 범위 밖 — 부록 A)</text>
+
+  <!-- 2 curate -->
+  <rect x="400" y="90" width="200" height="64" rx="8" fill="#e6f4ea" stroke="#2e7d32" stroke-width="1.5"/>
+  <text x="500" y="114" text-anchor="middle" font-weight="bold" fill="#1b5e20">2. 큐레이션</text>
+  <text x="500" y="132" text-anchor="middle" fill="#333">Cosmos Curator: 분할·필터·중복제거</text>
+  <text x="500" y="148" text-anchor="middle" fill="#333">Cosmos Dataset Search: 희귀 시나리오 검색</text>
+
+  <!-- 3 label -->
+  <rect x="720" y="90" width="200" height="64" rx="8" fill="#e6f4ea" stroke="#2e7d32" stroke-width="1.5"/>
+  <text x="820" y="114" text-anchor="middle" font-weight="bold" fill="#1b5e20">3. 라벨링</text>
+  <text x="820" y="132" text-anchor="middle" fill="#333">Cosmos Reason 자동 라벨 (CoC·캡션·VQA)</text>
+  <text x="820" y="148" text-anchor="middle" fill="#333">+ 사람 개입 (Alpamayo: 약 10%)</text>
+
+  <!-- 4 reconstruct -->
+  <rect x="720" y="230" width="200" height="64" rx="8" fill="#fff3e0" stroke="#ef6c00" stroke-width="1.5"/>
+  <text x="820" y="254" text-anchor="middle" font-weight="bold" fill="#e65100">4. 재구성</text>
+  <text x="820" y="272" text-anchor="middle" fill="#333">Omniverse NuRec (3DGRUT)</text>
+  <text x="820" y="288" text-anchor="middle" fill="#333">실로그 → 상호작용 3D 장면</text>
+
+  <!-- 5 synth -->
+  <rect x="720" y="370" width="200" height="64" rx="8" fill="#e6f4ea" stroke="#2e7d32" stroke-width="1.5"/>
+  <text x="820" y="394" text-anchor="middle" font-weight="bold" fill="#1b5e20">5. 합성·증폭</text>
+  <text x="820" y="412" text-anchor="middle" fill="#333">Cosmos Transfer (Sim2Real/Real2Real)</text>
+  <text x="820" y="428" text-anchor="middle" fill="#333">Drive-Dreams: 5,843 → 81,802 클립</text>
+
+  <!-- 6 train -->
+  <rect x="400" y="370" width="200" height="64" rx="8" fill="#f5f5f5" stroke="#999" stroke-width="1.5"/>
+  <text x="500" y="394" text-anchor="middle" font-weight="bold" fill="#333">6. 학습 (DGX)</text>
+  <text x="500" y="412" text-anchor="middle" fill="#333">SFT → RL (Cosmos-RL / Cosmos Framework)</text>
+  <text x="500" y="428" text-anchor="middle" fill="#333">Alpamayo 레시피 (3장)</text>
+
+  <!-- 7 eval -->
+  <rect x="80" y="370" width="200" height="64" rx="8" fill="#f5f5f5" stroke="#999" stroke-width="1.5"/>
+  <text x="180" y="394" text-anchor="middle" font-weight="bold" fill="#333">7. 평가</text>
+  <text x="180" y="412" text-anchor="middle" fill="#333">AlpaSim (NuRec 기본 / OmniDreams 옵션)</text>
+  <text x="180" y="428" text-anchor="middle" fill="#333">Cosmos Evaluator (Reason 크리틱)</text>
+
+  <!-- 8 gap -->
+  <rect x="80" y="230" width="200" height="64" rx="8" fill="#ffffff" stroke="#333" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <text x="180" y="254" text-anchor="middle" font-weight="bold" fill="#222">8. 데이터 갭 식별 → 재수집</text>
+  <text x="180" y="272" text-anchor="middle" fill="#333">Drive-Dreams 티저의 "Evaluate for Data Gap"</text>
+  <text x="180" y="288" text-anchor="middle" fill="#777" font-size="11">(실제 갭 → 수집 지시는 Tier-1/OEM 운영)</text>
+
+  <!-- arrows ring -->
+  <line x1="280" y1="122" x2="400" y2="122" stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="600" y1="122" x2="720" y2="122" stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="820" y1="154" x2="820" y2="230" stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="820" y1="294" x2="820" y2="370" stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="720" y1="402" x2="600" y2="402" stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="400" y1="402" x2="280" y2="402" stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="180" y1="370" x2="180" y2="294" stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="180" y1="230" x2="180" y2="154" stroke="#555" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#arr)"/>
+
+  <!-- cross links -->
+  <line x1="720" y1="130" x2="600" y2="380" stroke="#2e7d32" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+  <text x="600" y="262" fill="#2e7d32" font-size="11">라벨된 실데이터 → 직접 학습</text>
+  <line x1="720" y1="262" x2="280" y2="390" stroke="#ef6c00" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+  <text x="430" y="330" fill="#e65100" font-size="11">NuRec 장면 → 폐루프 평가 렌더</text>
+
+  <!-- center note -->
+  <rect x="330" y="200" width="340" height="110" fill="#fafafa" stroke="#ccc"/>
+  <text x="500" y="222" text-anchor="middle" font-weight="bold" fill="#222">3-computer 배치</text>
+  <text x="500" y="242" text-anchor="middle" fill="#333">2·3·6·7 = DGX (학습·라벨·평가 연산)</text>
+  <text x="500" y="260" text-anchor="middle" fill="#333">4·5 = OVX (Omniverse + Cosmos 시뮬)</text>
+  <text x="500" y="278" text-anchor="middle" fill="#333">1·8 = 차량·운영 (AGX + 플릿)</text>
+  <text x="500" y="298" text-anchor="middle" fill="#777" font-size="11">배치는 NVIDIA 3-computer 설명에서 추정</text>
+
+  <text x="20" y="480" fill="#333">근거: Cosmos Curator docs 🔍 · Cosmos Cookbook 🔍 · Drive-Dreams README·티저 🔍 · AlpaSim README 🔍 · Data Factory Blueprint 보도자료 📄 · NVIDIA "three computers" 블로그 📄</text>
+  <text x="20" y="500" fill="#333">NVIDIA가 제공하지 않는 것(흰 상자): 플릿 수집 체계·법적 근거·갭 기반 재수집 운영. 상세는 부록 A.2.6.</text>
+  <text x="20" y="540" fill="#777" font-size="12">자체 작성 (research/nvidia-fullstack).</text>
+</svg>

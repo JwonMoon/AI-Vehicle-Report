@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="690" viewBox="0 0 1240 690" font-family="Helvetica, Arial, 'Noto Sans KR', sans-serif" font-size="12.5">
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#555"/></marker>
+  </defs>
+  <rect id="bg" width="1240" height="690" fill="#ffffff"/>
+  <text x="20" y="28" font-size="18" font-weight="bold" fill="#222">Cosmos와 Omniverse의 위치와 역할 — 3-computer 속 자리 (2026-09 기준)</text>
+
+  <!-- column headings (text + rule) -->
+  <text x="20" y="88" font-size="14.5" font-weight="bold" fill="#222">DGX — 학습 (데이터센터)</text>
+  <line x1="20" y1="97" x2="370" y2="97" stroke="#222" stroke-width="2"/>
+  <text x="390" y="88" font-size="14.5" font-weight="bold" fill="#222">OVX — Omniverse + Cosmos 시뮬레이션</text>
+  <line x1="390" y1="97" x2="820" y2="97" stroke="#222" stroke-width="2"/>
+  <text x="840" y="88" font-size="14.5" font-weight="bold" fill="#222">DRIVE AGX · Jetson — 차량 · 로봇</text>
+  <line x1="840" y1="97" x2="1220" y2="97" stroke="#222" stroke-width="2"/>
+
+  <!-- ===== DGX column ===== -->
+  <rect x="30" y="125" width="330" height="70" fill="#e6f4ea" stroke="#2e7d32"/>
+  <text x="195" y="148" text-anchor="middle" font-weight="bold" fill="#1b5e20">Cosmos Reason 1 → 2 → Cosmos 3 Reasoner</text>
+  <text x="195" y="166" text-anchor="middle" fill="#333">영상 + 텍스트 → 물리 상식 추론 (VLM)</text>
+  <text x="195" y="184" text-anchor="middle" fill="#333">자동 라벨러 · 크리틱 · 주행 모델 백본</text>
+
+  <rect x="30" y="227" width="330" height="60" fill="#e6f4ea" stroke="#2e7d32"/>
+  <text x="195" y="250" text-anchor="middle" font-weight="bold" fill="#1b5e20">Cosmos Curator</text>
+  <text x="195" y="270" text-anchor="middle" fill="#333">영상 → 분할 · 필터 · 중복 제거 · 캡셔닝 → 학습 데이터</text>
+
+  <rect x="30" y="319" width="330" height="60" fill="#e6f4ea" stroke="#2e7d32"/>
+  <text x="195" y="342" text-anchor="middle" font-weight="bold" fill="#1b5e20">Cosmos-RL · Cosmos Framework</text>
+  <text x="195" y="362" text-anchor="middle" fill="#333">SFT · 강화학습 후학습 (Alpamayo 레시피가 사용)</text>
+
+  <rect x="30" y="411" width="330" height="60" fill="#f5f5f5" stroke="#999"/>
+  <text x="195" y="434" text-anchor="middle" font-weight="bold" fill="#333">Physical AI AV 데이터셋</text>
+  <text x="195" y="454" text-anchor="middle" fill="#333">1,727 h · 7카메라 · LiDAR · 레이더 (게이트 공개)</text>
+
+  <!-- ===== OVX column ===== -->
+  <rect x="400" y="125" width="410" height="76" fill="#fff3e0" stroke="#ef6c00"/>
+  <text x="605" y="146" text-anchor="middle" font-weight="bold" fill="#e65100">Omniverse — 물리 기반 시뮬레이션 (정밀 도면)</text>
+  <text x="605" y="164" text-anchor="middle" fill="#333">Sensor RTX: 카메라 · 레이더 · 라이다를 광선 추적으로 렌더</text>
+  <text x="605" y="180" text-anchor="middle" fill="#333">NuRec: 실주행 로그 → 3D 장면 재구성 (새 시점 · 궤적)</text>
+  <text x="605" y="196" text-anchor="middle" fill="#333">깊이 · 세그멘테이션 같은 정답 라벨을 함께 출력</text>
+
+  <rect x="400" y="233" width="200" height="80" fill="#e6f4ea" stroke="#2e7d32"/>
+  <text x="500" y="254" text-anchor="middle" font-weight="bold" fill="#1b5e20">Cosmos Transfer</text>
+  <text x="500" y="273" text-anchor="middle" fill="#333" font-size="11.5">도면(깊이·세그·HD맵) → 영상</text>
+  <text x="500" y="289" text-anchor="middle" fill="#333" font-size="11.5">날씨 · 조명 · 지역을 변주</text>
+  <text x="500" y="305" text-anchor="middle" fill="#333" font-size="11.5">Sim2Real · Real2Real 증강</text>
+
+  <rect x="610" y="233" width="200" height="80" fill="#e6f4ea" stroke="#2e7d32"/>
+  <text x="710" y="254" text-anchor="middle" font-weight="bold" fill="#1b5e20">Cosmos Predict</text>
+  <text x="710" y="273" text-anchor="middle" fill="#333" font-size="11.5">텍스트 · 영상(+행동) → 미래 영상</text>
+  <text x="710" y="289" text-anchor="middle" fill="#333" font-size="11.5">"다음에 세상이 어떻게 변하나"</text>
+  <text x="710" y="305" text-anchor="middle" fill="#333" font-size="11.5">AV 7카메라 멀티뷰</text>
+
+  <rect x="400" y="345" width="410" height="56" fill="#c8e6c9" stroke="#2e7d32" stroke-width="2"/>
+  <text x="605" y="367" text-anchor="middle" font-weight="bold" fill="#1b5e20">Cosmos 3 (2026-05-31): Reasoner + Generator 통합 옴니모델</text>
+  <text x="605" y="387" text-anchor="middle" fill="#333">Super 64B · Nano 16B · Edge 4B · OpenMDW-1.1</text>
+
+  <rect x="400" y="433" width="410" height="56" fill="#f5f5f5" stroke="#999"/>
+  <text x="605" y="455" text-anchor="middle" font-weight="bold" fill="#333">AlpaSim · AlpaGym — 폐루프 평가 · 강화학습</text>
+  <text x="605" y="475" text-anchor="middle" fill="#333">렌더러: NuRec(Omniverse) 기본 / OmniDreams(비디오 모델) 옵션</text>
+
+  <!-- ===== AGX column ===== -->
+  <rect x="850" y="125" width="360" height="70" fill="#f5f5f5" stroke="#999"/>
+  <text x="1030" y="148" text-anchor="middle" font-weight="bold" fill="#333">Alpamayo → DRIVE AV</text>
+  <text x="1030" y="166" text-anchor="middle" fill="#333">Cosmos Reason 백본 + action expert</text>
+  <text x="1030" y="184" text-anchor="middle" fill="#333">증류된 student 모델이 차량에서 실행</text>
+
+  <rect x="850" y="237" width="360" height="56" fill="#e6f4ea" stroke="#2e7d32" stroke-dasharray="6,4"/>
+  <text x="1030" y="259" text-anchor="middle" font-weight="bold" fill="#1b5e20">Cosmos 3 Edge 4B</text>
+  <text x="1030" y="279" text-anchor="middle" fill="#333">Jetson AGX Orin · Thor 대상 (차량 적용 미확인)</text>
+
+  <!-- ===== flows ===== -->
+  <!-- Reason → Curator -->
+  <line x1="195" y1="195" x2="195" y2="227" stroke="#555" marker-end="url(#arr)"/>
+  <text x="203" y="215" fill="#555" font-size="10.5">캡셔닝 · 자동 라벨에 사용</text>
+  <!-- Curator → RL/Framework -->
+  <line x1="195" y1="287" x2="195" y2="319" stroke="#555" marker-end="url(#arr)"/>
+  <text x="203" y="307" fill="#555" font-size="10.5">정제된 학습 데이터</text>
+  <!-- Dataset → RL/Framework -->
+  <line x1="195" y1="411" x2="195" y2="379" stroke="#555" marker-end="url(#arr)"/>
+  <text x="203" y="399" fill="#555" font-size="10.5">공개 학습 · 평가 데이터</text>
+  <!-- Omniverse → Transfer -->
+  <line x1="500" y1="201" x2="500" y2="233" stroke="#555" marker-end="url(#arr)"/>
+  <text x="508" y="221" fill="#555" font-size="10.5">깊이 · 세그 · HD맵 렌더를 조건 입력으로 (도면 위에 채색)</text>
+  <!-- Transfer / Predict → Cosmos 3 -->
+  <line x1="500" y1="313" x2="500" y2="345" stroke="#555" marker-end="url(#arr)"/>
+  <line x1="710" y1="313" x2="710" y2="345" stroke="#555" marker-end="url(#arr)"/>
+  <text x="605" y="333" text-anchor="middle" fill="#555" font-size="10.5">2026-05 Cosmos 3로 통합</text>
+  <!-- Reason ⇢ Alpamayo (backbone), routed above the OVX blocks -->
+  <polyline points="360,140 380,140 380,113 830,113 830,160 850,160" fill="none" stroke="#555" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#arr)"/>
+  <text x="400" y="109" fill="#555" font-size="10.5">Cosmos Reason이 Alpamayo의 백본이 된다 (점선 = 이 보고서 밖, 3장)</text>
+  <!-- Cosmos 3 ⇢ Edge -->
+  <polyline points="810,373 830,373 830,265 850,265" fill="none" stroke="#555" stroke-dasharray="6,4" marker-end="url(#arr)"/>
+  <text x="850" y="312" fill="#555" font-size="10.5">Cosmos 3 → Edge 4B 배포 경로 (점선 = 차량 적용 미확인)</text>
+
+  <!-- maturity strip -->
+  <rect x="20" y="515" width="1200" height="150" fill="#fafafa" stroke="#ccc"/>
+  <text x="35" y="540" font-weight="bold" fill="#222">현재 위치(성숙도) — ① 연구 → ② 오픈 공개 → ③ 파트너 시범 → ④ 1개 양산차 → ⑤ 다수 양산</text>
+  <text x="35" y="563" fill="#333" font-size="12">• Cosmos Predict · Transfer · Reason: ② 오픈 가중치(2.5세대 2025-10~12) → Cosmos 3(2026-05-31)로 통합, 이전 저장소는 유지보수 모드</text>
+  <text x="35" y="583" fill="#333" font-size="12">• Transfer 실사용: ③ Foretellix · CARLA 0.9.16 · Oxa · Voxel51 통합 ✅ · Uber "Cosmos 기반 공동 데이터 팩토리" ✅</text>
+  <text x="35" y="603" fill="#333" font-size="12">• Reason 실사용: ③ Alpamayo 1 · 1.5 · 2 Super 백본 (NVIDIA 내부 파이프라인) 🔍</text>
+  <text x="35" y="623" fill="#333" font-size="12">• Omniverse NuRec: ③ Isaac Sim 5.0 · CARLA · AlpaSim 통합, 3DGRUT 오픈소스 · Sensor RTX(ovrtx): 프리릴리스 · 독점 라이선스</text>
+  <text x="35" y="643" fill="#333" font-size="12">• 양산차 인증 근거로의 사용: 사례 없음 ⚠️ (NVIDIA 자신도 평가 기본값은 생성이 아닌 재구성)</text>
+  <text x="35" y="660" fill="#777" font-size="11">근거: 7장 본문 각 절의 인라인 인용. 초록 = Cosmos, 주황 = Omniverse (이 보고서 범위), 회색 = 참조만. 자체 작성.</text>
+</svg>
