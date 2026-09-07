@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 470" width="980" height="470" font-family="'IBM Plex Sans KR','Helvetica Neue',Arial,sans-serif">
+  <rect width="980" height="470" rx="14" fill="#f7f8fa"/>
+  <text x="28" y="40" font-size="19" font-weight="700" fill="#14213d">Autoware 파이프라인 안에서 Alpamayo 노드의 실제 위치</text>
+  <text x="28" y="62" font-size="12.5" fill="#5a6478">핵심: 제어 루프에 끼어들지 않는다. 별도 네임스페이스로만 발행하는 병렬 관찰자다.</text>
+
+  <defs>
+    <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#14213d"/>
+    </marker>
+    <marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#c1462f"/>
+    </marker>
+  </defs>
+
+  <!-- main pipeline -->
+  <rect x="28" y="96" width="924" height="118" rx="11" fill="#ffffff" stroke="#14213d" stroke-width="1.8"/>
+  <text x="46" y="120" font-size="13.5" font-weight="700" fill="#14213d">기존 Autoware 주행 파이프라인 (그대로 유지)</text>
+
+  <g font-size="12" text-anchor="middle">
+    <rect x="48" y="134" width="150" height="58" rx="8" fill="#e8f0fe" stroke="#3b6fd4"/>
+    <text x="123" y="158" font-weight="600" fill="#1b3b7a">Sensing</text>
+    <text x="123" y="176" font-size="10.5" fill="#5a6f9c">카메라 · LiDAR</text>
+
+    <rect x="226" y="134" width="150" height="58" rx="8" fill="#e8f0fe" stroke="#3b6fd4"/>
+    <text x="301" y="158" font-weight="600" fill="#1b3b7a">Perception</text>
+    <text x="301" y="176" font-size="10.5" fill="#5a6f9c">검출 · 추적 · 예측</text>
+
+    <rect x="404" y="134" width="150" height="58" rx="8" fill="#e8f0fe" stroke="#3b6fd4"/>
+    <text x="479" y="158" font-weight="600" fill="#1b3b7a">Planning</text>
+    <text x="479" y="176" font-size="10.5" fill="#5a6f9c">규칙 기반 모듈형</text>
+
+    <rect x="582" y="134" width="180" height="58" rx="8" fill="#dbe7fb" stroke="#3b6fd4" stroke-width="1.6"/>
+    <text x="672" y="155" font-weight="600" fill="#1b3b7a">/planning/scenario_</text>
+    <text x="672" y="171" font-weight="600" fill="#1b3b7a">planning/trajectory</text>
+    <text x="672" y="186" font-size="10" fill="#5a6f9c">약 10초 · 0.1초 해상도</text>
+
+    <rect x="790" y="134" width="142" height="58" rx="8" fill="#e8f0fe" stroke="#3b6fd4"/>
+    <text x="861" y="158" font-weight="600" fill="#1b3b7a">Control</text>
+    <text x="861" y="176" font-size="10.5" fill="#5a6f9c">trajectory_follower</text>
+  </g>
+  <g stroke="#14213d" stroke-width="1.6" fill="none" marker-end="url(#a2)">
+    <path d="M198 163 L222 163"/>
+    <path d="M376 163 L400 163"/>
+    <path d="M554 163 L578 163"/>
+    <path d="M762 163 L786 163"/>
+  </g>
+
+  <!-- taps -->
+  <g stroke="#5f8a52" stroke-width="1.5" fill="none" stroke-dasharray="5 4" marker-end="url(#a2)">
+    <path d="M123 192 L123 262 L300 262"/>
+    <path d="M479 192 L479 240 L392 240 L392 262"/>
+  </g>
+  <text x="140" y="255" font-size="10.5" fill="#5f8a52">카메라 CompressedImage · odometry</text>
+  <text x="400" y="234" font-size="10.5" fill="#5f8a52">mission_planning/route</text>
+
+  <!-- alpamayo node -->
+  <rect x="286" y="262" width="408" height="98" rx="11" fill="#eae6f7" stroke="#6a4fbf" stroke-width="2"/>
+  <text x="490" y="290" font-size="14.5" font-weight="700" fill="#3c2a80" text-anchor="middle">alpamayo_node — 추론·설명 레이어</text>
+  <text x="490" y="312" font-size="11.5" fill="#54419b" text-anchor="middle">Alpamayo 1.5 (10B VLA) · 1회 추론 0.600초 ≈ 1.67 FPS</text>
+  <text x="490" y="332" font-size="11.5" fill="#54419b" text-anchor="middle">읽기 전용으로 토픽을 구독하고, 자기 네임스페이스로만 발행</text>
+  <text x="490" y="350" font-size="11" fill="#7a68b8" text-anchor="middle">패키지 관리자: shintaro.sakoda@tier4.jp · yukihiro.saito@tier4.jp</text>
+
+  <!-- outputs -->
+  <rect x="286" y="392" width="180" height="46" rx="8" fill="#ffffff" stroke="#6a4fbf"/>
+  <text x="376" y="412" font-size="11.5" font-weight="600" fill="#3c2a80" text-anchor="middle">/alpamayo/predicted_trajectory</text>
+  <text x="376" y="428" font-size="10" fill="#7a68b8" text-anchor="middle">64점 · 6.4초 · RViz 시각화용</text>
+
+  <rect x="482" y="392" width="212" height="46" rx="8" fill="#ffffff" stroke="#6a4fbf"/>
+  <text x="588" y="412" font-size="11.5" font-weight="600" fill="#3c2a80" text-anchor="middle">/alpamayo/reasoning</text>
+  <text x="588" y="428" font-size="10" fill="#7a68b8" text-anchor="middle">"Keep lane … no critical agent is present."</text>
+
+  <g stroke="#6a4fbf" stroke-width="1.5" fill="none" marker-end="url(#a2)">
+    <path d="M376 360 L376 388"/>
+    <path d="M588 360 L588 388"/>
+  </g>
+
+  <!-- the missing link -->
+  <path d="M694 311 L800 311 L800 200" stroke="#c1462f" stroke-width="2" fill="none" stroke-dasharray="7 5" marker-end="url(#a3)"/>
+  <text x="812" y="270" font-size="12.5" font-weight="700" fill="#c1462f">존재하지 않는 연결</text>
+  <text x="812" y="290" font-size="11" fill="#c1462f">저장소 어디에도</text>
+  <text x="812" y="306" font-size="11" fill="#c1462f">scenario_planning 발행/리맵 없음</text>
+  <text x="812" y="322" font-size="11" fill="#c1462f">→ 차량은 여전히 기존 플래너로 주행</text>
+
+  <text x="28" y="462" font-size="11" fill="#8b95ab">근거: alpamayo_node.py 파라미터 기본값, launch/alpamayo.launch.py, 저장소 전체 grep "scenario_planning" 결과 0건 (커밋 65eda63) · Autoware 플래닝 인터페이스는 공식 문서 기준</text>
+</svg>

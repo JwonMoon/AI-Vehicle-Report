@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TIER IV × NVIDIA Alpamayo — Autoware에 추론형 VLA를 얹다</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f6f9; --panel:#ffffff; --ink:#161c28; --ink2:#3e4a60; --muted:#77839a;
+  --line:#e0e5ee; --line2:#eef1f6;
+  --accent:#2f5da8; --accent-soft:#e8f0fe; --accent-ink:#1b3b7a;
+  --warn:#c1462f; --warn-soft:#fdeceb;
+  --good:#2f7d6b; --good-soft:#e6f2ef;
+  --purple:#6a4fbf; --purple-soft:#eae6f7;
+  --amber:#c98a1e; --amber-soft:#fdf3e3;
+  --code-bg:#f0f2f6;
+  --shadow:0 1px 2px rgba(20,33,61,.05), 0 6px 22px rgba(20,33,61,.06);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#11151d; --panel:#181d27; --ink:#e8ecf4; --ink2:#b8c2d4; --muted:#7f8ba1;
+    --line:#28303e; --line2:#212836;
+    --accent:#6f9be8; --accent-soft:#1b2739; --accent-ink:#a9c6f5;
+    --warn:#f08a76; --warn-soft:#2e1e1c;
+    --good:#5cbfa8; --good-soft:#16292a;
+    --purple:#a58ef0; --purple-soft:#221d33;
+    --amber:#e0ac52; --amber-soft:#2b2318;
+    --code-bg:#1f2632;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 6px 22px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11151d; --panel:#181d27; --ink:#e8ecf4; --ink2:#b8c2d4; --muted:#7f8ba1;
+  --line:#28303e; --line2:#212836;
+  --accent:#6f9be8; --accent-soft:#1b2739; --accent-ink:#a9c6f5;
+  --warn:#f08a76; --warn-soft:#2e1e1c;
+  --good:#5cbfa8; --good-soft:#16292a;
+  --purple:#a58ef0; --purple-soft:#221d33;
+  --amber:#e0ac52; --amber-soft:#2b2318;
+  --code-bg:#1f2632;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 6px 22px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth; scroll-padding-top:24px}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:'IBM Plex Sans KR',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',sans-serif;
+  font-size:16px; line-height:1.75; -webkit-font-smoothing:antialiased;
+}
+code,kbd{font-family:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.86em;
+  background:var(--code-bg); padding:.12em .38em; border-radius:4px; word-break:break-word}
+pre{background:var(--code-bg); border:1px solid var(--line); border-radius:10px; padding:16px 18px;
+  overflow-x:auto; font-family:'IBM Plex Mono',monospace; font-size:13px; line-height:1.65}
+pre code{background:none; padding:0}
+a{color:var(--accent); text-underline-offset:3px; text-decoration-color:color-mix(in srgb,var(--accent) 40%,transparent)}
+a:hover{text-decoration-color:var(--accent)}
+
+/* layout */
+.shell{display:block; max-width:1500px; margin:0 auto; padding:0 24px 96px}
+.main{max-width:900px; margin:0 auto}
+@media (min-width:1240px){
+  .shell{display:grid; grid-template-columns:264px minmax(0,1fr); gap:52px; padding-left:32px}
+  .main{margin:0}
+}
+
+/* toc */
+.toc{display:none}
+@media (min-width:1240px){
+  .toc{display:block; position:sticky; top:0; align-self:start; max-height:100vh; overflow-y:auto;
+    padding:44px 8px 60px; font-size:13.5px}
+  .toc-title{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted);
+    font-weight:600; margin:0 0 14px 10px}
+  .toc a{display:flex; gap:10px; align-items:baseline; padding:5px 10px; border-radius:7px;
+    color:var(--ink2); text-decoration:none; line-height:1.45; border-left:2px solid transparent}
+  .toc a:hover{background:var(--line2); color:var(--ink)}
+  .toc a.active{color:var(--accent-ink); background:var(--accent-soft); border-left-color:var(--accent); font-weight:600}
+  .toc .n{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted); min-width:16px}
+  .toc a.active .n{color:var(--accent)}
+  .toc-group{margin:18px 0 6px 10px; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--muted); font-weight:600}
+}
+
+/* hero */
+.hero{padding:56px 0 34px; border-bottom:1px solid var(--line)}
+.kicker{font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--accent);
+  font-weight:600; margin:0 0 14px}
+h1{font-size:clamp(28px,4.2vw,42px); line-height:1.22; margin:0 0 16px; letter-spacing:-.02em; font-weight:700}
+.sub{font-size:17px; color:var(--ink2); margin:0 0 26px; max-width:64ch; line-height:1.65}
+.meta{display:flex; flex-wrap:wrap; gap:8px 10px; font-size:12.5px; color:var(--muted)}
+.meta span{background:var(--panel); border:1px solid var(--line); border-radius:999px; padding:4px 12px}
+
+/* stat strip */
+.stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; margin:32px 0 8px}
+.stat{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px 18px; box-shadow:var(--shadow)}
+.stat b{display:block; font-size:26px; line-height:1.15; letter-spacing:-.02em; color:var(--accent-ink); font-weight:700}
+.stat small{display:block; margin-top:6px; font-size:12px; color:var(--muted); line-height:1.5}
+
+/* sections */
+section{padding-top:52px}
+h2{font-size:25px; line-height:1.3; margin:0 0 6px; letter-spacing:-.015em; font-weight:700;
+  padding-left:14px; border-left:4px solid var(--accent)}
+.h2sub{margin:0 0 22px; padding-left:18px; color:var(--muted); font-size:14px}
+h3{font-size:17.5px; margin:32px 0 10px; font-weight:600; color:var(--ink)}
+p{margin:0 0 16px; color:var(--ink2)}
+p strong,li strong,td strong{color:var(--ink); font-weight:600}
+ul,ol{margin:0 0 16px; padding-left:22px; color:var(--ink2)}
+li{margin:6px 0}
+
+/* callouts */
+.card{background:var(--panel); border:1px solid var(--line); border-radius:14px;
+  padding:22px 24px; margin:22px 0; box-shadow:var(--shadow)}
+.callout{border-radius:12px; padding:18px 22px; margin:22px 0; border:1px solid; font-size:15px}
+.callout p:last-child{margin-bottom:0}
+.callout .lbl{display:block; font-size:11.5px; letter-spacing:.12em; text-transform:uppercase;
+  font-weight:700; margin-bottom:8px}
+.c-warn{background:var(--warn-soft); border-color:color-mix(in srgb,var(--warn) 38%,transparent)}
+.c-warn .lbl{color:var(--warn)}
+.c-good{background:var(--good-soft); border-color:color-mix(in srgb,var(--good) 38%,transparent)}
+.c-good .lbl{color:var(--good)}
+.c-key{background:var(--accent-soft); border-color:color-mix(in srgb,var(--accent) 38%,transparent)}
+.c-key .lbl{color:var(--accent)}
+
+/* verdict list */
+.verdicts{counter-reset:v; list-style:none; padding:0; margin:24px 0}
+.verdicts li{counter-increment:v; position:relative; padding:16px 20px 16px 60px; margin:12px 0;
+  background:var(--panel); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow); color:var(--ink2)}
+.verdicts li::before{content:counter(v); position:absolute; left:20px; top:16px;
+  width:26px; height:26px; border-radius:50%; background:var(--accent); color:#fff;
+  font-size:13px; font-weight:700; display:grid; place-items:center}
+
+/* tables */
+.tw{overflow-x:auto; margin:20px 0; border:1px solid var(--line); border-radius:12px; background:var(--panel); box-shadow:var(--shadow)}
+table{border-collapse:collapse; width:100%; font-size:14px; min-width:520px}
+th,td{padding:11px 15px; text-align:left; border-bottom:1px solid var(--line2); vertical-align:top; line-height:1.6}
+th{background:var(--line2); font-weight:600; color:var(--ink); font-size:12.5px;
+  letter-spacing:.03em; white-space:nowrap; border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:none}
+td:first-child{color:var(--ink)}
+.num{font-family:'IBM Plex Mono',monospace; font-size:13px; white-space:nowrap}
+tr.hl td{background:var(--accent-soft); font-weight:600}
+
+/* figures */
+figure{margin:28px 0; background:var(--panel); border:1px solid var(--line);
+  border-radius:14px; padding:12px; box-shadow:var(--shadow)}
+figure img{display:block; width:100%; height:auto; border-radius:8px}
+figcaption{margin-top:12px; padding:0 8px 4px; font-size:12.5px; color:var(--muted); line-height:1.6}
+
+/* badges */
+.b{display:inline-block; font-size:11px; font-weight:600; padding:1px 7px; border-radius:5px;
+  white-space:nowrap; vertical-align:middle; font-family:'IBM Plex Mono',monospace}
+.b-code{background:var(--good-soft); color:var(--good); border:1px solid color-mix(in srgb,var(--good) 35%,transparent)}
+.b-src{background:var(--accent-soft); color:var(--accent-ink); border:1px solid color-mix(in srgb,var(--accent) 35%,transparent)}
+.b-un{background:var(--warn-soft); color:var(--warn); border:1px solid color-mix(in srgb,var(--warn) 35%,transparent)}
+.b-3rd{background:var(--amber-soft); color:var(--amber); border:1px solid color-mix(in srgb,var(--amber) 35%,transparent)}
+
+/* timeline */
+.tl{list-style:none; padding:0; margin:22px 0; position:relative}
+.tl::before{content:''; position:absolute; left:96px; top:8px; bottom:8px; width:2px; background:var(--line)}
+.tl li{position:relative; padding:0 0 20px 124px; color:var(--ink2); font-size:14.5px}
+.tl .d{position:absolute; left:0; top:1px; width:84px; text-align:right;
+  font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted)}
+.tl li::before{content:''; position:absolute; left:91px; top:8px; width:12px; height:12px;
+  border-radius:50%; background:var(--panel); border:2px solid var(--accent)}
+.tl li.key::before{background:var(--accent)}
+.tl li.key{color:var(--ink); font-weight:600}
+@media (max-width:640px){
+  .tl::before{left:8px} .tl li{padding:0 0 18px 30px} .tl li::before{left:3px}
+  .tl .d{position:static; display:block; width:auto; text-align:left; margin-bottom:2px}
+}
+
+/* glossary */
+.gl{display:grid; gap:12px; margin:20px 0}
+@media(min-width:720px){.gl{grid-template-columns:1fr 1fr}}
+.gl div{background:var(--panel); border:1px solid var(--line); border-radius:11px; padding:14px 16px}
+.gl b{display:block; color:var(--accent-ink); font-size:14.5px; margin-bottom:4px}
+.gl span{font-size:13.5px; color:var(--ink2); line-height:1.6}
+
+/* refs */
+.refs h3{margin-top:26px; font-size:15px; color:var(--muted); letter-spacing:.06em; text-transform:uppercase}
+.refs ul{list-style:none; padding:0; font-size:14px}
+.refs li{padding:7px 0 7px 18px; border-bottom:1px solid var(--line2); position:relative}
+.refs li::before{content:'▸'; position:absolute; left:0; color:var(--muted); font-size:11px; top:9px}
+.refs li.fail::before{content:'✕'; color:var(--warn)}
+.refs li.fail{color:var(--muted)}
+
+footer{margin-top:64px; padding-top:26px; border-top:1px solid var(--line);
+  font-size:13px; color:var(--muted)}
+.theme-tog{position:fixed; right:18px; bottom:18px; z-index:20; width:40px; height:40px;
+  border-radius:50%; border:1px solid var(--line); background:var(--panel); color:var(--ink2);
+  cursor:pointer; font-size:16px; box-shadow:var(--shadow)}
+</style>
+</head>
+<body>
+
+<button class="theme-tog" id="tt" title="라이트/다크 전환">◐</button>
+
+<div class="shell">
+
+<nav class="toc" id="toc">
+  <p class="toc-title">목차</p>
+  <a href="#s1"><span class="n">01</span><span>한눈 요약</span></a>
+  <a href="#s2"><span class="n">02</span><span>타임라인</span></a>
+  <a href="#s3"><span class="n">03</span><span>등장 요소 정리</span></a>
+  <a href="#s4"><span class="n">04</span><span>Alpamayo 모델의 실체</span></a>
+  <a href="#s5"><span class="n">05</span><span>코드 해부</span></a>
+  <a href="#s6"><span class="n">06</span><span>성능 정직하게 읽기</span></a>
+  <a href="#s7"><span class="n">07</span><span>Cosmos × Co-MLOps</span></a>
+  <a href="#s8"><span class="n">08</span><span>Isuzu L4 버스</span></a>
+  <a href="#s9"><span class="n">09</span><span>한계와 리스크</span></a>
+  <a href="#s10"><span class="n">10</span><span>시사점</span></a>
+  <p class="toc-group">부록</p>
+  <a href="#a1"><span class="n">A</span><span>용어집</span></a>
+  <a href="#a2"><span class="n">B</span><span>재현 절차</span></a>
+  <a href="#a3"><span class="n">C</span><span>미확인·검증 로그</span></a>
+  <a href="#a4"><span class="n">D</span><span>레퍼런스</span></a>
+</nav>
+
+<main class="main">
+
+<header class="hero">
+  <p class="kicker">AI-Vehicle-Research · 심층 리서치</p>
+  <h1>TIER IV × NVIDIA Alpamayo<br>— Autoware에 추론형 VLA를 얹다</h1>
+  <p class="sub">발표는 "통합"이라 말했다. 코드는 다른 말을 한다. 저장소 전량을 읽고 확인한, 이 협력의 실제 모양.</p>
+  <div class="meta">
+    <span>작성 2026-09-07</span>
+    <span>저장소 커밋 <code>65eda63</code> 기준</span>
+    <span>1차 자료 코드 6,125줄 + 공식 발표 5건</span>
+    <span>표기: <span class="b b-code">💻 코드</span> <span class="b b-src">🔍 1차</span> <span class="b b-3rd">📰 매체</span> <span class="b b-un">⚠️ 미확인</span></span>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b>0.600 s</b><small>최적화 후 1회 추론 지연 = 1.67 FPS</small></div>
+    <div class="stat"><b>646줄</b><small>TIER IV가 새로 쓴 ROS 2 노드</small></div>
+    <div class="stat"><b>0건</b><small>저장소 내 <code>scenario_planning</code> 참조 — 플래너 미대체</small></div>
+    <div class="stat"><b>0.671→0.893</b><small>Cosmos 합성 데이터 투입 후 개 검출 IoU</small></div>
+  </div>
+</header>
+
+<div class="callout c-warn" style="margin-top:34px">
+  <span class="lbl">⚠️ 미리 알림 — 이 보고서가 뒤집은 통설 3가지</span>
+  <p><b>1.</b> "TIER IV가 Alpamayo를 Autoware에 통합해 차가 그걸로 주행한다" → <b>아니다.</b> 노드는 자기 네임스페이스로만 발행하고 Autoware 플래너·제어를 대체하지 않는다 (§5.3).</p>
+  <p><b>2.</b> "Alpamayo는 diffusion 모델이다" → 코드상 실체는 <b>Flow Matching(Euler 적분)</b>이다 (§4.2).</p>
+  <p><b>3.</b> "모델 가중치는 이제 상용 가능하다" → Alpamayo 2 Super는 그렇지만, <b>1.5 모델 카드는 2026-09-07 확인 시점에도 여전히 비상용</b>이다 (§9.1).</p>
+</div>
+
+<section id="s1">
+  <h2>01. 한눈 요약 — 판단 3줄</h2>
+  <p class="h2sub">결론부터. 근거는 아래 각 절에서.</p>
+
+  <ol class="verdicts">
+    <li><b>이 협력의 실물은 "모델 통합"이 아니라 "관찰 창구"다.</b> TIER IV가 만든 것은 Autoware의 카메라·오도메트리·경로 토픽을 읽어 궤적과 자연어 추론을 별도 토픽으로 뱉는 ROS 2 노드 한 개다. 주행 제어 경로에는 손대지 않았다.</li>
+    <li><b>막는 것은 성능이다.</b> 최적화를 다 넣어도 1회 추론 0.600초 = 1.67 FPS. Autoware 제어 루프가 요구하는 주기와 두 자릿수 배 차이가 난다. 그래서 "플래너"가 아니라 "설명·감독 레이어"에 머무를 수밖에 없다.</li>
+    <li><b>진짜 자산은 데이터 쪽 절반이다.</b> Alpamayo 노드가 데모 수준인 것과 달리, Cosmos × Co-MLOps 조합은 이미 수치로 증명된 성과를 내고 있다. 이쪽이 TIER IV의 L4 상용화에 실제로 기여하는 축이다.</li>
+  </ol>
+
+  <div class="tw"><table>
+    <thead><tr><th>질문</th><th>답</th><th>근거</th></tr></thead>
+    <tbody>
+      <tr><td>누가 코드를 썼나</td><td>ROS 2 패키지는 TIER IV 엔지니어 2인이 작성</td><td><span class="b b-code">💻</span> <code>package.xml</code> 관리자 <code>@tier4.jp</code> 2인</td></tr>
+      <tr><td>Autoware 본체에 머지됐나</td><td>아니다. Autoware Foundation 조직 아래 <b>별도 포크 저장소</b></td><td><span class="b b-src">🔍</span> Discussion #6747</td></tr>
+      <tr><td>어느 모델을 쓰나</td><td><code>nvidia/Alpamayo-1.5-10B</code> 하드코딩</td><td><span class="b b-code">💻</span> <code>alpamayo_node.py:53</code></td></tr>
+      <tr><td>차를 움직이나</td><td>아니다. <code>/alpamayo/*</code> 네임스페이스로만 발행</td><td><span class="b b-code">💻</span> 저장소 전체 grep 0건</td></tr>
+      <tr><td>프로덕션 가능한가</td><td>저장소가 명시적으로 부정</td><td><span class="b b-src">🔍</span> README 면책</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="s2">
+  <h2>02. 타임라인 — 8개월 만에 벌어진 일</h2>
+  <p class="h2sub">논문 공개에서 ROS 2 통합까지 3개월. 그리고 4월 이후 정지.</p>
+
+  <ul class="tl">
+    <li><span class="d">2025-10-30</span>Alpamayo-R1 논문 arXiv 공개 (NVIDIA, 저자 42인) <span class="b b-src">🔍</span></li>
+    <li><span class="d">2025-10</span>Physical AI AV 데이터셋 v25.10 — 1,700시간 / 25개국 / 306,152클립 / 133 TB <span class="b b-src">🔍</span></li>
+    <li><span class="d">2025-11-18</span>NVlabs 상류 저장소 최초 커밋 <span class="b b-code">💻</span></li>
+    <li class="key"><span class="d">2026-01-23</span>TIER IV가 ROS 2 노드를 올리고 Autoware Foundation 조직에 포크 공개 <span class="b b-code">💻</span> <span class="b b-src">🔍</span></li>
+    <li><span class="d">2026-03-16~19</span>NVIDIA GTC 2026 (산호세)</li>
+    <li class="key"><span class="d">2026-03-18</span>TIER IV·NVIDIA 협력 공식 발표 — Alpamayo → Autoware, Cosmos → Co-MLOps <span class="b b-src">🔍</span></li>
+    <li><span class="d">2026-03-22~25</span>Alpamayo 1.5 대응 코드 수정, Lanelet2 경로 기반 내비 텍스트 구현 <span class="b b-code">💻</span></li>
+    <li><span class="d">2026-03-25</span>Isuzu·TIER IV·NVIDIA L4 버스(Erga 디젤/EV) 발표 <span class="b b-3rd">📰</span></li>
+    <li class="key"><span class="d">2026-04-23</span>GPU 상주 전처리 + TensorRT expert 최적화 머지 — <b>이후 새 기능 커밋 없음</b> <span class="b b-code">💻</span></li>
+    <li><span class="d">2026-05-31</span>Alpamayo 2 Super (34B) GTC Taipei 발표 <span class="b b-src">🔍</span></li>
+    <li><span class="d">2026-08-04~05</span>Alpamayo 2 Super 상용 공개 (OpenMDW-1.1) <span class="b b-src">🔍</span></li>
+    <li><span class="d">2026-08-07</span>TIER IV, Co-MLOps × Cosmos 기술 보고 공개 <span class="b b-src">🔍</span></li>
+  </ul>
+
+  <div class="callout c-key">
+    <span class="lbl">읽는 법</span>
+    <p>개발 활동은 2026년 1월(초기 구현) → 3월(1.5 대응·발표) → 4월(성능 최적화)에 집중되고 그 이후 5개월간 새 기능이 없다. <b>발표는 3월에 정점을 찍었지만 코드는 4월에 멈췄다.</b></p>
+  </div>
+</section>
+
+<section id="s3">
+  <h2>03. 등장 요소 정리 — 무엇이 무엇인지</h2>
+  <p class="h2sub">발표문의 이름들이 서로 다른 계층에 속해 있어 뒤섞이기 쉽다.</p>
+
+  <h3>NVIDIA 쪽</h3>
+  <div class="tw"><table>
+    <thead><tr><th>이름</th><th>계층</th><th>하는 일</th></tr></thead>
+    <tbody>
+      <tr><td><b>Alpamayo</b></td><td>AI 모델 (VLA)</td><td>카메라 영상 → 자연어 추론 + 미래 궤적</td></tr>
+      <tr><td><b>Cosmos</b></td><td>World Foundation Model 플랫폼</td><td>합성 데이터 생성·증강·검색</td></tr>
+      <tr><td><b>DRIVE AGX Thor / Hyperion</b></td><td>차량 탑재 하드웨어</td><td>L4 연산 플랫폼</td></tr>
+      <tr><td><b>Physical AI AV Dataset</b></td><td>데이터셋</td><td>1,700시간 공개 주행 데이터</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>TIER IV 쪽</h3>
+  <div class="tw"><table>
+    <thead><tr><th>이름</th><th>계층</th><th>하는 일</th></tr></thead>
+    <tbody>
+      <tr><td><b>Autoware</b></td><td>오픈소스 AD 스택 (ROS 2)</td><td>인지·계획·제어 모듈형 파이프라인</td></tr>
+      <tr><td><b>Co-MLOps</b></td><td>데이터·MLOps 플랫폼</td><td>2024년 출범, 글로벌 데이터 공유·자동 라벨링</td></tr>
+      <tr><td><b><code>alpamayo-autoware</code></b></td><td>ROS 2 패키지 (포크)</td><td>이번 협력의 코드 산출물</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="card">
+    <p style="margin-bottom:14px">“To advance autonomous driving to the next generation, it is necessary to move toward reasoning-based systems capable of navigating the unpredictability of the real world.”<br>
+    <span style="color:var(--muted); font-size:14px">— Shinpei Kato, TIER IV 창업자·CEO <span class="b b-src">🔍</span></span></p>
+    <p style="margin:0">“By integrating NVIDIA Alpamayo into Autoware and utilizing NVIDIA Cosmos within their Co-MLOps platform, TIER IV is establishing a powerful blueprint for the ecosystem.”<br>
+    <span style="color:var(--muted); font-size:14px">— Marco Pavone, NVIDIA Autonomous Vehicle Research 디렉터 <span class="b b-src">🔍</span></span></p>
+  </div>
+</section>
+
+<section id="s4">
+  <h2>04. Alpamayo 모델 — 가져다 쓴 물건의 실체</h2>
+  <p class="h2sub">보도자료는 "1"이라 하고 코드는 "1.5"를 부른다. 둘 다 맞다.</p>
+
+  <h3>4.1 세대 비교</h3>
+  <div class="tw"><table>
+    <thead><tr><th></th><th>Alpamayo 1 Nano</th><th>Alpamayo 1.5 <span style="font-weight:400">(통합 대상)</span></th><th>Alpamayo 2 Super</th></tr></thead>
+    <tbody>
+      <tr><td>파라미터</td><td class="num">10B</td><td class="num">약 10.5B</td><td class="num">34B</td></tr>
+      <tr><td>구성</td><td>—</td><td>Cosmos-Reason2 백본 8.2B + 액션 디코더 2.3B</td><td>32B급 VLM + 액션 디코더</td></tr>
+      <tr><td>백본 계열</td><td>—</td><td>Qwen3-VL 계열 <span class="b b-code">💻</span></td><td>Cosmos 3 Super Reasoner</td></tr>
+      <tr><td>공개</td><td>2026-01 전후</td><td>—</td><td>발표 05-31 / 상용 08-04</td></tr>
+      <tr class="hl"><td>상용 사용</td><td>—</td><td><b>비상용</b> — "Commercial licensing available upon request"</td><td>OpenMDW-1.1, 상용 가능</td></tr>
+    </tbody>
+  </table></div>
+  <p>보도자료는 TIER IV가 "Alpamayo 1의 얼리 어답터"라고 쓰지만 <span class="b b-src">🔍</span>, 저장소 코드는 <code>nvidia/Alpamayo-1.5-10B</code>를 하드코딩하고 브랜치명도 <code>alpamayo1.5</code>다 <span class="b b-code">💻</span>. 3월 발표 직전 커밋 <code>abe1ab1</code> "Fixed the code for Alpamayo-1.5"가 전환점이다. <b>실제 통합 대상은 1.5다.</b></p>
+
+  <h3>4.2 입출력과 내부 구조</h3>
+  <ul>
+    <li><b>입력</b> — 멀티 카메라 RGB(기본 4대), 텍스트 지시, 자차 운동 이력. 1080×1920을 받아 프로세서가 320×576으로 다운샘플. 시간 창 10 Hz × 0.4초 <span class="b b-src">🔍</span></li>
+    <li><b>출력</b> — 추론 텍스트 + <b>6.4초 궤적 = 10 Hz 64 웨이포인트</b>. 자차 좌표계 위치와 회전 행렬 <span class="b b-src">🔍</span> <span class="b b-code">💻</span></li>
+    <li><b>학습 데이터</b> — 80,000시간 멀티카메라 주행 영상 + 300만 건 Chain-of-Causation 추론 주석 <span class="b b-src">🔍</span></li>
+  </ul>
+  <div class="callout c-good">
+    <span class="lbl">💻 코드가 정정한 것</span>
+    <p>매체와 모델 카드는 액션 디코더를 "diffusion"이라 부르지만, 실행되는 클래스는 <code>FlowMatching</code>이고 적분법은 <code>euler</code>, 참조 논문은 <i>Flow Matching for Generative Modeling</i>(arXiv:2210.02747)이다. 확산 계열의 넓은 범주 안에 있지만 정확히는 <b>flow matching</b>이다. <span style="color:var(--muted)">(<code>diffusion/flow_matching.py:22-50</code>)</span></p>
+  </div>
+
+  <h3>4.3 Chain of Causation이 일반 CoT와 다른 점</h3>
+  <p>Alpamayo-R1 논문은 CoC를 "자동 라벨링과 human-in-the-loop 파이프라인으로 만든, 주행 행동과 정렬된 결정 근거형 인과 연결 추론 트레이스"로 정의한다 <span class="b b-src">🔍</span>. 일반 CoT가 그럴듯한 설명 문장을 만드는 데 그치는 반면, CoC는 <b>실제로 취한 궤적과 짝지어 라벨링</b>되어 추론과 행동의 일관성 자체를 학습·평가 대상으로 삼는다.</p>
+  <div class="tw"><table>
+    <thead><tr><th>논문이 보고한 지표</th><th>개선</th></tr></thead>
+    <tbody>
+      <tr><td>난도 높은 케이스 계획 정확도</td><td class="num">+12%</td></tr>
+      <tr><td>폐루프 시뮬레이션 근접 조우율</td><td class="num">−35%</td></tr>
+      <tr><td>RL 사후학습 후 추론 품질</td><td class="num">+45%</td></tr>
+      <tr><td>추론–행동 일관성</td><td class="num">+37%</td></tr>
+      <tr><td>온보드 지연</td><td class="num">99 ms</td></tr>
+    </tbody>
+  </table></div>
+  <p style="font-size:14px; color:var(--muted)">이 99 ms는 논문의 온보드 측정치이며, 뒤에 나오는 저장소 벤치마크 600 ms와는 측정 조건이 다르다 (§6.2).</p>
+</section>
+
+<section id="s5">
+  <h2>05. <code style="font-size:.8em">alpamayo-autoware</code> 코드 해부</h2>
+  <p class="h2sub">커밋 <code>65eda63</code>, 브랜치 <code>alpamayo1.5</code>, Python 6,125줄 전량 확인.</p>
+
+  <figure>
+    <img src="images/data-flow.svg" alt="Alpamayo ROS 2 노드 내부 데이터 흐름 다이어그램">
+    <figcaption>그림 1. 노드 내부 데이터 흐름. 그림 출처: 본 보고서 작성 — 근거는 커밋 <code>65eda63</code>의 <code>alpamayo_node.py</code>, <code>helper.py</code>, <code>base_model.py</code>, <code>diffusion/flow_matching.py</code>.</figcaption>
+  </figure>
+
+  <h3>5.1 저장소의 정체</h3>
+  <ul>
+    <li><code>NVlabs/alpamayo</code>의 <b>포크</b>. 상류 패키지명 <code>alpamayo_r1</code>을 <code>alpamayo1_5</code>로 갈아끼우고 ROS 2 패키지를 신규 추가 — 42파일, +4,938 / −791 <span class="b b-code">💻</span></li>
+    <li>생성 2026-01-23, 마지막 푸시 2026-08-06, 스타 140, 포크 14, 코드 라이선스 Apache-2.0 <span class="b b-src">🔍</span></li>
+    <li><b>ROS 2 패키지는 전적으로 TIER IV 저작.</b> <code>package.xml</code> 관리자가 <code>shintaro.sakoda@tier4.jp</code>, <code>yukihiro.saito@tier4.jp</code>이고 상류 NVIDIA 커밋은 2026-01-15에서 끊긴다 <span class="b b-code">💻</span></li>
+  </ul>
+
+  <h3>5.2 노드가 실제로 하는 일</h3>
+  <ol>
+    <li><b>구독</b> — 카메라 <code>CompressedImage</code> N개(BEST_EFFORT), <code>/localization/kinematic_state</code>, <code>/planning/mission_planning/route</code> <span style="color:var(--muted)">(<code>:150-187</code>)</span></li>
+    <li><b>버퍼링</b> — JPEG 바이트를 그대로 <code>torch.uint8</code>로 적재해 CPU 디코드 회피. 오도메트리 50 Hz를 5개마다 1개씩 추려 10 Hz 16스텝 이력 구성 <span style="color:var(--muted)">(<code>:92-96</code>, <code>:359-364</code>)</span></li>
+    <li><b>GPU 전처리</b> — <code>torchvision.io.decode_jpeg(device="cuda")</code> → 560×1008 bicubic. 픽셀이 GPU를 떠나지 않는다 <span style="color:var(--muted)">(<code>:381-386</code>)</span></li>
+    <li><b>프롬프트 조립</b> — 카메라 표시명·프레임 번호 텍스트 + <code>&lt;|traj_history|&gt;</code> 48토큰 + <code>&lt;|route_start|&gt;…&lt;|route_end|&gt;</code>. 학습 포맷을 그대로 재현 <span style="color:var(--muted)">(<code>helper.py</code>)</span></li>
+    <li><b>추론</b> — BF16 autocast로 VLM 롤아웃 + Flow Matching 샘플링. 내비 텍스트 유무로 CoT 생성 경로가 갈린다 <span style="color:var(--muted)">(<code>:478-492</code>)</span></li>
+    <li><b>발행</b> — <code>autoware_planning_msgs/Trajectory</code>(64점, <code>dt=0.1</code>, frame <code>base_link</code>), CoC 텍스트, 내비 텍스트, RViz 마커 <span style="color:var(--muted)">(<code>:498-519</code>)</span></li>
+  </ol>
+
+  <div class="callout c-warn">
+    <span class="lbl">💻 주목할 구현 디테일 2가지</span>
+    <p><b>가속도·헤딩 레이트가 0으로 채워진다.</b> 궤적 점의 속도는 인접 점 간 거리 ÷ 0.1초로 유한차분하지만, <code>acceleration_mps2</code>와 <code>heading_rate_rps</code>는 전부 <code>0.0</code>이다 <span style="color:var(--muted)">(<code>:555-566</code>)</span>. 실제 제어기에 물릴 것을 전제한 메시지가 아니다.</p>
+    <p><b><code>inference_period_sec=0.1</code>은 상한일 뿐이다.</b> 타이머는 0.1초마다 깨어나지만 직전 추론이 끝나지 않았으면 그냥 반환한다 <span style="color:var(--muted)">(<code>:346-348</code>)</span>. 실효 주기는 추론 시간 그 자체이고, launch 파일 기본값은 아예 1.0초다.</p>
+  </div>
+
+  <h3>5.3 판정 — Autoware 플래너를 대체하는가</h3>
+
+  <figure>
+    <img src="images/autoware-position.svg" alt="Autoware 파이프라인 안에서 Alpamayo 노드의 위치">
+    <figcaption>그림 2. Autoware 파이프라인 내 위치. 그림 출처: 본 보고서 작성 — Autoware 플래닝 인터페이스 서술은 공식 문서 기준.</figcaption>
+  </figure>
+
+  <div class="callout c-key">
+    <span class="lbl">판정</span>
+    <p><b>대체하지 않는다.</b> 근거 셋 — ① 저장소 전체를 <code>scenario_planning</code>으로 grep하면 <b>0건</b>. Autoware가 제어로 넘기는 토픽은 <code>/planning/scenario_planning/trajectory</code>인데 노드는 이 이름을 발행하지도 리맵하지도 않는다. ② 발행 토픽 기본값이 전부 <code>/alpamayo/</code> 네임스페이스다. ③ 궤적 길이도 다르다 — Autoware가 제어에 넘기는 trajectory는 "일반적으로 10초 길이, 0.1초 해상도"인데 Alpamayo 출력은 6.4초 64점이다.</p>
+  </div>
+
+  <p>즉 이 노드는 Autoware의 센서·경로 토픽을 <b>읽기만 하는 병렬 관찰자</b>다. 데모 화면이 그 성격을 그대로 보여준다 — 상단은 4개 카메라 입력, 하단은 기존 Autoware의 LiDAR 점군·차선 지도 위에 Alpamayo가 그린 초록 궤적과 자연어 판단이 오버레이된 RViz 화면이다.</p>
+
+  <figure>
+    <img src="images/demo-rviz.png" alt="Alpamayo × Autoware 데모 RViz 화면">
+    <figcaption>그림 3. 화면 문구 "Keep lane to continue driving since no critical agent is present."가 <code>/alpamayo/reasoning</code>으로 나가는 CoC 텍스트다. 그림 출처: <a href="https://github.com/autowarefoundation/alpamayo-autoware">autowarefoundation/alpamayo-autoware</a> <code>images/alpamayo-autoware.gif</code> 첫 프레임 (Apache-2.0).</figcaption>
+  </figure>
+
+  <h3>5.4 TIER IV가 추가한 것 — 두 갈래</h3>
+  <div class="card">
+    <p><b>(A) Autoware 접속 계층 (2026-01, 03)</b> — ROS 2 노드 646줄 전체. 그리고 Lanelet2 지도 + <code>LaneletRoute</code>를 읽어 "Turn left in 40m" / "Continue straight" 같은 내비 지시문을 합성하는 로직 <span style="color:var(--muted)">(<code>:287-337</code>)</span>. 모델이 학습 때 받았던 <code>route</code> 조건을 Autoware 미션 플래너 출력으로부터 만들어주는 어댑터로, 이 저장소에서 가장 Autoware-특화된 부분이다.</p>
+    <p style="margin-bottom:0"><b>(B) 성능 최적화 계층 (2026-04)</b> — GPU 상주 전처리, greedy 디코딩 + 5스텝 기본값("5-step Euler keeps trajectory ADE within ~1% of 10-step but cuts ~94 ms / inference"), 그리고 expert denoiser만 ONNX로 뽑아 <b>ONNX Runtime의 TensorRT Execution Provider</b>로 돌리는 경로. <b>VLM 본체는 PyTorch 그대로 남는다</b> — "TensorRT로 모델을 변환했다"는 서술은 부정확하고, 정확히는 디노이저 서브그래프만 대체한 것이다. 빌드 스크립트는 SmoothQuant + INT8까지 지원하지만 노드는 <code>enable_int8=False, enable_fp16=True</code>로 호출한다.</p>
+  </div>
+</section>
+
+<section id="s6">
+  <h2>06. 성능 — 숫자를 정직하게 읽기</h2>
+  <p class="h2sub">정밀도를 지연으로 바꾸는 교환이 벤치마크 표에 그대로 드러난다.</p>
+
+  <figure>
+    <img src="images/latency-bench.svg" alt="최적화 단계별 지연 벤치마크 차트">
+    <figcaption>그림 4. 그림 출처: 본 보고서 작성 — 수치는 저장소 README "Performance" 표 <span class="b b-src">🔍</span>.</figcaption>
+  </figure>
+
+  <h3>6.1 벤치마크 원문</h3>
+  <p>RTX PRO 6000(96 GB, SM120), 카메라 4대 × 시간 4프레임, 1080×1920. <b>TIER IV rosbag</b>을 <code>rate=0.5</code>로 재생하며 노드 로그의 "Alpamayo inference completed in X.XXs"를 15회 이상 수집한 중앙값 <span class="b b-src">🔍</span>.</p>
+  <div class="tw"><table>
+    <thead><tr><th>구성</th><th>지연</th><th>FPS</th><th>궤적 편차</th></tr></thead>
+    <tbody>
+      <tr><td>원본 (CPU 전처리·샘플링·native·10스텝)</td><td class="num">0.820 s</td><td class="num">1.22</td><td>기준</td></tr>
+      <tr><td>GPU 전처리 + greedy + native + 10스텝</td><td class="num">0.820 s</td><td class="num">1.22</td><td class="num">~0.4%</td></tr>
+      <tr><td>GPU 전처리 + greedy + native + 5스텝</td><td class="num">0.720 s</td><td class="num">1.39</td><td class="num">~0.4%</td></tr>
+      <tr><td>GPU 전처리 + greedy + TRT + 10스텝</td><td class="num">0.700 s</td><td class="num">1.43</td><td class="num">~1.3%</td></tr>
+      <tr><td>GPU 전처리 + greedy + TRT + 5스텝</td><td class="num">0.660 s</td><td class="num">1.52</td><td class="num">~1.8%</td></tr>
+      <tr class="hl"><td>전면 최적화</td><td class="num">0.600 s</td><td class="num">1.67</td><td class="num">~1.8%</td></tr>
+    </tbody>
+  </table></div>
+  <p>읽어야 할 것: <b>5스텝 전환은 거의 공짜(편차 0.4% 유지, 100 ms 절감)지만, TRT FP16은 편차를 0.4% → 1.8%로 4배 넓히면서 60 ms를 산다.</b></p>
+
+  <h3>6.2 논문 99 ms vs 저장소 600 ms</h3>
+  <div class="tw"><table>
+    <thead><tr><th></th><th>논문 99 ms</th><th>저장소 600 ms</th></tr></thead>
+    <tbody>
+      <tr><td>대상</td><td>Alpamayo-R1 온보드 구성</td><td>Alpamayo 1.5 10B, ROS 2 노드 end-to-end</td></tr>
+      <tr><td>포함 범위</td><td><span class="b b-un">⚠️</span> 초록에 명시 없음</td><td>JPEG 디코드 → 프롬프트 조립 → VLM 텍스트 생성 → 궤적 샘플링 → 메시지 변환 전체</td></tr>
+      <tr><td>하드웨어</td><td><span class="b b-un">⚠️</span> 초록에 명시 없음</td><td>RTX PRO 6000 데스크톱 GPU</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout c-key">
+    <span class="lbl">핵심</span>
+    <p><b>결정적 차이는 CoC 텍스트 생성이다.</b> 노드는 매 추론마다 최대 64토큰의 자연어 추론을 자기회귀로 뽑는다. 설명가능성이 이 협력의 핵심 가치인데, 그 설명을 만드는 비용이 곧 지연의 큰 몫이다. <b>설명을 포기하면 빨라지고, 유지하면 느리다.</b></p>
+  </div>
+
+  <h3>6.3 그래서 어디에 쓸 수 있나</h3>
+  <p>Autoware 플래닝이 제어에 넘기는 궤적은 0.1초 해상도로 갱신되는 실시간 신호다. 1.67 FPS는 그 대역에 들어갈 수 없다. 현실적인 용처는 셋이다.</p>
+  <ol>
+    <li><b>오프라인 분석</b> — rosbag을 돌려 각 장면에 자연어 판단 근거를 붙인다. 사고·해제 구간 사후 분석에 바로 쓰인다.</li>
+    <li><b>온라인 감독 레이어</b> — 기존 플래너의 결정과 Alpamayo의 판단이 불일치하는 구간을 저속으로 감시해 플래그를 세운다.</li>
+    <li><b>데이터 큐레이션</b> — 롱테일 장면 자동 태깅. §7의 Cosmos-Reason 역할과 정확히 겹친다.</li>
+  </ol>
+  <p>저장소 스스로도 못박는다 — "Alpamayo 1.5 is a pre-trained reasoning model for research purposes and is not a complete autonomous driving stack. It is not intended for use in production environments." <span class="b b-src">🔍</span></p>
+</section>
+
+<section id="s7">
+  <h2>07. 데이터 쪽 절반 — Cosmos × Co-MLOps</h2>
+  <p class="h2sub">이 협력에서 실제로 성과 수치가 나오는 축.</p>
+  <p>TIER IV 수석 엔지니어 Dan Umeda가 GTC 2026 세션 S81897에서 발표하고 2026-08-07 공식 기술 업데이트로 공개했다 <span class="b b-src">🔍</span>.</p>
+
+  <h3>7.1 Co-MLOps의 기반</h3>
+  <ul>
+    <li>2024년 출범. 데이터 공유 + MLOps를 통합한 협업 프레임워크</li>
+    <li>수집 차량 센서: <b>LiDAR 4대</b>(각 120° 커버리지) + <b>다중 화각 카메라 8대</b></li>
+    <li>수집 범위: 일본 <b>39개 도도부현, 127개 지점</b> — 도심·지방도·터널·공사구간·기상 변화</li>
+    <li>자동 라벨링 기반 모델 <b>CoMET</b>(Collaborative Multi-stage Ensemble-based Teacher): 카메라·LiDAR를 처리하는 <b>12개 대규모 모델 앙상블</b>, MoE 설계, TensorRT 배치 추론. 파놉틱 분할·신호등 인식·3D 객체 검출 생성</li>
+    <li>8단계 능동학습 루프: 자동 라벨링 → 데이터 태깅 → 공백 식별 → 데이터 생성 → 품질 검증 → 유사도 랭킹 → 불확실성 추정 → 프라이버시 익명화</li>
+  </ul>
+
+  <h3>7.2 Cosmos 3종의 배치</h3>
+  <div class="tw"><table>
+    <thead><tr><th>모델</th><th>Co-MLOps에서의 역할</th><th>확인된 사양·성과</th></tr></thead>
+    <tbody>
+      <tr><td><b>Cosmos Reason</b></td><td>검색·요약. 장면 설명·날씨·시간대·장소 유형·자차 거동을 구조화 JSON으로 출력. 자연어 검색과 ISO 34504 기준 시나리오 태깅</td><td>페타바이트급 영상 아카이브 처리</td></tr>
+      <tr><td><b>Cosmos Predict 2.5</b></td><td>엣지케이스 생성. 텍스트·이미지·영상 프롬프트로 30초 영상 생성</td><td>2B / 14B 버전</td></tr>
+      <tr><td><b>Cosmos Transfer 2.5</b></td><td>데이터 증강. 주간→야간, 맑음→우천/설경 등 다시점 일관 변환. Co-MLOps 파놉틱 마스크로 사후학습해 도메인 격차 보정</td><td>2B, 3D 차선·큐보이드 검출 <b>최대 +60%</b></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>7.3 증명된 수치 하나</h3>
+  <div class="callout c-good">
+    <span class="lbl">🔍 합성 데이터의 효과</span>
+    <p>노면에 누워 있는 사람, 소형 동물 같은 롱테일 대상은 실데이터로 학습이 안 된다. 개 검출 IoU — 실데이터만 <b>0.671</b> → 실데이터 + Cosmos 합성 <b>0.893</b> (+0.222).</p>
+    <p style="margin-bottom:0"><b>이 보고서에서 확인한 유일하게 구체적인 "협력의 실효 성과"다.</b> Alpamayo 노드 쪽에는 이에 상응하는 주행 성능 개선 수치가 아직 공개되지 않았다 <span class="b b-un">⚠️</span>.</p>
+  </div>
+
+  <h3>7.4 다음 단계</h3>
+  <p>TIER IV는 Cosmos 3로 이행하며 일본 주행 환경 특화 파인튜닝을 진행 중이다. Cosmos 3 Nano 사후학습으로 엣지케이스 생성, 파인튜닝한 Gemma4-31B로 캡션 자동 변환, 7카메라 서라운드 다시점 영상 생성으로 확장, AutoQA·데이터 클렌징 AI 개발. 목표는 "엣지케이스 생성부터 자동 라벨링, AutoQA 품질보증까지 전 주기를 완전 자율로 도는 차세대 데이터 기반" <span class="b b-src">🔍</span>.</p>
+</section>
+
+<section id="s8">
+  <h2>08. 상용화 트랙 — Isuzu L4 버스</h2>
+  <p class="h2sub">Alpamayo 노드가 연구 단계인 것과 별개로 진행되는 경로.</p>
+  <ul>
+    <li><b>조합</b>: Autoware 기반 TIER IV L4 소프트웨어 스택 + Isuzu Erga 버스 플랫폼(디젤/EV 양쪽) + NVIDIA DRIVE AGX Thor SoC 및 DRIVE Hyperion <span class="b b-3rd">📰</span> <span class="b b-src">🔍</span></li>
+    <li><b>발표</b>: GTC 2026 기간, 2026-03-25</li>
+    <li><b>명분</b>: 일본의 운전자 부족 대응</li>
+  </ul>
+  <div class="card">
+    <p style="margin:0">“Deploying Level 4 autonomous driving on both our Erga EV and diesel models ensures that we provide versatile, sustainable, and highly efficient solutions.”<br>
+    <span style="color:var(--muted); font-size:14px">— Hiroshi Sato, Isuzu SVP <span class="b b-3rd">📰</span></span></p>
+  </div>
+  <div class="callout c-warn">
+    <span class="lbl">⚠️ 중요한 구분</span>
+    <p><b>Isuzu 버스 스택에 Alpamayo가 들어간다는 서술은 어느 출처에도 없다.</b> 보도자료는 Alpamayo/Cosmos 통합과 Isuzu 버스 배치를 "Together with"로 병렬 서술한다. 두 트랙을 하나로 묶어 읽으면 안 된다.</p>
+    <p style="margin-bottom:0">구체 노선·상용 운행 개시 시점·초기 투입 대수도 어느 출처에도 공개되지 않았다. 일부 매체가 붙인 "2,000 TFLOPS / ASIL-D" 수치는 NVIDIA 원문에서 확인되지 않는다.</p>
+  </div>
+</section>
+
+<section id="s9">
+  <h2>09. 한계와 리스크</h2>
+  <p class="h2sub">도입을 검토한다면 먼저 읽어야 할 절.</p>
+
+  <h3>9.1 라이선스 — 가장 헷갈리는 지점</h3>
+  <div class="tw"><table>
+    <thead><tr><th>항목</th><th>상태</th></tr></thead>
+    <tbody>
+      <tr><td><code>alpamayo-autoware</code> 추론 코드</td><td>Apache-2.0 <span class="b b-code">💻</span></td></tr>
+      <tr class="hl"><td><b>Alpamayo 1.5 가중치</b></td><td>라이선스는 OpenMDW-1.1이지만 카드 문구는 <b>"ready for non-commercial use. Commercial licensing available upon request."</b> (2026-09-07 확인) <span class="b b-src">🔍</span></td></tr>
+      <tr><td>Alpamayo 2 Super 가중치</td><td>OpenMDW-1.1, 파인튜닝·파생모델·상용 재배포 허용 <span class="b b-src">🔍</span></td></tr>
+      <tr><td>Physical AI AV 데이터셋</td><td>별도 라이선스 동의 필요. AV 개발 용도 한정, <b>법 집행·교통법규 단속 목적 사용 금지</b> 조항 <span class="b b-src">🔍</span></td></tr>
+    </tbody>
+  </table></div>
+  <p>NVIDIA 블로그는 OpenMDW를 Alpamayo 패밀리 전체에 적용해 이전 릴리스도 상용 배포 가능해졌다고 서술하지만, <b>1.5 모델 카드와 저장소 README는 여전히 비상용을 명시</b>한다. 상용 도입을 검토한다면 NVIDIA에 직접 확인해야 한다.</p>
+
+  <h3>9.2 기술적 한계</h3>
+  <div class="tw"><table>
+    <thead><tr><th>리스크</th><th>내용</th></tr></thead>
+    <tbody>
+      <tr><td><b>실시간성</b></td><td>1.67 FPS. 제어 루프 대역에 진입 불가</td></tr>
+      <tr><td><b>하드웨어 격차</b></td><td>벤치마크는 96 GB 데스크톱 GPU. 최소 요구도 24 GB VRAM — 차량 탑재 SoC로 내리려면 별도 축소 필요</td></tr>
+      <tr><td><b>메시지 불완전성</b></td><td>궤적의 가속도·헤딩 레이트가 0으로 채워짐 — 제어기 입력으로 쓸 수 없는 형태 <span class="b b-code">💻</span></td></tr>
+      <tr><td><b>모델 다운로드</b></td><td>최초 실행 시 약 22 GB, HF 게이트 승인 필요</td></tr>
+      <tr><td><b>결합도</b></td><td><code>autoware_planning_msgs</code>, <code>autoware_internal_debug_msgs</code>, <code>autoware_lanelet2_extension_python</code> 의존. 다른 ROS 2 스택으로 옮기려면 메시지 계층부터 다시 써야 한다</td></tr>
+      <tr><td><b>지역 일반화</b></td><td>일본 특화 정밀도 수치 미공개 <span class="b b-un">⚠️</span>. Co-MLOps 쪽에서 "일본 환경 특화 파인튜닝"을 별도 진행 중이라는 사실 자체가 격차의 방증</td></tr>
+      <tr><td><b>안전 인증</b></td><td>ASIL 경로에서 생성형 VLA를 어떻게 다룰지에 대한 공식 서술 없음 <span class="b b-un">⚠️</span>. DRIVE Hyperion의 "ASIL-D 인증 DriveOS"는 플랫폼 OS 얘기지 모델 얘기가 아니다</td></tr>
+      <tr><td><b>개발 정체</b></td><td>2026-04-23 이후 새 기능 커밋 없음. 이슈 5건 열림</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>9.3 거버넌스</h3>
+  <p><code>alpamayo-autoware</code>는 Autoware Foundation 조직 계정에 있지만 <b>Autoware 본체에 머지된 컴포넌트가 아니라 독립 포크 저장소</b>다. 공개 공지도 정식 릴리스 노트가 아니라 GitHub Discussion 형태였고, 관리자는 "커뮤니티 피드백과 테스트를 받아 개선하겠다"고 썼다. 위치를 정확히 말하면 <b>공식 조직이 호스팅하는 참조 구현</b>이다.</p>
+</section>
+
+<section id="s10">
+  <h2>10. 시사점</h2>
+  <p class="h2sub">이 조합에서 실제로 가져갈 것.</p>
+  <ol class="verdicts">
+    <li><b>오픈소스 AD 스택의 프런티어 모델 흡수 속도.</b> NVIDIA가 Alpamayo-R1 논문을 낸 지(2025-10-30) 3개월도 안 돼 Autoware Foundation 조직에 ROS 2 노드가 올라왔다(2026-01-23). LLM 생태계에서 익숙한 속도가 자율주행 스택에도 그대로 옮겨왔다.</li>
+    <li><b>그러나 "통합"의 의미가 다르다.</b> 실제로 벌어진 일은 스택 교체가 아니라 <b>관찰 창구 추가</b>다. 모듈형 스택은 그대로 두고 그 옆에 추론 레이어를 붙여 설명가능성을 확보하는 것. L4 안전 논증에서 "왜 그렇게 판단했는가"를 남겨야 하는 상황을 생각하면 합리적인 첫 수다.</li>
+    <li><b>경쟁 지형에서의 위치.</b> Waymo EMMA는 논문·연구 공개, Wayve는 OEM에 판매하는 폐쇄형 end-to-end 스택, 학계에는 OpenDriveVLA(AAAI 2026) 같은 재현 시도가 있다. <b>가중치·추론 코드·데이터셋·ROS 2 통합 예제가 한 줄로 이어져 공개된 조합은 Alpamayo × Autoware가 현재 유일에 가깝다.</b> 성능이 아니라 접근성이 차별점이다.</li>
+    <li><b>국내 관점.</b> 이 스택은 지금 그대로 가져와도 차를 움직이지 못한다. 반대로 말하면 <b>재현 비용이 낮은 학습·평가용 자산</b>이다. RTX 4090급 24 GB GPU 한 장과 rosbag만 있으면 자국 도로 데이터로 CoC 추론 품질을 정성 평가할 수 있다. §7의 Co-MLOps 방법론이 더 직접적으로 이식 가능한 교훈이다.</li>
+    <li><b>주시할 것.</b> ① Alpamayo 2 Super의 Autoware 통합 여부 ② <code>alpamayo-autoware</code> 개발 재개 여부 ③ Isuzu 버스의 실제 운행 개시 ④ 1.5 가중치 라이선스 정리.</li>
+  </ol>
+</section>
+
+<section id="a1">
+  <h2>부록 A. 용어집</h2>
+  <div class="gl">
+    <div><b>VLA (Vision-Language-Action)</b><span>영상과 언어를 함께 이해해 곧바로 행동(궤적)을 출력하는 모델.</span></div>
+    <div><b>CoC (Chain of Causation)</b><span>주행 판단의 인과 사슬을 언어화한 추론 트레이스. 실제 취한 행동과 짝지어 라벨링된다는 점이 일반 CoT와 다르다.</span></div>
+    <div><b>WFM (World Foundation Model)</b><span>물리 세계의 동역학을 학습해 영상을 생성·변환하는 기반 모델. NVIDIA Cosmos가 이 범주.</span></div>
+    <div><b>Flow Matching</b><span>노이즈에서 목표 분포로 가는 벡터장을 직접 학습하는 생성 기법. 확산 모델보다 적은 적분 스텝으로 샘플링 가능.</span></div>
+    <div><b>Expert Denoiser</b><span>Alpamayo에서 VLM 히든 상태를 조건으로 궤적을 반복 정제하는 별도 서브네트워크.</span></div>
+    <div><b>Lanelet2</b><span>Autoware가 쓰는 차선 단위 HD 맵 포맷.</span></div>
+    <div><b>Co-MLOps</b><span>TIER IV의 데이터 공유 + MLOps 통합 플랫폼 (2024~).</span></div>
+    <div><b>ISO 34504</b><span>자율주행 시나리오 분류·기술에 관한 국제 표준.</span></div>
+    <div><b>minADE</b><span>여러 예측 궤적 중 정답과 가장 가까운 것의 평균 변위 오차.</span></div>
+  </div>
+</section>
+
+<section id="a2">
+  <h2>부록 B. 재현 절차</h2>
+  <p class="h2sub">전제: ROS 2 Humble, Python 3.10.x, NVIDIA GPU 24 GB+ VRAM, CUDA 12.x+, <code>uv</code>, HF 게이트 승인 2건. 최초 실행 시 가중치 약 22 GB 다운로드.</p>
+
+<pre><code>git clone -b alpamayo1.5 https://github.com/autowarefoundation/alpamayo-autoware.git
+cd alpamayo-autoware
+uv venv a1_5_venv --python python3.10   # ROS 2 Humble 호환을 위해 3.10 고정
+source a1_5_venv/bin/activate
+uv sync --active
+huggingface-cli login
+
+source /opt/ros/humble/setup.bash
+source ~/workspace/autoware/install/setup.bash
+
+# rosbag 재생 평가
+ros2 launch alpamayo_ros alpamayo.launch.py use_sim_time:=true
+ros2 bag play &lt;bag_path&gt; --clock --rate 0.5</code></pre>
+
+  <div class="tw"><table>
+    <thead><tr><th>파라미터</th><th>기본값</th><th>의미</th></tr></thead>
+    <tbody>
+      <tr><td><code>camera_topics</code> / <code>camera_indices</code></td><td>필수</td><td>0=전좌, 1=전방, 2=전우, 3=후좌, 4=후방, 5=후우, 6=전방 망원. launch 기본 <code>[0,1,2,6]</code></td></tr>
+      <tr><td><code>odometry_topic</code></td><td><code>/localization/kinematic_state</code></td><td>50 Hz 가정, 5개마다 1개 추출</td></tr>
+      <tr><td><code>route_topic</code></td><td><code>/planning/mission_planning/route</code></td><td>내비 지시문 생성용 (선택)</td></tr>
+      <tr><td><code>lanelet2_map_path</code></td><td><code>""</code></td><td>지정하면 내비 지시문 활성화</td></tr>
+      <tr><td><code>num_diffusion_steps</code></td><td><code>5</code></td><td>10이면 품질 우선</td></tr>
+      <tr><td><code>use_greedy_decode</code></td><td><code>true</code></td><td>false면 nucleus (top_p 0.98 / temp 0.6)</td></tr>
+      <tr><td><code>expert_onnx_path</code></td><td><code>""</code></td><td>지정 시 ONNX Runtime TensorRT FP16 엔진 사용</td></tr>
+      <tr><td><code>max_generation_length</code></td><td><code>64</code></td><td>CoC 텍스트 토큰 예산</td></tr>
+      <tr><td><code>inference_period_sec</code></td><td><code>0.1</code> (launch는 <code>1.0</code>)</td><td>타이머 주기 상한</td></tr>
+    </tbody>
+  </table></div>
+
+  <p><b>트러블슈팅</b> — <code>ModuleNotFoundError: No module named 'rclpy._rclpy_pybind11'</code> → venv를 Python 3.10으로 재생성. CUDA OOM → 24 GB+ GPU 사용, <code>inference_period_sec</code> 증가. Flash Attention 문제 → <code>config.attn_implementation = "sdpa"</code>.</p>
+
+<pre><code># TensorRT expert 엔진 빌드
+uv sync --active --group trt
+python3 scripts/build_trt_expert_engine.py --help
+# 주요 옵션: --num-calibration-samples, --calibration-method, --smoothquant-alpha, --skip-validation</code></pre>
+</section>
+
+<section id="a3">
+  <h2>부록 C. 미확인 항목과 검증 로그</h2>
+  <p class="h2sub">확인하지 못한 것과, 소스가 충돌했을 때 어떻게 판정했는지.</p>
+
+  <h3>미확인 항목</h3>
+  <div class="tw"><table>
+    <thead><tr><th>#</th><th>항목</th><th>상태</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Alpamayo 1.5 가중치의 최종 상용 가능 여부</td><td>NVIDIA 블로그와 HF 모델 카드가 상충. NVIDIA 직접 확인 필요</td></tr>
+      <tr><td>2</td><td>Isuzu L4 버스의 노선·시기·대수</td><td>어느 출처에도 없음</td></tr>
+      <tr><td>3</td><td>Isuzu 버스 스택에 Alpamayo 포함 여부</td><td>언급 없음. 별개 트랙으로 서술됨</td></tr>
+      <tr><td>4</td><td>Alpamayo 2 Super의 Autoware 통합 계획</td><td>저장소·발표 어디에도 언급 없음</td></tr>
+      <tr><td>5</td><td>2026-08-06 마지막 푸시의 내용</td><td><code>alpamayo1.5</code> 브랜치 최신 커밋은 2026-04-23. 다른 참조일 가능성</td></tr>
+      <tr><td>6</td><td>논문 "온보드 99 ms"의 측정 하드웨어·범위</td><td>초록에 명시 없음</td></tr>
+      <tr><td>7</td><td>Alpamayo 노드 도입에 따른 주행 성능 개선 수치</td><td>TIER IV 공개 자료 없음</td></tr>
+      <tr><td>8</td><td>TIER IV 상용 스택에서의 Alpamayo 활용 여부</td><td>확인 불가</td></tr>
+      <tr><td>9</td><td>Medium 기술 블로그 원문의 추가 서술·다이어그램</td><td>Cloudflare 403. 동일 내용 보도자료로 대체</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>검증 로그 (판정 이력)</h3>
+  <div class="tw"><table>
+    <thead><tr><th>쟁점</th><th>소스 A</th><th>소스 B</th><th>판정</th></tr></thead>
+    <tbody>
+      <tr><td>통합한 Alpamayo 버전</td><td>보도자료: "early adopter of Alpamayo 1"</td><td>코드: <code>Alpamayo-1.5-10B</code> 하드코딩</td><td><b>둘 다 사실.</b> 1로 시작해 3월에 1.5로 전환. 현재 통합 대상은 1.5</td></tr>
+      <tr><td>VLM 백본 계열</td><td>서드파티: "Qwen2 기반"</td><td>코드: <code>Qwen/Qwen3-VL-8B-Instruct</code> / 카드: Cosmos-Reason2 8.2B</td><td><b>Qwen3-VL 계열.</b> Cosmos-Reason2가 Qwen3-VL 위에 구축된 것. "Qwen2"는 오기</td></tr>
+      <tr><td>생성 방식</td><td>카드·매체: "diffusion-based"</td><td>코드: <code>class FlowMatching</code>, euler</td><td><b>Flow Matching.</b> 넓은 확산 계열이나 정확한 명칭은 flow matching</td></tr>
+      <tr><td>TensorRT 적용 범위</td><td>서드파티: "TensorRT 양자화"</td><td>코드: expert denoiser만 ONNX→ORT TRT EP</td><td><b>부분 적용.</b> VLM 본체는 PyTorch 유지</td></tr>
+      <tr><td>가중치 라이선스</td><td>NVIDIA 블로그: 패밀리 전체 OpenMDW, 상용 가능</td><td>HF 카드·README: 비상용 (2026-09-07 확인)</td><td><b>미해결.</b> 양쪽 원문 병기</td></tr>
+      <tr><td>벤치마크 인용 범위</td><td>서드파티: 2개 구성만</td><td>README: 6개 구성 전체 표</td><td><b>README 전체 표 채택.</b> 중간 단계가 정밀도-지연 교환을 드러냄</td></tr>
+      <tr><td>데이터 규모</td><td>데이터셋 카드: 1,700시간</td><td>모델 카드: 학습 80,000시간</td><td><b>모순 아님.</b> 전자는 공개 데이터셋, 후자는 학습 총량</td></tr>
+      <tr><td>Alpamayo 2 Super 파라미터</td><td>일부 요약: "약 30억"</td><td>NVIDIA 원문: "34-billion-parameter"</td><td><b>34B.</b> 요약 과정의 오독</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="a4" class="refs">
+  <h2>부록 D. 레퍼런스</h2>
+  <p class="h2sub">전체 수집 기록과 원문 인용은 <a href="reference/references.md">reference/references.md</a>에 있다.</p>
+
+  <h3>1차 — 코드·모델·데이터</h3>
+  <ul>
+    <li><a href="https://github.com/autowarefoundation/alpamayo-autoware">autowarefoundation/alpamayo-autoware</a> — 브랜치 <code>alpamayo1.5</code>, 커밋 <code>65eda63</code> 전량 확인</li>
+    <li><a href="https://github.com/NVlabs/alpamayo">NVlabs/alpamayo</a> — 상류 저장소</li>
+    <li><a href="https://huggingface.co/nvidia/Alpamayo-1.5-10B">nvidia/Alpamayo-1.5-10B</a> — 모델 카드</li>
+    <li><a href="https://huggingface.co/datasets/nvidia/PhysicalAI-Autonomous-Vehicles">nvidia/PhysicalAI-Autonomous-Vehicles</a> — 데이터셋 카드</li>
+    <li><a href="https://github.com/orgs/autowarefoundation/discussions/6747">Autoware Foundation Discussion #6747</a> — 패키지 공개 공지, 2026-01-23</li>
+  </ul>
+
+  <h3>1차 — 공식 발표</h3>
+  <ul>
+    <li><a href="https://www.prnewswire.com/news-releases/tier-iv-accelerates-ai-based-level-4-autonomous-driving-with-nvidias-reasoning-based-ai-and-world-foundation-models-302717091.html">TIER IV accelerates AI-based Level 4 autonomous driving… (PRNewswire, 2026-03-18)</a></li>
+    <li><a href="https://tier4.co.jp/en/updates/technology/20260807-comlops-dataset-foundation-for-autonomous-driving-with-nvidia-cosmos">Building a dataset foundation for autonomous driving with NVIDIA Cosmos (TIER IV, 2026-08-07)</a></li>
+    <li><a href="https://nvidianews.nvidia.com/news/drive-hyperion-level-4">BYD, Geely, Isuzu and Nissan Adopt NVIDIA DRIVE Hyperion for Level 4 Vehicles (2026-03-16)</a></li>
+    <li><a href="https://nvidianews.nvidia.com/news/nvidia-alpamayo-2-super-robotaxis">NVIDIA Launches Alpamayo 2 Super Open Reasoning Model for Robotaxis</a></li>
+    <li><a href="https://blogs.nvidia.com/blog/alpamayo-2-super-open-model-now-available/">NVIDIA Alpamayo 2 Super … Now Available for Commercial Use</a></li>
+  </ul>
+
+  <h3>학술·문서</h3>
+  <ul>
+    <li><a href="https://arxiv.org/abs/2511.00088">Alpamayo-R1 (arXiv:2511.00088)</a> — NVIDIA, 2025-10-30 v1 / 2026-01-07 v2</li>
+    <li><a href="https://arxiv.org/abs/2410.23262">EMMA: End-to-End Multimodal Model for Autonomous Driving (arXiv:2410.23262)</a> — Waymo</li>
+    <li><a href="https://drivevla.github.io/">OpenDriveVLA</a> — AAAI 2026</li>
+    <li><a href="https://arxiv.org/abs/2210.02747">Flow Matching for Generative Modeling (arXiv:2210.02747)</a> — 코드가 인용한 원 논문</li>
+    <li><a href="https://tier4.github.io/autoware-documentation/latest/design/autoware-architecture/planning/">Autoware Planning component design</a></li>
+  </ul>
+
+  <h3>서드파티</h3>
+  <ul>
+    <li><a href="https://www.just-auto.com/news/isuzu-deploys-level-4-autonomous-buses/">Isuzu deploys Level 4 autonomous buses (just-auto, 2026-03-25)</a></li>
+    <li><a href="https://note.com/ai_driven/n/n43fe3f1fe358">Alpamayo 1.5 × Autoware 해설 (note.com / AI-Driven Lab, 2026-08-27)</a> — 백본·라이선스 서술에 오차 있음, 검증 로그 참조</li>
+  </ul>
+
+  <h3>접근 실패</h3>
+  <ul>
+    <li class="fail"><a href="https://medium.com/tier-iv-tech-blog/tier-iv-accelerates-ai-based-level-4-autonomous-driving-with-nvidias-reasoning-based-ai-and-world-aa84408d822f">TIER IV Tech Blog (Medium, 영문)</a> — Cloudflare 403. 우회 시도(r.jina.ai, curl UA 위장) 모두 실패. PRNewswire 원문으로 대체</li>
+    <li class="fail">TIER IV Tech Blog (Medium, 일문) — 403</li>
+    <li class="fail">Automotive World 기사 — 403</li>
+  </ul>
+</section>
+
+<footer>
+  AI-Vehicle-Research · 2026-09-07 작성. 모든 사실 주장에 출처를 병기했고, 확인하지 못한 항목은 부록 C에 명시했다.
+  원본 마크다운: <a href="tier4_alpamayo_autoware_보고서.md">tier4_alpamayo_autoware_보고서.md</a>
+</footer>
+
+</main>
+</div>
+
+<script>
+(function(){
+  var toggle = document.getElementById('tt');
+  try{
+    var saved = localStorage.getItem('t4-theme');
+    if(saved) document.documentElement.setAttribute('data-theme', saved);
+  }catch(e){}
+  toggle.addEventListener('click', function(){
+    var cur = document.documentElement.getAttribute('data-theme');
+    var next;
+    if(cur === 'dark') next = 'light';
+    else if(cur === 'light') next = 'dark';
+    else next = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try{ localStorage.setItem('t4-theme', next); }catch(e){}
+  });
+
+  var links = Array.prototype.slice.call(document.querySelectorAll('#toc a'));
+  var sections = links.map(function(a){ return document.querySelector(a.getAttribute('href')); });
+  function onScroll(){
+    var y = window.scrollY + 120, idx = 0;
+    for(var i=0;i<sections.length;i++){
+      if(sections[i] && sections[i].offsetTop <= y) idx = i;
+    }
+    links.forEach(function(a,i){ a.classList.toggle('active', i===idx); });
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+})();
+</script>
+</body>
+</html>
