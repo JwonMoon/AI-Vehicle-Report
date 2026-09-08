@@ -135,7 +135,7 @@ li{margin:.3rem 0}
 li::marker{color:var(--fg-3)}
 strong{font-weight:600}
 em{font-style:italic}
-code{background:var(--code-bg);padding:.1em .38em;border-radius:5px;font-size:.84em;color:var(--fg)}
+code{background:var(--code-bg);padding:.08em .28em;border-radius:4px;font-size:.84em;color:var(--fg)}
 pre{background:var(--pre-bg);color:var(--pre-fg);padding:1rem 1.1rem;border-radius:10px;overflow-x:auto;
   font-size:.8rem;line-height:1.6;margin:0 0 1.2rem;border:1px solid rgba(255,255,255,.06)}
 pre code{background:none;padding:0;color:inherit;font-size:inherit}
@@ -412,7 +412,7 @@ footer ul{list-style:none;padding:0;margin:.5rem 0 0;display:flex;flex-wrap:wrap
 <div class="qa-a"><span class="lbl">세 줄 답</span><ol class="three"><li><span class="num">①</span><span>차 한 대의 자율주행 소프트웨어는 HW부터 앱까지 여덟 층으로 나뉘고, 이 보고서의 모든 비교는 이 층 번호로 한다.</span></li><li><span class="num">②</span><span>E2E는 L4(인지)와 L5(계획)를 한 모델로 합친 것이지 스택을 없앤 것이 아니다.</span></li><li><span class="num">③</span><span>스택이 HPC에 요구하는 것은 층마다 다르며, E2E로 갈수록 요구가 "연산량"에서 "메모리·지연 예산·안전 파티션"으로 이동한다.</span></li></ol></div>
 </aside>
 <h3 id="s1-1"><a class="anchor" href="#s1-1">1.1 여덟 층 지도</a></h3>
-<figure class="fig"><img src="images/stack-map.svg" alt="자율주행 SW 스택 8층 지도" loading="lazy"><figcaption>그림 1. 자율주행 SW 스택 8층 지도. 왼쪽 열은 모듈형 스택(Autoware·Apollo·openpilot)의 실제 구성요소, 오른쪽 열은 E2E/VLA에서 달라지는 점. 실선 = 출처로 확인, 점선 = 추정·유동. 자체 작성.</figcaption></figure>
+<figure class="fig"><img src="images/stack-map.svg" alt="자율주행 SW 스택 8층 지도" width="1240" height="859" loading="lazy"><figcaption>그림 1. 자율주행 SW 스택 8층 지도. 왼쪽 열은 모듈형 스택(Autoware·Apollo·openpilot)의 실제 구성요소, 오른쪽 열은 E2E/VLA에서 달라지는 점. 실선 = 출처로 확인, 점선 = 추정·유동. 자체 작성.</figcaption></figure>
 <div class="table-wrap"><table class="cols-4">
 <thead>
 <tr>
@@ -706,7 +706,7 @@ footer ul{list-style:none;padding:0;margin:.5rem 0 0;display:flex;flex-wrap:wrap
 <div class="qa-q"><span class="lbl">이 장의 질문</span><p>열두 스택을 같은 자리에 놓으면 무엇이 보이나.</p></div>
 <div class="qa-a"><span class="lbl">세 줄 답</span><ol class="three"><li><span class="num">①</span><span>공개도는 오픈소스 3종과 학계만 높고, 상용 스택은 벤치마크·릴리스 노트·보도자료로만 밖을 본다.</span></li><li><span class="num">②</span><span>자체 실리콘이 기본값이 됐고, 자체 칩이 없는 스택 벤더(Wayve·Momenta·Autoware)는 NVIDIA Thor 또는 칩 벤더 파트너십에 묶인다.</span></li><li><span class="num">③</span><span>안전·폴백 구조를 공개한 곳은 오픈소스 3종과 Mobileye·Waymo·NVIDIA뿐이고, 나머지는 "미공개"다.</span></li></ol></div>
 </aside>
-<figure class="fig"><img src="images/stack-matrix.svg" alt="스택 비교 매트릭스" loading="lazy"><figcaption>그림 2. 열두 스택 × 여덟 축 비교 매트릭스(히트맵형). 색이 진할수록 공개 자료로 확인된 정도가 높다. 자체 작성. 세부 근거는 아래 표와 각 장.</figcaption></figure>
+<figure class="fig"><img src="images/stack-matrix.svg" alt="스택 비교 매트릭스" width="1180" height="640" loading="lazy"><figcaption>그림 2. 열두 스택 × 여덟 축 비교 매트릭스(히트맵형). 색이 진할수록 공개 자료로 확인된 정도가 높다. 자체 작성. 세부 근거는 아래 표와 각 장.</figcaption></figure>
 <div class="table-wrap"><table class="cols-9">
 <thead>
 <tr>
@@ -867,7 +867,7 @@ footer ul{list-style:none;padding:0;margin:.5rem 0 0;display:flex;flex-wrap:wrap
 <div class="qa-a"><span class="lbl">세 줄 답</span><ol class="three"><li><span class="num">①</span><span>Autoware는 "많은 노드, 부분 컴포지션"의 ROS 2 스택이고 GPU 코드는 전부 Universe(확장)에만 있으며, 통신 비용은 Agnocast(CPU zero-copy)와 cuda_blackboard(GPU zero-copy) 두 층으로 따로 푼다.</span></li><li><span class="num">②</span><span>Apollo는 자체 미들웨어 Cyber RT가 사용자 공간 코루틴 스케줄러와 공유메모리 arena를 가지며, "어떤 컴포넌트를 어느 코어에 얼마의 우선순위로" 배치하는 설정 파일이 곧 실시간 설계도다.</span></li><li><span class="num">③</span><span>openpilot은 가장 작은 스택이면서 유일하게 양산차에서 매일 도는 E2E 스택이고, 30M 파라미터 모델을 SoC GPU에서 20 Hz로 돌리되 액추에이터 명령은 규칙 제어기와 안전 펌웨어가 낸다.</span></li></ol></div>
 </aside>
 <p>세 스택 모두 이 세션에서 <code>git clone --depth 1</code>로 받아 파이썬 표준 라이브러리 스크립트로 정적 측정했다. 빌드·실행은 하지 않았다(GPU 없음). 측정 정의와 전체 출력은 <code>reference/demo-logs/d1-*.md</code>, <code>d2-*.md</code>, <code>d3-*.md</code>에 있다.</p>
-<figure class="fig"><img src="images/three-stack-anatomy.svg" alt="오픈소스 3종 조립 방식 비교" loading="lazy"><figcaption>그림 3. 세 스택의 파이프라인·프로세스·IPC 비교. 숫자는 이 세션의 정적 측정(2026-09-08 main/master HEAD). 자체 작성.</figcaption></figure>
+<figure class="fig"><img src="images/three-stack-anatomy.svg" alt="오픈소스 3종 조립 방식 비교" width="1260" height="854" loading="lazy"><figcaption>그림 3. 세 스택의 파이프라인·프로세스·IPC 비교. 숫자는 이 세션의 정적 측정(2026-09-08 main/master HEAD). 자체 작성.</figcaption></figure>
 <h3 id="s4-1"><a class="anchor" href="#s4-1">4.1 Autoware — ROS 2 위의 "많은 노드, 두 겹의 zero-copy"</a></h3>
 <p><strong>규모.</strong> 메타 저장소 <code>autoware</code>의 매니페스트 <code>autoware.repos</code>는 31개 저장소를 core 12 · universe 13 · launcher 1 · sensor_component 5로 나눈다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. 그중 핵심 7개(autoware, core, universe, launch, msgs, adapi_msgs, internal_msgs)를 받아 세어 보면 다음과 같다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> D1.</p>
 <div class="table-wrap"><table class="cols-6">
@@ -1107,7 +1107,7 @@ footer ul{list-style:none;padding:0;margin:.5rem 0 0;display:flex;flex-wrap:wrap
 <div class="qa-q"><span class="lbl">이 장의 질문</span><p>논문 스택은 무엇을 증명했고 무엇을 증명하지 못했나. 코드를 열면 차에 실을 수 있는 것인가.</p></div>
 <div class="qa-a"><span class="lbl">세 줄 답</span><ol class="three"><li><span class="num">①</span><span>2023~2026년 계보는 "nuScenes 오픈루프(UniAD·VAD) → 벤치마크 붕괴(에고 상태만으로 SOTA) → NAVSIM 비반응 시뮬(PDMS) → 앵커 디퓨전·어휘 스코어링 → VLA·월드모델·RL"로 이어진다.</span></li><li><span class="num">②</span><span>NAVSIM 계열 SOTA는 놀랄 만큼 작다(ResNet-34, 50~60M 파라미터). 성능은 백본 크기보다 후보 생성·스코어링 설계에서 나온다.</span></li><li><span class="num">③</span><span>조사한 오픈 코드베이스 중 실차 양산 배포를 명시한 것은 없고, PyTorch·timm·nuplan-devkit 의존에 TensorRT·양자화·결정적 스케줄 검증이 전무하다. 이식 가능한 자산은 가중치가 아니라 평가기(PDM 스코어러)와 헤드 설계다.</span></li></ol></div>
 </aside>
-<figure class="fig"><img src="images/e2e-lineage.svg" alt="학계 E2E 계보" loading="lazy"><figcaption>그림 4. 학계 오픈 E2E 스택 계보와 벤치마크 전환. 자체 작성. 점수는 각 README·논문 보고값(<span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span><span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>).</figcaption></figure>
+<figure class="fig"><img src="images/e2e-lineage.svg" alt="학계 E2E 계보" width="1180" height="560" loading="lazy"><figcaption>그림 4. 학계 오픈 E2E 스택 계보와 벤치마크 전환. 자체 작성. 점수는 각 README·논문 보고값(<span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span><span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>).</figcaption></figure>
 <h3 id="s5-1"><a class="anchor" href="#s5-1">5.1 계보 — 여섯 번의 방향 전환</a></h3>
 <div class="table-wrap"><table class="cols-4">
 <thead>
@@ -1474,7 +1474,7 @@ footer ul{list-style:none;padding:0;margin:.5rem 0 0;display:flex;flex-wrap:wrap
 <div class="qa-q"><span class="lbl">이 장의 질문</span><p>HPC 위에서 스택을 돌리는 "배관"은 무엇이고, 2026년에 무엇이 바뀌고 있나.</p></div>
 <div class="qa-a"><span class="lbl">세 줄 답</span><ol class="three"><li><span class="num">①</span><span>ROS 2의 표준 경로(Fast DDS + wait-set executor)는 그대로 쓰면 최대 50% 미들웨어 오버헤드와 하드코딩된 콜백 순서 문제가 있어, 양산 스택은 rmw 교체(Zenoh·iceoryx)나 우회(Agnocast·Apex.Ida)로 수렴한다.</span></li><li><span class="num">②</span><span>AUTOSAR Adaptive의 ara::com은 바인딩(SOME/IP·DDS·IPC) 교체가 가능한 API이고, 오픈 구현(Eclipse S-CORE LoLa)은 "ASIL별 공유메모리 세그먼트 분리"를 핵심 설계로 잡았다.</span></li><li><span class="num">③</span><span>SOAFEE는 아키텍처 v1.0에서 OCI 컨테이너·Kubernetes API·환경 동등성만 필수로 정의했고 혼합 중요도 오케스트레이션은 Future Work다 — 컨테이너는 배포 단위이지 격리 수단이 아니다.</span></li></ol></div>
 </aside>
-<figure class="fig"><img src="images/middleware-landscape.svg" alt="미들웨어 지형" loading="lazy"><figcaption>그림 5. 미들웨어·OS 층 지형 — ROS 2 rmw 계열, 자체 미들웨어, AUTOSAR Adaptive 계열, SDV 프레임워크, OS/하이퍼바이저. 인증 상태와 zero-copy 범위를 표시. 자체 작성.</figcaption></figure>
+<figure class="fig"><img src="images/middleware-landscape.svg" alt="미들웨어 지형" width="1260" height="904" loading="lazy"><figcaption>그림 5. 미들웨어·OS 층 지형 — ROS 2 rmw 계열, 자체 미들웨어, AUTOSAR Adaptive 계열, SDV 프레임워크, OS/하이퍼바이저. 인증 상태와 zero-copy 범위를 표시. 자체 작성.</figcaption></figure>
 <h3 id="s8-1"><a class="anchor" href="#s8-1">8.1 ROS 2 — rmw, QoS, Executor, zero-copy의 한계, 그리고 Agnocast</a></h3>
 <p><strong>rmw 추상화.</strong> rmw는 rcl 아래에서 벤더별 미들웨어를 감추는 C API이고, <code>RMW_IMPLEMENTATION</code> 환경변수로 런타임 전환한다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>design/articles/060_ros_middleware_interface.md</code>. rmw 헤더 목록이 곧 플랫폼에 요구하는 기능 표면이다. QoS 프로파일, 디스커버리 범위, 동적 타입, 콘텐츠 필터, <strong>네트워크 플로우 식별(TSN·QoS 매핑용)</strong>, 보안(SROS2), QoS 불일치 이벤트, loan 시퀀스 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>rmw/include/rmw/</code>. 지원 등급은 Foxy·Humble 이후 기본 <code>rmw_fastrtps_cpp</code>, Galactic만 CycloneDDS 기본, <strong>Kilted(2025-05)부터 <code>rmw_zenoh_cpp</code> Tier-1</strong>이다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span> 릴리스 노트. Lyrical(2026-05, LTS 2031)에서도 기본은 Fast DDS이며 Tier-1은 Fast DDS·Connext·CycloneDDS·Zenoh 넷이다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>.</p>
 <p><strong>QoS.</strong> ROS 2 QoS는 DDS의 부분집합(History·Depth·Reliability·Durability + Deadline·Liveliness·Lifespan)이고 Request-vs-Offer로 호환될 때만 매칭된다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>qos.md</code>. rmw_zenoh 설계 문서는 RELIABLE → TCP 링크, BEST_EFFORT → UDP 링크가 있을 때만, KEEP_ALL+RELIABLE → <code>CongestionControl::BLOCK</code>(발행자 블로킹 백프레셔), TRANSIENT_LOCAL → AdvancedPublisher 캐시, DEADLINE·LIFESPAN 미구현, 그리고 "Zenoh에는 사실상 비호환 QoS가 없다"고 쓴다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>rmw_zenoh/docs/design.md</code>.</p>
@@ -1491,7 +1491,7 @@ footer ul{list-style:none;padding:0;margin:.5rem 0 0;display:flex;flex-wrap:wrap
 </ul>
 <h3 id="s8-3"><a class="anchor" href="#s8-3">8.3 D4 실측 — 같은 호스트, 같은 4코어, 전송만 바꾸면</a></h3>
 <p>방법: ping 프로세스가 페이로드를 보내고 pong 프로세스가 같은 크기로 되돌리는 왕복 지연(RTT). 워밍업 50회 제외 1,000회(1 MB는 200회), Zenoh 1.10.1(peer, IPv4 루프백 고정, 멀티캐스트 끔), CycloneDDS 11.0.1(Reliable·KeepLast 16, <code>sequence&lt;uint8&gt;</code> IDL), 기준선은 <code>multiprocessing.Pipe</code> 바이트 전송. <strong>Python 바인딩·GIL 오버헤드가 포함되므로 절대치가 아니라 같은 조건의 상대 비교</strong>로 읽는다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>d4-ipc-bench.md</code>.</p>
-<figure class="fig"><img src="images/ipc-latency-bench.svg" alt="IPC 지연 벤치" loading="lazy"><figcaption>그림 6. D4 실측(평균 RTT, 로그 스케일)과 문헌 수치 병기. 자체 작성.</figcaption></figure>
+<figure class="fig"><img src="images/ipc-latency-bench.svg" alt="IPC 지연 벤치" width="1180" height="520" loading="lazy"><figcaption>그림 6. D4 실측(평균 RTT, 로그 스케일)과 문헌 수치 병기. 자체 작성.</figcaption></figure>
 <div class="table-wrap"><table class="cols-5">
 <thead>
 <tr>
@@ -2600,9 +2600,11 @@ document.addEventListener('DOMContentLoaded',function(){
     if(active===id)return;
     if(active&&links[active])links[active].classList.remove('active');
     active=id;
-    if(links[id]){links[id].classList.add('active');
-      var r=links[id].getBoundingClientRect(),tr=toc.getBoundingClientRect();
-      if(r.top<tr.top+40||r.bottom>tr.bottom-40){links[id].scrollIntoView({block:'center'});}
+    if(links[id]){var a=links[id];a.classList.add('active');
+      if(toc.scrollHeight>toc.clientHeight){
+        var at=a.offsetTop,ah=a.offsetHeight,st=toc.scrollTop,ch=toc.clientHeight;
+        if(at<st+40||at+ah>st+ch-40){toc.scrollTop=Math.max(0,at-ch/2+ah/2);}
+      }
     }
   }
   function spy(){
