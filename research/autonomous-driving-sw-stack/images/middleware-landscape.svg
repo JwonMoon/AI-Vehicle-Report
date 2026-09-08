@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1260" height="904" viewBox="0 0 1260 904" font-family="IBM Plex Sans KR, Pretendard, Noto Sans KR, Apple SD Gothic Neo, sans-serif">
+<defs><marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#4b5563"/></marker></defs>
+<title>미들웨어·OS 층 지형</title>
+<rect width="1260" height="904" fill="#ffffff"/>
+<text x="24" y="32" font-size="18" fill="#111827" font-weight="700">미들웨어 · OS 층 지형 — 누가 무엇을 zero-copy하고, 무엇이 인증됐나 (2026-09)</text>
+<text x="24" y="52" font-size="11" fill="#6b7280">태그: [ASIL D] 인증 완료 · [ASIL B] 설계 / 인증 · [QM] 인증 없음 · ZC = zero-copy 범위(고정 = 고정 크기 타입만, 가변 = 가변 크기 포함). 파란 테두리 = 가변 타입 zero-copy. 자체 작성.</text>
+<rect x="24" y="66" width="800" height="320.858" rx="10" fill="#f8fafc" stroke="#e5e7eb" stroke-width="1.2"/>
+<text x="36" y="88" font-size="13" fill="#374151" font-weight="700">ROS 2 계열 — rmw 추상화 위·아래</text>
+<rect x="36.0" y="98" width="252.0" height="76.99400000000003" rx="6" fill="#fff" stroke="#9ca3af" stroke-width="1.2"/>
+<text x="44.0" y="118.075" font-size="11.5" fill="#111827" font-weight="600">rmw_fastrtps (기본)</text>
+<text x="44.0" y="134.37" font-size="10" fill="#374151">Fast DDS · data-sharing은 XML opt-in ·</text>
+<text x="44.0" y="148.17000000000002" font-size="10" fill="#374151">Lyrical rosidl::Buffer 첫 지원</text>
+<text x="44.0" y="163.76000000000002" font-size="9.8" fill="#6b7280" font-weight="700">[QM] ZC: 고정(opt-in)</text>
+<rect x="298.0" y="98" width="252.0" height="76.99400000000003" rx="6" fill="#fff" stroke="#9ca3af" stroke-width="1.2"/>
+<text x="306.0" y="118.075" font-size="11.5" fill="#111827" font-weight="600">rmw_cyclonedds</text>
+<text x="306.0" y="134.37" font-size="10" fill="#374151">Autoware 기본 · iceoryx PSMX 플러그인으로</text>
+<text x="306.0" y="148.17000000000002" font-size="10" fill="#374151">SHM</text>
+<text x="306.0" y="163.76000000000002" font-size="9.8" fill="#6b7280" font-weight="700">[QM] ZC: 고정(PSMX)</text>
+<rect x="560.0" y="98" width="252.0" height="76.99400000000003" rx="6" fill="#fff" stroke="#9ca3af" stroke-width="1.2"/>
+<text x="568.0" y="118.075" font-size="11.5" fill="#111827" font-weight="600">rmw_zenoh (Kilted+ Tier-1)</text>
+<text x="568.0" y="134.37" font-size="10" fill="#374151">호스트당 router · p2p TCP · 멀티캐스트 off ·</text>
+<text x="568.0" y="148.17000000000002" font-size="10" fill="#374151">Deadline/Lifespan 미구현</text>
+<text x="568.0" y="163.76000000000002" font-size="9.8" fill="#6b7280" font-weight="700">[QM] ZC: SHM opt-in · zenoh-pico ASIL D 진행</text>
+<rect x="36.0" y="184.994" width="252.0" height="63.19399999999999" rx="6" fill="#fff" stroke="#9ca3af" stroke-width="1.2"/>
+<text x="44.0" y="205.069" font-size="11.5" fill="#111827" font-weight="600">rmw_connextdds</text>
+<text x="44.0" y="221.36399999999998" font-size="10" fill="#374151">RTI · Connext Drive 파생</text>
+<text x="44.0" y="236.95399999999998" font-size="9.8" fill="#166534" font-weight="700">[ASIL D] Connext Drive 기초 컴포넌트</text>
+<rect x="298.0" y="184.994" width="252.0" height="76.994" rx="6" fill="#fff" stroke="#9ca3af" stroke-width="1.2"/>
+<text x="306.0" y="205.069" font-size="11.5" fill="#111827" font-weight="600">rmw_iceoryx / iceoryx2</text>
+<text x="306.0" y="221.36399999999998" font-size="10" fill="#374151">RouDi 데몬 / 데몬 없음 · 0.09 µs(i7) · QNX tier</text>
+<text x="306.0" y="235.164" font-size="10" fill="#374151">3</text>
+<text x="306.0" y="250.754" font-size="9.8" fill="#6b7280" font-weight="700">[QM] ZC: 고정</text>
+<rect x="560.0" y="184.994" width="252.0" height="76.994" rx="6" fill="#fff" stroke="#1d4ed8" stroke-width="1.2"/>
+<text x="568.0" y="205.069" font-size="11.5" fill="#111827" font-weight="600">Agnocast (TIER IV → AWF)</text>
+<text x="568.0" y="221.36399999999998" font-size="10" fill="#374151">커널 모듈 + 공유메모리 + 힙 후킹 · rmw 우회 ·</text>
+<text x="568.0" y="235.164" font-size="10" fill="#374151">Autoware 80 pkgs</text>
+<text x="568.0" y="250.754" font-size="9.8" fill="#6b7280" font-weight="700">[QM] ZC: 가변 타입 포함</text>
+<rect x="36.0" y="271.988" width="252.0" height="76.99400000000003" rx="6" fill="#fff" stroke="#9ca3af" stroke-width="1.2"/>
+<text x="44.0" y="292.063" font-size="11.5" fill="#111827" font-weight="600">Apex.Grace + Apex.Ida</text>
+<text x="44.0" y="308.358" font-size="10" fill="#374151">ROS 2 파생 · TÜV NORD 인증 · 기본 RMW / DDS</text>
+<text x="44.0" y="322.158" font-size="10" fill="#374151">대체 미들웨어</text>
+<text x="44.0" y="337.74800000000005" font-size="9.8" fill="#166534" font-weight="700">[ASIL D] ZC: 공유메모리</text>
+<rect x="298.0" y="271.988" width="252.0" height="104.87000000000006" rx="6" fill="#fff" stroke="#9ca3af" stroke-width="1.2"/>
+<text x="306.0" y="292.063" font-size="11.5" fill="#111827" font-weight="600">Executor 계보</text>
+<text x="306.0" y="308.358" font-size="10" fill="#374151">Single / Multi(wait-set) →</text>
+<text x="306.0" y="322.158" font-size="10" fill="#374151">EventsCBG(Lyrical, CPU −10~15%) →</text>
+<text x="306.0" y="335.958" font-size="10" fill="#374151">CallbackIsolated(콜백당 스레드, OS 위임)</text>
+<text x="306.0" y="351.75800000000004" font-size="10" fill="#374151">실시간: TLSF 할당자 · mlockall · 콜백 그룹 → OS</text>
+<text x="306.0" y="365.55800000000005" font-size="10" fill="#374151">우선순위</text>
+<rect x="840" y="66" width="396" height="205.988" rx="10" fill="#f8fafc" stroke="#e5e7eb" stroke-width="1.2"/>
+<text x="852" y="88" font-size="13" fill="#374151" font-weight="700">스택 자체 미들웨어</text>
+<rect x="852.0" y="98" width="372.0" height="76.99400000000003" rx="6" fill="#fff" stroke="#9ca3af" stroke-width="1.2"/>
+<text x="860.0" y="118.075" font-size="11.5" fill="#111827" font-weight="600">Apollo Cyber RT</text>
+<text x="860.0" y="134.37" font-size="10" fill="#374151">INTRA / SHM arena(32 MiB × 32) / RTPS · 코루틴 스케줄러 prio 20 ·</text>
+<text x="860.0" y="148.17000000000002" font-size="10" fill="#374151">classic(워크 스틸링) / choreography(코어 핀)</text>
+<text x="860.0" y="163.76000000000002" font-size="9.8" fill="#6b7280" font-weight="700">[QM] ZC: arena(protobuf) · Fast-RTPS 디스커버리</text>
+<rect x="852.0" y="184.994" width="372.0" height="76.994" rx="6" fill="#fff" stroke="#9ca3af" stroke-width="1.2"/>
+<text x="860.0" y="205.069" font-size="11.5" fill="#111827" font-weight="600">openpilot msgq + VisionIPC</text>
+<text x="860.0" y="221.36399999999998" font-size="10" fill="#374151">/dev/shm mmap 링버퍼 + Cap&#x27;n Proto · ION DMA 버퍼 공유 · 큐 크기</text>
+<text x="860.0" y="235.164" font-size="10" fill="#374151">명시 · isolcpus</text>
+<text x="860.0" y="250.754" font-size="9.8" fill="#6b7280" font-weight="700">[QM] ZC: 프레임(ION) · 안전은 panda MCU</text>
+<rect x="24" y="398.858" width="800" height="132.79399999999998" rx="10" fill="#f8fafc" stroke="#e5e7eb" stroke-width="1.2"/>
+<text x="36" y="420.858" font-size="13" fill="#374151" font-weight="700">AUTOSAR Adaptive 계열 — ara::com 바인딩</text>
+<rect x="36.0" y="430.858" width="252.0" height="76.99400000000003" rx="6" fill="#fff" stroke="#9ca3af" stroke-width="1.2"/>
+<text x="44.0" y="450.933" font-size="11.5" fill="#111827" font-weight="600">MICROSAR Adaptive (Vector)</text>
+<text x="44.0" y="467.228" font-size="10" fill="#374151">SOME/IP · IPC · RTI DDS 바인딩 애드온 ·</text>
+<text x="44.0" y="481.028" font-size="10" fill="#374151">ETAS RTA-VRTE: QNX / Linux + HV</text>
+<text x="44.0" y="496.61800000000005" font-size="9.8" fill="#92400e" font-weight="700">[ASIL B] Safe 변형</text>
+<rect x="298.0" y="430.858" width="252.0" height="76.99400000000003" rx="6" fill="#fff" stroke="#9ca3af" stroke-width="1.2"/>
+<text x="306.0" y="450.933" font-size="11.5" fill="#111827" font-weight="600">vsomeip 3.7 (BMW, MPL-2.0)</text>
+<text x="306.0" y="467.228" font-size="10" fill="#374151">4 .so · 로컬 UDS · routing manager ·</text>
+<text x="306.0" y="481.028" font-size="10" fill="#374151">SOME/IP-SD 멀티캐스트</text>
+<text x="306.0" y="496.61800000000005" font-size="9.8" fill="#6b7280" font-weight="700">[QM] ZC: 없음(직렬화)</text>
+<rect x="560.0" y="430.858" width="252.0" height="90.79400000000004" rx="6" fill="#fff" stroke="#1d4ed8" stroke-width="1.2"/>
+<text x="568.0" y="450.933" font-size="11.5" fill="#111827" font-weight="600">Eclipse S-CORE LoLa</text>
+<text x="568.0" y="467.228" font-size="10" fill="#374151">ara::com 부분 구현 · ASIL별 SHM 세그먼트 ·</text>
+<text x="568.0" y="481.028" font-size="10" fill="#374151">Linux + QNX(qnx_dispatch) · v0.8 QNX 8 이미지</text>
+<text x="568.0" y="494.82800000000003" font-size="10" fill="#374151">· &quot;production 아님&quot;</text>
+<text x="568.0" y="510.41800000000006" font-size="9.8" fill="#92400e" font-weight="700">[ASIL B 설계] ZC: 공유메모리</text>
+<rect x="840" y="398.858" width="396" height="205.988" rx="10" fill="#f8fafc" stroke="#e5e7eb" stroke-width="1.2"/>
+<text x="852" y="420.858" font-size="13" fill="#374151" font-weight="700">OS · 하이퍼바이저 (1)</text>
+<rect x="852.0" y="430.858" width="372.0" height="76.99400000000003" rx="6" fill="#fff" stroke="#9ca3af" stroke-width="1.2"/>
+<text x="860.0" y="450.933" font-size="11.5" fill="#111827" font-weight="600">QNX SDP 8 / Hypervisor 8.0</text>
+<text x="860.0" y="467.228" font-size="10" fill="#374151">thread executive · 2~64코어 근선형 · HV 8.0 for Safety GA 2026-03 ·</text>
+<text x="860.0" y="481.028" font-size="10" fill="#374151">게스트 QNX / Linux / Android</text>
+<text x="860.0" y="496.61800000000005" font-size="9.8" fill="#166534" font-weight="700">[ASIL D]</text>
+<rect x="852.0" y="517.852" width="372.0" height="76.99399999999991" rx="6" fill="#fff" stroke="#9ca3af" stroke-width="1.2"/>
+<text x="860.0" y="537.927" font-size="11.5" fill="#111827" font-weight="600">NVIDIA DriveOS</text>
+<text x="860.0" y="554.222" font-size="10" fill="#374151">Type-1 HV · 파티션-코어 바인딩 · Thor: QNX OS for Safety 8 게스트 ·</text>
+<text x="860.0" y="568.0219999999999" font-size="10" fill="#374151">7.0 LLM SDK(FP8 / NVFP4 / INT4)</text>
+<text x="860.0" y="583.6119999999999" font-size="9.8" fill="#166534" font-weight="700">[ASIL D] TÜV SÜD</text>
+<rect x="24" y="616.846" width="800" height="133.07" rx="10" fill="#f8fafc" stroke="#e5e7eb" stroke-width="1.2"/>
+<text x="36" y="638.846" font-size="13" fill="#374151" font-weight="700">SDV 프레임워크 — 배포 · 오케스트레이션 (격리 수단 아님)</text>
+<rect x="36.0" y="648.846" width="383.0" height="91.06999999999982" rx="6" fill="#fff" stroke="#9ca3af" stroke-width="1.2"/>
+<text x="44.0" y="668.921" font-size="11.5" fill="#111827" font-weight="600">SOAFEE (Arm → CoreCollective WG, 2026)</text>
+<text x="44.0" y="685.216" font-size="10" fill="#374151">v1.0 필수: OCI 컨테이너 · K8s API · 환경 동등성 · EWAOL / Future Work:</text>
+<text x="44.0" y="699.016" font-size="10" fill="#374151">혼합 중요도 오케스트레이션 · 파티셔닝 지침</text>
+<text x="44.0" y="714.8159999999999" font-size="10" fill="#374151">Open AD Kit R1: Autoware + CycloneDDS 컨테이너 / R2: 액추에이션 →</text>
+<text x="44.0" y="728.6159999999999" font-size="10" fill="#374151">Zephyr / S32Z(R52) 분리 · 회원 150+ · LG전자 이사회</text>
+<rect x="429.0" y="648.846" width="383.0" height="91.06999999999982" rx="6" fill="#fff" stroke="#9ca3af" stroke-width="1.2"/>
+<text x="437.0" y="668.921" font-size="11.5" fill="#111827" font-weight="600">Eclipse SDV — S-CORE · Ankaios · BlueChi · Kuksa · uProtocol</text>
+<text x="437.0" y="685.216" font-size="10" fill="#374151">S-CORE: Lifecycle(≈EM+PHM, cgroup / secpol / OCI sandbox) ·</text>
+<text x="437.0" y="699.016" font-size="10" fill="#374151">Orchestration(고정 스레드풀 + 선언적 그래프) · FEO(고정 실행 순서)</text>
+<text x="437.0" y="714.8159999999999" font-size="10" fill="#374151">v0.5α 2025-11 → v0.6 2026-02(Rust) → v0.8(QNX 8) · 회원 BMW ·</text>
+<text x="437.0" y="728.6159999999999" font-size="10" fill="#374151">Mercedes · ETAS · EB · Qorix · Aumovio · Qualcomm · 현대모비스</text>
+<rect x="840" y="616.846" width="396" height="118.994" rx="10" fill="#f8fafc" stroke="#e5e7eb" stroke-width="1.2"/>
+<text x="852" y="638.846" font-size="13" fill="#374151" font-weight="700">OS · 하이퍼바이저 (2)</text>
+<rect x="852.0" y="648.846" width="372.0" height="76.99399999999991" rx="6" fill="#fff" stroke="#9ca3af" stroke-width="1.2"/>
+<text x="860.0" y="668.921" font-size="11.5" fill="#111827" font-weight="600">Linux — AGL · ELISA · 배포판</text>
+<text x="860.0" y="685.216" font-size="10" fill="#374151">AGL Ultimate Unagi(2026-05) SoDeV · ELISA는 인증 안 함(도구 ·</text>
+<text x="860.0" y="699.016" font-size="10" fill="#374151">프로세스) · Xen · L4Re(Open AD Kit R2)</text>
+<text x="860.0" y="714.6059999999999" font-size="9.8" fill="#92400e" font-weight="700">[ASIL B] Red Hat IVOS · [ASIL D 평가] Codethink</text>
+<rect x="24" y="761.9159999999999" width="1212" height="89.67" rx="10" fill="#f8fafc" stroke="#e5e7eb" stroke-width="1.2"/>
+<text x="36" y="783.9159999999999" font-size="13" fill="#374151" font-weight="700">혼합 중요도 분리 포인트 — 스택이 플랫폼에 요구하는 네 가지</text>
+<rect x="36.0" y="793.9159999999999" width="289.5" height="47.66999999999996" rx="6" fill="#fff" stroke="#9ca3af" stroke-width="1.2"/>
+<text x="44.0" y="813.991" font-size="11.5" fill="#111827" font-weight="600">(i) 하이퍼바이저 · 코어 파티셔닝</text>
+<text x="44.0" y="830.286" font-size="10" fill="#374151">QNX HV · DriveOS · Xen · L4Re · cpuset / isolcpus</text>
+<rect x="335.5" y="793.9159999999999" width="289.5" height="47.66999999999996" rx="6" fill="#fff" stroke="#9ca3af" stroke-width="1.2"/>
+<text x="343.5" y="813.991" font-size="11.5" fill="#111827" font-weight="600">(ii) OS 프로세스 격리 + ACL</text>
+<text x="343.5" y="830.286" font-size="10" fill="#374151">secpol · cgroup · S-CORE Lifecycle sandbox</text>
+<rect x="635.0" y="793.9159999999999" width="289.5" height="47.66999999999996" rx="6" fill="#fff" stroke="#9ca3af" stroke-width="1.2"/>
+<text x="643.0" y="813.991" font-size="11.5" fill="#111827" font-weight="600">(iii) 미들웨어 SHM의 ASIL별 세그먼트</text>
+<text x="643.0" y="830.286" font-size="10" fill="#374151">LoLa triplet · QM 소비자 배제 규칙</text>
+<rect x="934.5" y="793.9159999999999" width="289.5" height="47.66999999999996" rx="6" fill="#fff" stroke="#9ca3af" stroke-width="1.2"/>
+<text x="942.5" y="813.991" font-size="11.5" fill="#111827" font-weight="600">(iv) 컨테이너 = 배포 단위(격리 아님)</text>
+<text x="942.5" y="830.286" font-size="10" fill="#374151">SOAFEE v1.0 · S-CORE sandbox 옵션 · Open AD Kit R2</text>
+<text x="24" y="869.5859999999999" font-size="11" fill="#6b7280">2026년 기본값: 안전 파티션에는 인증 스택(Apex.Grace · Connext Drive · QNX HV · DriveOS), QM 파티션에는 오픈 스택(Zenoh · iceoryx2 · Agnocast · LoLa). 호스트 내 대용량은 공유메모리 계열, 존 / 도메인 간과 차량-클라우드는</text>
+<text x="24" y="884.7659999999998" font-size="11" fill="#6b7280">Zenoh · SOME/IP. 근거: 각 저장소 README · 설계 문서(💻🔍), 인증은 보도 · 벤더 페이지(📰).</text>
+</svg>

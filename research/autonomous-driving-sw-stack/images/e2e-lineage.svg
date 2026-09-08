@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="560" viewBox="0 0 1180 560" font-family="IBM Plex Sans KR, Pretendard, Noto Sans KR, Apple SD Gothic Neo, sans-serif">
+  <defs>
+    <marker id="a" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#6b7280"/></marker>
+    <style>
+      .h{font-size:17px;font-weight:700;fill:#111827}
+      .lane{font-size:12px;font-weight:700;fill:#374151}
+      .n{font-size:11px;font-weight:600;fill:#111827}
+      .s{font-size:9px;fill:#4b5563}
+      .lbl{font-size:11px;fill:#6b7280}
+      .yr{font-size:11px;fill:#6b7280;font-weight:600}
+      .node{stroke-width:1.2;rx:6}
+      .l1{fill:#fee2e2;stroke:#ef4444}
+      .l2{fill:#fef3c7;stroke:#f59e0b}
+      .l3{fill:#dbeafe;stroke:#3b82f6}
+      .l4{fill:#dcfce7;stroke:#22c55e}
+      .e{stroke:#9ca3af;stroke-width:1.2;fill:none;marker-end:url(#a)}
+      .ed{stroke:#9ca3af;stroke-width:1.2;fill:none;stroke-dasharray:4 3;marker-end:url(#a)}
+    </style>
+  </defs>
+  <rect width="1180" height="560" fill="#ffffff"/>
+  <text x="24" y="32" class="h">학계 오픈 E2E 계보 — 벤치마크가 바뀔 때마다 모델 설계가 바뀌었다</text>
+  <text x="24" y="50" class="lbl">행 = 평가 방식(무엇을 재는가). 점수는 각 README·논문 보고값(🔍📰). 실선 = 직접 계승, 점선 = 영향. 자체 작성.</text>
+
+  <!-- year axis -->
+  <g class="yr">
+    <text x="150" y="80">2021~22</text><text x="300" y="80">2023</text><text x="470" y="80">2024</text><text x="700" y="80">2025</text><text x="960" y="80">2026</text>
+  </g>
+  <line x1="120" y1="86" x2="1160" y2="86" stroke="#e5e7eb"/>
+
+  <!-- lane 1: nuScenes open-loop -->
+  <rect x="24" y="100" width="1136" height="96" fill="#fff7f7" stroke="none"/>
+  <text x="32" y="118" class="lane">nuScenes 오픈루프 (L2·충돌률)</text>
+  <rect class="node l1" x="140" y="130" width="110" height="46"/><text x="148" y="148" class="n">ST-P3 (ECCV'22)</text><text x="148" y="162" class="s">BEV 시공간, 해석가능</text>
+  <rect class="node l1" x="290" y="130" width="134" height="46"/><text x="298" y="148" class="n">UniAD (CVPR'23 ★)</text><text x="298" y="162" class="s">계획 지향 쿼리 · A100 1.8 FPS</text>
+  <rect class="node l1" x="436" y="130" width="104" height="46"/><text x="444" y="148" class="n">VAD (ICCV'23)</text><text x="444" y="162" class="s">벡터화 · Tiny 16.8 FPS</text>
+  <rect class="node l1" x="550" y="130" width="120" height="46"/><text x="558" y="148" class="n">SparseDrive ('24)</text><text x="558" y="162" class="s">희소 표현 · 4090 9 FPS</text>
+  <rect class="node l1" x="690" y="130" width="170" height="46" stroke-dasharray="4 3"/><text x="698" y="148" class="n">"Ego Status All You Need?"</text><text x="698" y="162" class="s">CVPR'24: 에고 MLP ≈ SOTA → 붕괴</text>
+  <path class="e" d="M250,153 L290,153"/><path class="e" d="M424,153 L436,153"/><path class="e" d="M540,153 L550,153"/>
+
+  <!-- lane 2: CARLA closed-loop -->
+  <rect x="24" y="204" width="1136" height="96" fill="#fffbeb" stroke="none"/>
+  <text x="32" y="222" class="lane">CARLA 폐루프 (Driving Score)</text>
+  <rect class="node l2" x="140" y="234" width="134" height="46"/><text x="148" y="252" class="n">TransFuser ('21/'22)</text><text x="148" y="266" class="s">캠+LiDAR 융합 · LB1 DS 61</text>
+  <rect class="node l2" x="290" y="234" width="130" height="46"/><text x="298" y="252" class="n">TransFuser++ ('23)</text><text x="298" y="266" class="s">"Hidden Biases" · Longest6</text>
+  <rect class="node l2" x="470" y="234" width="130" height="46"/><text x="478" y="252" class="n">Bench2Drive ('24)</text><text x="478" y="266" class="s">220 루트 · CC-BY-NC-ND</text>
+  <rect class="node l2" x="700" y="234" width="120" height="46"/><text x="708" y="252" class="n">SimLingo ('25)</text><text x="708" y="266" class="s">비전 VLA · LB2 1위</text>
+  <rect class="node l2" x="960" y="234" width="170" height="46" stroke-dasharray="4 3"/><text x="968" y="252" class="n">Bench2Drive-Robust ('26-05)</text><text x="968" y="266" class="s">연산-제어 지연·스트림 실패 포함</text>
+  <path class="e" d="M274,257 L290,257"/><path class="e" d="M420,257 L470,257"/><path class="e" d="M600,257 L700,257"/><path class="ed" d="M820,257 L960,257"/>
+
+  <!-- lane 3: NAVSIM -->
+  <rect x="24" y="308" width="1136" height="120" fill="#eff6ff" stroke="none"/>
+  <text x="32" y="326" class="lane">NAVSIM 비반응 시뮬 (PDMS / v2 EPDMS)</text>
+  <rect class="node l3" x="470" y="340" width="146" height="46"/><text x="478" y="358" class="n">NAVSIM v1 ('24)</text><text x="478" y="372" class="s">PDMS · TF 84.0 · Ego-MLP 65.6</text>
+  <rect class="node l3" x="626" y="340" width="130" height="46"/><text x="634" y="358" class="n">Hydra-MDP (NVIDIA)</text><text x="634" y="372" class="s">다중 교사 증류 · 86.5</text>
+  <rect class="node l3" x="766" y="340" width="140" height="46"/><text x="774" y="358" class="n">DiffusionDrive ('25)</text><text x="774" y="372" class="s">앵커 20 · 2스텝 · 88.1 · 45 FPS</text>
+  <rect class="node l3" x="916" y="340" width="120" height="46"/><text x="924" y="358" class="n">GTRS · WoTE</text><text x="924" y="372" class="s">어휘 스코어 / BEV 월드모델</text>
+  <rect class="node l3" x="1040" y="340" width="120" height="46"/><text x="1048" y="358" class="n">SparseDriveV2 ('26)</text><text x="1048" y="372" class="s">경로×속도 어휘 · 92.2</text>
+  <rect class="node l3" x="766" y="392" width="230" height="30" stroke-dasharray="4 3"/><text x="774" y="411" class="s">v2(CoRL'25): 3DGS 합성 관측 → EPDMS, r=0.89</text>
+  <path class="e" d="M616,363 L626,363"/><path class="e" d="M756,363 L766,363"/><path class="e" d="M906,363 L916,363"/><path class="e" d="M1036,363 L1040,363"/>
+  <path class="ed" d="M735,176 L520,340"/>
+
+  <!-- lane 4: VLA / world model / RL -->
+  <rect x="24" y="436" width="1136" height="96" fill="#f0fdf4" stroke="none"/>
+  <text x="32" y="454" class="lane">VLA · 월드모델 · RL (평가자 선호, 폐루프 챌린지)</text>
+  <rect class="node l4" x="470" y="466" width="110" height="46"/><text x="478" y="484" class="n">DriveLM ('24)</text><text x="478" y="498" class="s">Graph VQA</text>
+  <rect class="node l4" x="700" y="466" width="150" height="46"/><text x="708" y="484" class="n">OpenDriveVLA · AutoVLA</text><text x="708" y="498" class="s">Qwen 0.5~7B + 액션 토큰</text>
+  <rect class="node l4" x="866" y="466" width="140" height="46"/><text x="874" y="484" class="n">Epona · ReCogDrive</text><text x="874" y="498" class="s">2.5B 월드모델 / VLM+확산 90.8</text>
+  <rect class="node l4" x="1016" y="466" width="150" height="46"/><text x="1024" y="484" class="n">WOD-E2E (CVPR'26)</text><text x="1024" y="498" class="s">롱테일 4,021 · RFS(평가자 선호)</text>
+  <path class="e" d="M580,489 L700,489"/><path class="e" d="M850,489 L866,489"/><path class="ed" d="M1006,489 L1016,489"/>
+
+  <text x="24" y="550" class="lbl">읽기: 오픈루프 붕괴(2024) → 비반응 시뮬(NAVSIM) 위에서 "작은 백본 + 후보 생성·스코어링"이 이겼다(ResNet-34, 50~60M). 2026년 축은 폐루프·롱테일·평가자 선호로 이동. 실차 양산 배포를 명시한 오픈 코드는 없다.</text>
+</svg>

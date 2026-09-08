@@ -1,0 +1,2626 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>자율주행 SW Stack 파헤치기</title>
+<meta name="description" content="열두 스택을 여덟 층으로 열어 보니, 승부는 모델이 아니라 &quot;층 경계&quot;에서 벌어지고 있었다">
+<meta name="author" content="AI-Vehicle-Research">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f6f2; --bg-2:#ffffff; --bg-3:#efede6; --fg:#1d1f22; --fg-2:#4a4e55; --fg-3:#767b84;
+  --line:#dcd9d0; --line-2:#e9e6de;
+  --accent:#0f6f8e; --accent-2:#0a5a74; --accent-bg:#e5f1f5;
+  --hpc:#9a5a00; --hpc-bg:#fbf1df; --hpc-line:#e7c98f;
+  --howto-bg:#eeede8;
+  --myth:#8c3a3a; --fact:#1d5f3a;
+  --code-bg:#f0efea; --pre-bg:#1e2126; --pre-fg:#e6e8ec;
+  --shadow:0 1px 2px rgba(0,0,0,.06),0 8px 24px -12px rgba(0,0,0,.18);
+  --radius:12px;
+  --w:860px; --toc-w:272px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#131518; --bg-2:#1b1e23; --bg-3:#22262c; --fg:#e7e9ec; --fg-2:#b7bcc5; --fg-3:#858c97;
+    --line:#2f343c; --line-2:#272c33;
+    --accent:#5cc0e0; --accent-2:#8ad4ec; --accent-bg:#152a33;
+    --hpc:#f0b458; --hpc-bg:#2a2115; --hpc-line:#5a4520;
+    --howto-bg:#1e2126;
+    --myth:#e08a8a; --fact:#7fce9f;
+    --code-bg:#262a31; --pre-bg:#0e1013; --pre-fg:#dfe3e8;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#131518; --bg-2:#1b1e23; --bg-3:#22262c; --fg:#e7e9ec; --fg-2:#b7bcc5; --fg-3:#858c97;
+  --line:#2f343c; --line-2:#272c33;
+  --accent:#5cc0e0; --accent-2:#8ad4ec; --accent-bg:#152a33;
+  --hpc:#f0b458; --hpc-bg:#2a2115; --hpc-line:#5a4520;
+  --howto-bg:#1e2126;
+  --myth:#e08a8a; --fact:#7fce9f;
+  --code-bg:#262a31; --pre-bg:#0e1013; --pre-fg:#dfe3e8;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6);
+}
+:root[data-theme="dark"]{color-scheme:dark}
+:root[data-theme="light"]{color-scheme:light}
+
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+html,body{overflow-x:hidden}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font-family:"IBM Plex Sans KR","Pretendard","Noto Sans KR","Apple SD Gothic Neo",system-ui,sans-serif;
+  font-size:16px;line-height:1.75;word-break:keep-all;overflow-wrap:anywhere}
+code,pre,kbd{font-family:"IBM Plex Mono","SFMono-Regular",Menlo,Consolas,monospace}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+img{max-width:100%;height:auto}
+.skip{position:absolute;left:-999px;top:0;background:var(--accent);color:#fff;padding:.5rem 1rem;z-index:100}
+.skip:focus{left:8px;top:8px}
+
+/* top bar */
+.topbar{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 88%,transparent);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line-2)}
+.topbar-in{max-width:calc(var(--w) + var(--toc-w) + 96px);margin:0 auto;padding:.55rem 1.1rem;
+  display:flex;align-items:center;gap:.75rem}
+.brand{font-weight:600;font-size:.9rem;color:var(--fg-2);letter-spacing:.01em;flex:1;min-width:0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand em{font-style:normal;color:var(--accent)}
+.iconbtn{appearance:none;border:1px solid var(--line);background:var(--bg-2);color:var(--fg);
+  border-radius:999px;height:34px;padding:0 .8rem;font:inherit;font-size:.8rem;cursor:pointer;
+  display:inline-flex;align-items:center;gap:.4rem}
+.iconbtn:hover{border-color:var(--accent)}
+.iconbtn svg{width:16px;height:16px}
+#toc-toggle{display:none}
+
+/* layout */
+.layout{max-width:calc(var(--w) + var(--toc-w) + 96px);margin:0 auto;padding:0 1.1rem 4rem;
+  display:grid;grid-template-columns:minmax(0,1fr);gap:0 48px}
+main{min-width:0;max-width:var(--w);margin:0 auto;width:100%}
+.toc{display:none}
+@media (min-width:1240px){
+  .layout{grid-template-columns:var(--toc-w) minmax(0,var(--w))}
+  .toc{display:block;position:sticky;top:64px;align-self:start;max-height:calc(100vh - 80px);
+    overflow-y:auto;padding:1.4rem 0 1rem;font-size:.82rem;scrollbar-width:thin}
+  main{margin:0}
+}
+.toc-title{font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:var(--fg-3);margin:0 0 .6rem .75rem;font-weight:600}
+.toc-list,.toc-sub{list-style:none;margin:0;padding:0}
+.toc-list>li{margin:.05rem 0}
+.toc-list a{display:block;padding:.3rem .75rem;border-left:2px solid transparent;color:var(--fg-2);
+  line-height:1.4;border-radius:0 6px 6px 0}
+.toc-list a:hover{background:var(--bg-3);text-decoration:none;color:var(--fg)}
+.toc-list a.active{border-left-color:var(--accent);color:var(--accent);background:var(--accent-bg);font-weight:600}
+.toc-sub{margin:.05rem 0 .3rem .6rem}
+.toc-sub a{padding:.22rem .75rem;font-size:.78rem;color:var(--fg-3)}
+@media (max-width:1239.98px){
+  #toc-toggle{display:inline-flex}
+  .toc.open{display:block;position:fixed;top:52px;left:0;right:0;bottom:0;z-index:49;background:var(--bg);
+    overflow-y:auto;padding:1rem 1.1rem 3rem;font-size:.9rem}
+}
+
+/* hero */
+.hero{padding:3rem 0 1.5rem;border-bottom:1px solid var(--line-2);margin-bottom:1.5rem}
+.eyebrow{font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0 0 .8rem}
+.hero h1{font-size:clamp(1.9rem,4.6vw,2.7rem);line-height:1.2;margin:0 0 .7rem;letter-spacing:-.02em;font-weight:700}
+.hero .sub{font-size:clamp(1.02rem,2.2vw,1.22rem);color:var(--fg-2);line-height:1.55;margin:0 0 1.3rem;font-weight:400}
+.chips{display:flex;flex-wrap:wrap;gap:.5rem;margin:0 0 1.2rem}
+.chip{display:inline-flex;align-items:baseline;gap:.45rem;border:1px solid var(--line);background:var(--bg-2);
+  border-radius:999px;padding:.3rem .85rem;font-size:.82rem}
+.chip .k{color:var(--fg-3);font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.meta{display:grid;gap:.7rem;margin:0;font-size:.9rem;background:var(--bg-2);border:1px solid var(--line-2);
+  border-radius:var(--radius);padding:1rem 1.15rem}
+.meta div{display:grid;grid-template-columns:96px minmax(0,1fr);gap:.6rem}
+.meta dt{color:var(--fg-3);font-size:.76rem;font-weight:600;letter-spacing:.04em;padding-top:.2rem}
+.meta dd{margin:0;color:var(--fg-2);line-height:1.6}
+@media (max-width:560px){.meta div{grid-template-columns:1fr;gap:.15rem}}
+
+/* headings */
+h2,h3{scroll-margin-top:72px;letter-spacing:-.01em;line-height:1.3}
+h2{font-size:1.55rem;margin:0 0 1rem;font-weight:700}
+h3{font-size:1.16rem;margin:2.2rem 0 .8rem;font-weight:600;color:var(--fg)}
+h2 .anchor,h3 .anchor{color:inherit}
+h2 .anchor:hover,h3 .anchor:hover{text-decoration:none;color:var(--accent)}
+section{margin:0 0 3.4rem;padding-top:1.4rem}
+section.chapter{border-top:1px solid var(--line);padding-top:2rem}
+section.chapter::before{content:"CHAPTER " attr(data-num);display:block;font-family:"IBM Plex Mono",monospace;
+  font-size:.7rem;letter-spacing:.18em;color:var(--accent);font-weight:600;margin-bottom:.5rem}
+section.section{border-top:1px solid var(--line);padding-top:2rem}
+p{margin:0 0 1.05rem}
+p>strong:first-child{color:var(--fg)}
+ul,ol{padding-left:1.4rem;margin:0 0 1.1rem}
+li{margin:.3rem 0}
+li::marker{color:var(--fg-3)}
+strong{font-weight:600}
+em{font-style:italic}
+code{background:var(--code-bg);padding:.1em .38em;border-radius:5px;font-size:.84em;color:var(--fg)}
+pre{background:var(--pre-bg);color:var(--pre-fg);padding:1rem 1.1rem;border-radius:10px;overflow-x:auto;
+  font-size:.8rem;line-height:1.6;margin:0 0 1.2rem;border:1px solid rgba(255,255,255,.06)}
+pre code{background:none;padding:0;color:inherit;font-size:inherit}
+hr{border:0;border-top:1px solid var(--line);margin:2rem 0}
+
+/* evidence marks */
+.ev{font-size:.8em;cursor:help;opacity:.92;vertical-align:baseline}
+.ev-legend{display:flex;flex-wrap:wrap;gap:.4rem .9rem;margin:.6rem 0 0;padding:0;list-style:none;font-size:.8rem;color:var(--fg-2)}
+.ev-legend li{display:inline-flex;gap:.35rem;align-items:baseline}
+
+/* callouts */
+.callout{border-radius:var(--radius);padding:1.1rem 1.25rem;margin:0 0 1.6rem;border:1px solid var(--line-2);position:relative}
+.callout .lbl{display:inline-block;font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  margin-bottom:.35rem}
+.callout p:last-child,.callout ol:last-child{margin-bottom:0}
+.callout.howto{background:var(--howto-bg);font-size:.92rem;color:var(--fg-2)}
+.callout.howto .lbl{color:var(--fg-3)}
+.callout.qa{background:var(--bg-2);border-left:4px solid var(--accent);padding:0;overflow:hidden;box-shadow:var(--shadow)}
+.callout.qa .qa-q{padding:1rem 1.25rem .9rem;background:var(--accent-bg)}
+.callout.qa .qa-q p{margin:0;font-weight:600;font-size:1.02rem;line-height:1.55}
+.callout.qa .qa-a{padding:.9rem 1.25rem 1.05rem}
+.callout.qa .lbl{color:var(--accent)}
+ol.three{list-style:none;padding:0;margin:0;display:grid;gap:.45rem}
+ol.three li{display:grid;grid-template-columns:1.5rem minmax(0,1fr);gap:.4rem;margin:0;font-size:.95rem;line-height:1.65}
+ol.three .num{color:var(--accent);font-weight:700;font-size:1.05rem;line-height:1.5}
+.callout.hpc{background:var(--hpc-bg);border-color:var(--hpc-line);border-left:4px solid var(--hpc);
+  padding-left:1.25rem;font-size:.95rem}
+.callout.hpc .lbl{color:var(--hpc)}
+.callout.hpc .lbl::before{content:"";display:inline-block;width:.55rem;height:.55rem;border-radius:2px;background:var(--hpc);
+  margin-right:.45rem;vertical-align:1px}
+
+/* summary cards */
+ol.summary{list-style:none;padding:0;margin:0 0 .5rem;display:grid;gap:.7rem;counter-reset:card}
+ol.summary li{counter-increment:card;background:var(--bg-2);border:1px solid var(--line-2);border-radius:var(--radius);
+  padding:1rem 1.15rem 1rem 3.6rem;position:relative;margin:0;line-height:1.65;box-shadow:var(--shadow)}
+ol.summary li::before{content:counter(card);position:absolute;left:1.05rem;top:.95rem;width:1.75rem;height:1.75rem;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;font-size:.85rem;display:flex;align-items:center;justify-content:center;
+  font-family:"IBM Plex Mono",monospace}
+ol.summary li>strong{display:block;margin-bottom:.25rem;font-size:1.02rem;color:var(--fg)}
+
+/* tables */
+.table-wrap{overflow-x:auto;margin:0 0 1.4rem;border:1px solid var(--line-2);border-radius:10px;background:var(--bg-2);
+  -webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:.86rem;line-height:1.55}
+th,td{padding:.6rem .75rem;border-bottom:1px solid var(--line-2);vertical-align:top;text-align:left}
+th{background:var(--bg-3);font-weight:600;font-size:.8rem;color:var(--fg-2);white-space:nowrap;position:sticky;top:0}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:color-mix(in srgb,var(--accent-bg) 45%,transparent)}
+td.src{font-size:.78rem;color:var(--fg-3);white-space:nowrap}
+td code,th code{font-size:.8em}
+table.cols-4{min-width:640px}
+table.cols-5{min-width:760px}
+table.cols-6{min-width:900px}
+table.cols-9{min-width:1500px}
+table.myth td.myth-c{color:var(--myth);font-weight:500;min-width:190px}
+table.myth td.fact-c{min-width:340px}
+table.myth td.src{white-space:normal;min-width:120px}
+table.myth thead th:first-child{color:var(--myth)}
+table.myth thead th:nth-child(2){color:var(--fact)}
+
+/* figures */
+figure.fig{margin:1.2rem 0 1.6rem;background:var(--bg-2);border:1px solid var(--line-2);border-radius:var(--radius);padding:.8rem .8rem .6rem}
+figure.fig img{display:block;width:100%;height:auto;border-radius:6px;background:#fff}
+figure.fig figcaption{font-size:.8rem;color:var(--fg-3);line-height:1.55;padding:.7rem .3rem .2rem;font-style:normal}
+:root[data-theme="dark"] figure.fig img{filter:none}
+
+/* footer */
+footer{border-top:1px solid var(--line);margin-top:3rem;padding:1.6rem 0 0;font-size:.85rem;color:var(--fg-3)}
+footer ul{list-style:none;padding:0;margin:.5rem 0 0;display:flex;flex-wrap:wrap;gap:.4rem 1.2rem}
+
+/* to top */
+.totop{position:fixed;right:18px;bottom:18px;z-index:40;appearance:none;border:1px solid var(--line);background:var(--bg-2);
+  color:var(--fg-2);border-radius:999px;height:40px;padding:0 .9rem 0 .7rem;font:inherit;font-size:.78rem;cursor:pointer;
+  display:inline-flex;align-items:center;gap:.35rem;box-shadow:var(--shadow);opacity:0;transform:translateY(8px);
+  transition:opacity .2s,transform .2s;pointer-events:none}
+.totop.show{opacity:1;transform:none;pointer-events:auto}
+.totop svg{width:14px;height:14px}
+@media (max-width:640px){
+  body{font-size:15.5px}
+  .hero{padding-top:2rem}
+  .callout{padding:.9rem 1rem}
+  .callout.qa .qa-q,.callout.qa .qa-a{padding-left:1rem;padding-right:1rem}
+  ol.summary li{padding-left:3.1rem}
+  ol.summary li::before{left:.8rem}
+  .totop span{display:none}
+  .totop{padding:0 .7rem}
+}
+@media print{
+  .topbar,.toc,.totop{display:none!important}
+  .layout{display:block}
+  .table-wrap{overflow:visible}
+}
+</style>
+<script>(function(){try{var s=localStorage.getItem('adstack-theme');if(s==='dark'||s==='light')document.documentElement.setAttribute('data-theme',s);}catch(e){}})();</script>
+</head>
+<body>
+<a class="skip" href="#main">본문으로 건너뛰기</a>
+<div class="topbar"><div class="topbar-in">
+  <div class="brand"><em>AI-Vehicle-Research</em> · 자율주행 SW Stack 파헤치기</div>
+  <button id="toc-toggle" class="iconbtn" aria-expanded="false" aria-controls="toc">목차</button>
+  <button id="theme-toggle" class="iconbtn" type="button"><svg class="t-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="t-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg><span>다크</span></button>
+</div></div>
+
+<div class="layout">
+<nav id="toc" class="toc" aria-label="목차">
+  <p class="toc-title">목차</p>
+  <ol class="toc-list">
+<li><a href="#summary" data-target="summary">30초 요약</a>
+</li>
+<li><a href="#myths" data-target="myths">통설 vs 실체 — 조사하면서 뒤집힌 것</a>
+</li>
+<li><a href="#s1" data-target="s1">1. 개념</a>
+<ol class="toc-sub">
+<li><a href="#s1-1" data-target="s1-1">1.1 여덟 층 지도</a></li>
+<li><a href="#s1-2" data-target="s1-2">1.2 모듈형 → E2E → VLA: 무엇이 바뀌고 무엇은 남는가</a></li>
+<li><a href="#s1-3" data-target="s1-3">1.3 스택이 HPC에 요구하는 것</a></li>
+</ol></li>
+<li><a href="#s2" data-target="s2">2. 타임라인 2015 → 2026</a>
+</li>
+<li><a href="#s3" data-target="s3">3. 열두 스택 한눈 비교</a>
+</li>
+<li><a href="#s4" data-target="s4">4. 오픈소스 풀스택 3종 해부</a>
+<ol class="toc-sub">
+<li><a href="#s4-1" data-target="s4-1">4.1 Autoware</a></li>
+<li><a href="#s4-2" data-target="s4-2">4.2 Apollo</a></li>
+<li><a href="#s4-3" data-target="s4-3">4.3 openpilot</a></li>
+<li><a href="#s4-4" data-target="s4-4">4.4 세 스택 나란히</a></li>
+</ol></li>
+<li><a href="#s5" data-target="s5">5. 학계 오픈 E2E 계보</a>
+<ol class="toc-sub">
+<li><a href="#s5-1" data-target="s5-1">5.1 계보</a></li>
+<li><a href="#s5-2" data-target="s5-2">5.2 벤치마크 논쟁</a></li>
+<li><a href="#s5-3" data-target="s5-3">5.3 코드 해부</a></li>
+<li><a href="#s5-4" data-target="s5-4">5.4 차량 HPC 관점에서 읽는 학계 스택</a></li>
+</ol></li>
+<li><a href="#s6" data-target="s6">6. 신세대 상용 E2E/VLA</a>
+<ol class="toc-sub">
+<li><a href="#s6-1" data-target="s6-1">6.1 NVIDIA Alpamayo</a></li>
+<li><a href="#s6-2" data-target="s6-2">6.2 Tesla FSD</a></li>
+<li><a href="#s6-3" data-target="s6-3">6.3 Wayve</a></li>
+<li><a href="#s6-4" data-target="s6-4">6.4 Waymo</a></li>
+<li><a href="#s6-5" data-target="s6-5">6.5 온보드 추론의 현실</a></li>
+</ol></li>
+<li><a href="#s7" data-target="s7">7. 상용·중국 스택</a>
+<ol class="toc-sub">
+<li><a href="#s7-1" data-target="s7-1">7.1 Mobileye</a></li>
+<li><a href="#s7-2" data-target="s7-2">7.2 Huawei Qiankun ADS 3.0 / 4.0</a></li>
+<li><a href="#s7-3" data-target="s7-3">7.3 Momenta</a></li>
+<li><a href="#s7-4" data-target="s7-4">7.4 XPeng</a></li>
+<li><a href="#s7-5" data-target="s7-5">7.5 약술</a></li>
+<li><a href="#s7-6" data-target="s7-6">7.6 공통 패턴 여덟 가지</a></li>
+</ol></li>
+<li><a href="#s8" data-target="s8">8. 미들웨어·OS 층</a>
+<ol class="toc-sub">
+<li><a href="#s8-1" data-target="s8-1">8.1 ROS 2</a></li>
+<li><a href="#s8-2" data-target="s8-2">8.2 Zenoh</a></li>
+<li><a href="#s8-3" data-target="s8-3">8.3 D4 실측</a></li>
+<li><a href="#s8-4" data-target="s8-4">8.4 AUTOSAR Adaptive</a></li>
+<li><a href="#s8-5" data-target="s8-5">8.5 SOAFEE와 Eclipse SDV</a></li>
+<li><a href="#s8-6" data-target="s8-6">8.6 OS·하이퍼바이저</a></li>
+<li><a href="#s8-7" data-target="s8-7">8.7 비교표</a></li>
+</ol></li>
+<li><a href="#s9" data-target="s9">9. 데모·실행</a>
+</li>
+<li><a href="#s10" data-target="s10">10. 동향 뉴스</a>
+</li>
+<li><a href="#s11" data-target="s11">11. 한계와 리스크</a>
+<ol class="toc-sub">
+<li><a href="#s11-1" data-target="s11-1">11.1 라이선스</a></li>
+<li><a href="#s11-2" data-target="s11-2">11.2 &quot;reference&quot;와 &quot;production-ready&quot;의 뜻</a></li>
+<li><a href="#s11-3" data-target="s11-3">11.3 공개 정보 편향</a></li>
+<li><a href="#s11-4" data-target="s11-4">11.4 벤치마크 비교 불가성</a></li>
+<li><a href="#s11-5" data-target="s11-5">11.5 이 조사의 제약</a></li>
+</ol></li>
+<li><a href="#s12" data-target="s12">12. 시사점</a>
+</li>
+<li><a href="#s13" data-target="s13">13. 자사 관점</a>
+<ol class="toc-sub">
+<li><a href="#s13-1" data-target="s13-1">13.1 공개된 접점(사실)</a></li>
+<li><a href="#s13-2" data-target="s13-2">13.2 이 보고서의 특이사항(자사 관점)</a></li>
+<li><a href="#s13-3" data-target="s13-3">13.3 접점 지도(층별)</a></li>
+<li><a href="#s13-4" data-target="s13-4">13.4 협업·사업 고려사항</a></li>
+<li><a href="#s13-5" data-target="s13-5">13.5 결정 항목</a></li>
+</ol></li>
+<li><a href="#appendix-a" data-target="appendix-a">부록 A. 용어집</a>
+</li>
+<li><a href="#appendix-b" data-target="appendix-b">부록 B. 재현 절차</a>
+<ol class="toc-sub">
+<li><a href="#appendix-b-1" data-target="appendix-b-1">B.1 CPU 트랙(이 세션에서 실행한 것)</a></li>
+<li><a href="#appendix-b-2" data-target="appendix-b-2">B.2 GPU 머신 트랙(이 세션에서 하지 못한 것)</a></li>
+</ol></li>
+<li><a href="#unverified" data-target="unverified">미확인 항목</a>
+</li>
+<li><a href="#verification-log" data-target="verification-log">검증 로그(판정 이력)</a>
+</li>
+<li><a href="#references" data-target="references">레퍼런스</a>
+</li>
+</ol>
+</nav>
+
+<main id="main">
+<header class="hero">
+  <p class="eyebrow">Research · 자율주행 소프트웨어 스택</p>
+  <h1>자율주행 SW Stack 파헤치기</h1>
+  <p class="sub">열두 스택을 여덟 층으로 열어 보니, 승부는 모델이 아니라 &quot;층 경계&quot;에서 벌어지고 있었다</p>
+  <div class="chips"><span class="chip"><span class="k">작성일</span><span class="v">2026-09-08</span></span><span class="chip"><span class="k">읽는 시간</span><span class="v">요약만 3분 · 본문 40분 · 부록·출처는 참고용</span></span></div>
+  <dl class="meta"><div><dt>관점</dt><dd>차량용 HPC(고성능 컴퓨팅 플랫폼)를 만드는 Tier-1의 눈 — "이 스택은 우리 플랫폼에 무엇을 요구하는가"</dd></div><div><dt>다룬 스택</dt><dd>오픈소스 풀스택 3종(Autoware · Baidu Apollo · comma openpilot), 학계 오픈 E2E 계열(UniAD → DiffusionDrive, NAVSIM), 신세대 E2E/VLA(NVIDIA Alpamayo·DRIVE AV, Tesla FSD, Wayve, Waymo), 상용·중국 스택(Mobileye, Huawei ADS, Momenta, XPeng, Li Auto, NIO, Horizon), 미들웨어·OS 층(ROS 2 rmw·Zenoh·Agnocast, AUTOSAR Adaptive, Eclipse S-CORE, SOAFEE, QNX·Linux)</dd></div><div><dt>직접 해본 것</dt><dd>D1 Autoware 소스 정적 해부(패키지 365개) · D2 Apollo Cyber RT·DAG 해부(dag 109개) · D3 openpilot 구조 해부 + 주행 모델 CPU 추론 실측 · D4 Zenoh vs CycloneDDS IPC 마이크로벤치. 스크립트·원시 로그는 <code>scripts/</code>·<code>reference/demo-logs/</code>에 있어 재실행 가능</dd></div></dl>
+</header>
+
+<aside class="callout howto"><span class="lbl">읽는 법</span><p>각 장은 <strong>질문 → 세 줄 답 → 본문 → HPC 메모</strong> 순서다. 바쁘면 각 장 첫머리의 "세 줄 답"과 마지막 "HPC 메모"만 읽어도 이어진다. 사실 문장 뒤에는 근거 등급을 붙였다. <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> 코드·스크립트 출력에서 직접 확인(파일:줄) · <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span> 1차 출처 원문 확인(README·LICENSE·공식 문서) · <span class="ev" title="복수 출처 교차 확인">✅</span> 복수 출처 교차 확인 · <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span> 검색 요약·보도만 확인(원문 미열람) · <span class="ev" title="미확인·추정">⚠️</span> 미확인·추정. 세션 네트워크 정책상 arxiv·Hugging Face·nvidia.com·벤더 사이트 원문에 접근할 수 없어 논문·벤더 수치는 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span> 비중이 높다. 전체 출처는 <a href="reference/references.md">reference/references.md</a>.</p></aside>
+
+<ul class="ev-legend" aria-label="근거 등급 범례"><li><span class="ev">💻</span>코드·스크립트 출력에서 직접 확인(파일:줄)</li><li><span class="ev">🔍</span>1차 출처 원문 확인(README·LICENSE·공식 문서)</li><li><span class="ev">✅</span>복수 출처 교차 확인</li><li><span class="ev">📰</span>검색 요약·보도만 확인(원문 미열람)</li><li><span class="ev">⚠️</span>미확인·추정</li></ul>
+
+<section id="sec-summary" class="section">
+<h2 id="summary"><a class="anchor" href="#summary">30초 요약</a></h2>
+<ol class="summary">
+<li><strong>스택은 여덟 층이고, E2E는 그중 두 층(인지, 계획)만 합쳤다.</strong> 미들웨어·안전 감시·OS·데이터 루프는 그대로 남는다. 오히려 E2E일수록 안전 감시층과 오프보드 데이터층이 커진다.</li>
+<li><strong>오픈소스 3종은 조립 방식이 다르다.</strong> Autoware는 ROS 2 노드 365개 패키지를 런치 XML로 엮고, Apollo는 자체 Cyber RT 위에 컴포넌트 188개를 스케줄러 설정으로 배치하며, openpilot은 프로세스 44개를 공유메모리 큐로 묶고 30M 파라미터 모델을 SoC GPU에서 20 Hz로 돌린다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>.</li>
+<li><strong>양산 E2E는 "하이브리드 + 사람 폴백"이다.</strong> Tesla·Horizon·XPeng은 규칙 폴백 없이 단일망을 쓰지만 폴백을 원격 인간이나 안전운전자에게 넘겼고, Mobileye·Waymo·NVIDIA DRIVE AV는 규칙 기반 안전 스택을 병렬로 둔다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</li>
+<li><strong>VLA는 아직 느리다.</strong> Alpamayo 1.5(10B)는 데스크톱 GPU에서 0.60 s, 2 Super(34B)는 3.35 s가 걸리고, FlashDrive가 4.5배를 줄여도 Jetson Thor에서는 0.94 s다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>. 온보드 파라미터 예산은 "수십억"이 현실 상한이고, 그래서 XPeng은 언어 토큰을 우회하고 Huawei는 VLA를 거부했다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</li>
+<li><strong>미들웨어 층이 HPC에 요구하는 것은 대역폭이 아니라 zero-copy와 결정적 스케줄이다.</strong> 표준 ROS 2 loaned message는 고정 크기 타입만 zero-copy이고, 포인트클라우드 같은 가변 타입은 Agnocast(커널 모듈 + 힙 후킹)처럼 메모리 소유권 모델을 바꿔야 한다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>. 우리 샌드박스 실측(D4)에서도 같은 4코어 호스트 안에서 전송 방식에 따라 왕복 지연이 수 배 차이 났다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>.</li>
+</ol>
+
+</section>
+<section id="sec-myths" class="section">
+<h2 id="myths"><a class="anchor" href="#myths">통설 vs 실체 — 조사하면서 뒤집힌 것</a></h2>
+<div class="table-wrap"><table class="cols-3 myth">
+<thead>
+<tr>
+<th>통설</th>
+<th>실체</th>
+<th>근거</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="myth-c">"E2E가 모듈형 스택을 대체했다"</td>
+<td class="fact-c">양산 스택은 대부분 하이브리드다. NVIDIA DRIVE AV는 E2E 옆에 클래식 안전 스택을 병렬로 두고, Autoware 2.0은 "Generator(E2E 포함) – Selector(규칙 검사)" 구조를 공식 로드맵으로 채택했다. Huawei ADS 3도 인지망·계획망 2단이다</td>
+<td class="src src">§1.2, §4.1, §7 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td class="myth-c">"ROS 2 스택은 연구용, 양산 불가"</td>
+<td class="fact-c">Autoware는 Isuzu L4 버스(Thor)에 실리고, Renesas가 2026-09 최상위 회원으로 가입해 R-Car에 사전 통합하며, TIER IV는 Agnocast로 zero-copy 문제를 풀어 양산 트랙을 만들었다</td>
+<td class="src src">§4.1, §10 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span><span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td class="myth-c">"openpilot은 장난감"</td>
+<td class="fact-c">프로세스 44개, 서비스 69개, 차량 플랫폼 260개, 안전 로직은 MISRA C 펌웨어(panda)에 분리, 300M 마일 플릿 데이터. 2026-08에는 880M 파라미터 모델을 외장 GPU로 돌리기 시작했다</td>
+<td class="src src">§4.3 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td class="myth-c">"Zenoh가 DDS를 대체했다"</td>
+<td class="fact-c">rmw_zenoh는 Kilted(2025-05)부터 Tier-1이지만 Lyrical(2026-05)에서도 기본 rmw는 여전히 Fast DDS다. 호스트 내 소형 메시지 지연은 CycloneDDS·공유메모리 계열이 더 낮다</td>
+<td class="src src">§8.1, §9 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span><span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+</tr>
+<tr>
+<td class="myth-c">"Apollo는 멈췄다"</td>
+<td class="fact-c">2026-01 Apollo 11.0이 나왔지만 방향이 바뀌었다. 저속 기능차(배송·청소·순찰) 지향이고, 로보택시 Apollo Go의 ADFM은 비공개다. 최근 12개월 master 커밋은 21건, 작성자 5명</td>
+<td class="src src">§4.2 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span><span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td class="myth-c">"AutoDrive는 Autoware판 Alpamayo"</td>
+<td class="fact-c">Autoware Foundation의 AutoDrive는 단안 전방 카메라로 CIPO 거리·곡률·존재 확률을 회귀하는 소형 L2 모델이다. VLA가 아니다</td>
+<td class="src src">§4.1 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+</tbody>
+</table></div>
+
+</section>
+<section id="sec-s1" class="chapter" data-num="1">
+<h2 id="s1"><a class="anchor" href="#s1">1. 개념 — 자율주행 SW 스택은 여덟 층이다</a></h2>
+<aside class="callout qa">
+<div class="qa-q"><span class="lbl">이 장의 질문</span><p>"스택"이라고 할 때 정확히 무엇을 가리키는가. 모듈형 → E2E → VLA로 갈 때 무엇이 바뀌고 무엇은 남는가.</p></div>
+<div class="qa-a"><span class="lbl">세 줄 답</span><ol class="three"><li><span class="num">①</span><span>차 한 대의 자율주행 소프트웨어는 HW부터 앱까지 여덟 층으로 나뉘고, 이 보고서의 모든 비교는 이 층 번호로 한다.</span></li><li><span class="num">②</span><span>E2E는 L4(인지)와 L5(계획)를 한 모델로 합친 것이지 스택을 없앤 것이 아니다.</span></li><li><span class="num">③</span><span>스택이 HPC에 요구하는 것은 층마다 다르며, E2E로 갈수록 요구가 "연산량"에서 "메모리·지연 예산·안전 파티션"으로 이동한다.</span></li></ol></div>
+</aside>
+<h3 id="s1-1"><a class="anchor" href="#s1-1">1.1 여덟 층 지도</a></h3>
+<figure class="fig"><img src="images/stack-map.svg" alt="자율주행 SW 스택 8층 지도" loading="lazy"><figcaption>그림 1. 자율주행 SW 스택 8층 지도. 왼쪽 열은 모듈형 스택(Autoware·Apollo·openpilot)의 실제 구성요소, 오른쪽 열은 E2E/VLA에서 달라지는 점. 실선 = 출처로 확인, 점선 = 추정·유동. 자체 작성.</figcaption></figure>
+<div class="table-wrap"><table class="cols-4">
+<thead>
+<tr>
+<th>층</th>
+<th>이름</th>
+<th>하는 일</th>
+<th>이 보고서에서 다루는 대표 요소</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>L8</td>
+<td>API · HMI · 앱</td>
+<td>운행 요청, 상태 표시, 원격 감시 인터페이스</td>
+<td>Autoware AD API(61 msg·19 srv <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>), Apollo Dreamview, openpilot UI</td>
+</tr>
+<tr>
+<td>L7</td>
+<td>데이터 · 시뮬 · MLOps (오프보드)</td>
+<td>로그 수집, 라벨링, 학습, 폐루프 평가, OTA</td>
+<td>scenario_simulator_v2, Cyber record, comma 플릿 로그, NAVSIM·Bench2Drive, AlpaSim·Cosmos, GAIA, World Engine</td>
+</tr>
+<tr>
+<td>L6</td>
+<td>안전 감시 · 폴백</td>
+<td>모델 출력 검증, 최소위험기동(MRM), 감시기</td>
+<td>Autoware system 모듈(mrm_handler·diagnostic_graph), Apollo monitor/guardian, panda 안전 펌웨어, Mobileye RSS, DRIVE AV 클래식 스택</td>
+</tr>
+<tr>
+<td>L5</td>
+<td>예측 · 계획 · 제어</td>
+<td>궤적 생성과 추종. E2E에서는 L4와 합쳐짐</td>
+<td>Autoware planning 67 pkgs·control 21 pkgs <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>, Apollo planning 시나리오 19개 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>, openpilot plannerd·controlsd</td>
+</tr>
+<tr>
+<td>L4</td>
+<td>센서 · 인지 · 측위</td>
+<td>드라이버, 전처리, 검출·추적, 지도·측위</td>
+<td>Autoware perception 51 pkgs(CUDA 12.4k줄) <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>, Apollo perception 42 dag <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>, openpilot modeld</td>
+</tr>
+<tr>
+<td>L3</td>
+<td>미들웨어 · IPC</td>
+<td>pub/sub, 서비스, 실행기, zero-copy</td>
+<td>ROS 2(rmw: Fast DDS·CycloneDDS·Zenoh) + Agnocast, Cyber RT, msgq, ara::com, LoLa</td>
+</tr>
+<tr>
+<td>L2</td>
+<td>OS · 하이퍼바이저</td>
+<td>혼합 중요도 분리, 파티션, 컨테이너</td>
+<td>Linux, QNX 8·QNX Hypervisor, DriveOS, AGNOS, SOAFEE/EWAOL</td>
+</tr>
+<tr>
+<td>L1</td>
+<td>HW · SoC</td>
+<td>연산·메모리·센서 I/O</td>
+<td>Orin·Thor, R-Car Gen 5, Ride Flex, EyeQ6H, Turing, MDC, HW4/AI5, comma 3X/four(SDM845)</td>
+</tr>
+</tbody>
+</table></div>
+<p>층 번호는 이 보고서가 정의한 것이다. 표준(ISO·AUTOSAR)의 계층과 1:1로 대응하지는 않지만, 열두 스택을 같은 자리에 놓고 비교하기 위한 좌표계로 쓴다.</p>
+<h3 id="s1-2"><a class="anchor" href="#s1-2">1.2 모듈형 → E2E → VLA: 무엇이 바뀌고 무엇은 남는가</a></h3>
+<p><strong>모듈형 파이프라인</strong>은 L4와 L5를 여러 노드로 쪼갠다. Autoware의 최상위 런치 파일은 vehicle·system·map·sensing·localization·perception·traffic_light·planning·control·api 열두 개를 include하고, 정적으로 풀면 167개 런치 노드가 나온다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>autoware.launch.xml</code>. Apollo는 perception만 42개 dag 파일로 쪼개져 있고, 인지 → 예측 → 계획 → 제어 → CAN이 채널로 이어진다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> D2 로그 §6.1. 이 구조의 장점은 각 모듈을 따로 검증·교체할 수 있다는 것이고, 비용은 모듈 사이 통신과 정보 손실(중간 표현이 사람이 정한 객체 목록으로 고정됨)이다.</p>
+<p><strong>E2E(End-to-End)</strong>는 센서 입력에서 궤적까지 하나의 신경망으로 학습한다. 학계에서는 UniAD(CVPR 2023 최우수 논문)가 "계획을 최종 목표로 두고 검출·추적·지도·예측을 쿼리로 연결하는" 형태로 시작했고 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>, Tesla FSD v12(2024)가 도심 주행을 단일 신경망으로 바꾸면서 양산 어휘가 됐다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. 하지만 세 가지는 남는다.</p>
+<ul>
+<li><strong>L3 미들웨어</strong>: 모델 입출력도 IPC를 탄다. openpilot의 modeld는 카메라 프레임을 VisionIPC로 받고 결과를 <code>modelV2</code> 큐(10 MB)로 내보낸다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>services.py</code>. TIER IV가 Alpamayo를 Autoware에 얹은 노드도 결국 ROS 2 토픽으로 궤적을 발행한다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>.</li>
+<li><strong>L6 안전 감시</strong>: openpilot은 모델 출력을 <code>clip_curvature</code>·가속 한도·panda 펌웨어 한도의 3중 클램프로 통과시킨다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. NVIDIA DRIVE AV는 "코어 주행용 AI E2E 스택 + 병렬 클래식 안전 스택"을 제품 정의로 쓴다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. Autoware 2.0 문서는 E2E 모델을 "Generator" 후보 중 하나로 두고 "Selector"가 규칙 준수·주행 가능 영역을 검사한다고 쓴다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>.</li>
+<li><strong>L7 데이터 루프</strong>: 모델이 커질수록 학습·평가가 스택의 무게중심이 된다. openpilot 0.11은 2B 파라미터 디퓨전 트랜스포머 월드모델로 만든 학습 시뮬레이터에서 정책을 전량 학습했다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. Wayve는 15B GAIA-3을 주행이 아니라 검증용으로 만들었다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</li>
+</ul>
+<p><strong>VLA(Vision-Language-Action)</strong>는 E2E에 언어 추론을 더한 것이다. NVIDIA Alpamayo는 다중 카메라 영상과 자차 이력을 받아 "Chain of Causation" 추론 텍스트와 6.4초 궤적(64점)을 함께 낸다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>. 언어가 들어오면 설명 가능성이 생기지만 지연이 는다. TIER IV 노드는 매 추론마다 최대 64토큰의 추론 텍스트를 자기회귀로 뽑고, 그 비용이 지연의 큰 몫이다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>(§6.1). 그래서 XPeng VLA 2.0은 "Vision–Implicit Token–Action"으로 언어 토큰을 우회하고 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>, Huawei는 "VLA 대신 WA(World-Action)"를 공식화했다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</p>
+<h3 id="s1-3"><a class="anchor" href="#s1-3">1.3 스택이 HPC에 요구하는 것 — 층별로 다르다</a></h3>
+<div class="table-wrap"><table class="cols-4">
+<thead>
+<tr>
+<th>층</th>
+<th>모듈형이 요구하는 것</th>
+<th>E2E/VLA가 추가로 요구하는 것</th>
+<th>근거</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>L1 HW</td>
+<td>다중 센서 I/O, 인지용 TensorRT 가속</td>
+<td>수억~수십억 파라미터 상주 메모리, KV 캐시 대역폭</td>
+<td class="src">NIO NX9031이 546 GB/s를 전면에 내세움 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>, Alpamayo 2 Super 피크 69 GiB <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td>L2 OS</td>
+<td>ASIL 파티션 vs QM 파티션 분리</td>
+<td>GPU 상주 워크로드와 안전 파티션의 분리</td>
+<td class="src">QNX Hypervisor 8.0 for Safety(2026-03 GA) <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>L3 IPC</td>
+<td>노드 수십~수백 개 사이 pub/sub, 포인트클라우드 zero-copy</td>
+<td>이미지·텐서 대용량 zero-copy, GPU 버퍼 직접 전달</td>
+<td class="src">Agnocast 80 pkgs 준비 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>, ROS 2 Lyrical <code>rosidl::Buffer</code> CUDA 백엔드 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td>L4–L5</td>
+<td>모듈별 지연 예산 합산, 컨텍스트 스위치</td>
+<td>"모델 1회 추론"이 곧 지연 예산</td>
+<td class="src">Alpamayo 0.60→3.35 s <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>, FlashDrive Thor 0.94 s <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td>L6 안전</td>
+<td>감시기·MRM 노드</td>
+<td>모델 출력 검증기 + 폴백 컴퓨터</td>
+<td class="src">AUMOVIO가 Aurora용 백업 컴퓨터를 상품화 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>L7 데이터</td>
+<td>로그·시뮬</td>
+<td>월드모델·합성 데이터 인프라(오프보드)</td>
+<td class="src">GAIA-4, World Engine, R7, X-World <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+</tbody>
+</table></div>
+<aside class="callout hpc"><span class="lbl">HPC 메모</span><p>층 지도를 그려 보면 "E2E 대응"이라는 요구가 실제로는 네 가지로 갈라진다. (1) 메모리 용량·대역폭(L1) (2) 안전 파티션과 모델 파티션의 분리(L2) (3) 가변 크기 텐서의 zero-copy(L3) (4) 폴백 컴퓨터(L6). TOPS는 이 중 어디에도 직접 들어가지 않는다.</p></aside>
+
+</section>
+<section id="sec-s2" class="chapter" data-num="2">
+<h2 id="s2"><a class="anchor" href="#s2">2. 타임라인 2015 → 2026 — 무엇이 언제 바뀌었나</a></h2>
+<aside class="callout qa">
+<div class="qa-q"><span class="lbl">이 장의 질문</span><p>지금의 지형은 어떤 순서로 만들어졌나.</p></div>
+<div class="qa-a"><span class="lbl">세 줄 답</span><ol class="three"><li><span class="num">①</span><span>2015~2017년에 오픈소스 풀스택 3종이 모두 태어났고 모두 모듈형이었다.</span></li><li><span class="num">②</span><span>2023년 UniAD, 2024년 FSD v12가 E2E를 학계·양산 어휘로 만들었고, 2025년에는 VLA(Alpamayo, XPeng, Li Auto)와 월드모델(openpilot, Wayve, Huawei)이 동시에 등장했다.</span></li><li><span class="num">③</span><span>2026년의 사건은 "칩 벤더가 오픈 스택을 레퍼런스로 채택"(Renesas–Autoware, AMD–Autoware)과 "미들웨어 세대교체"(rmw_zenoh Tier-1, S-CORE, ROS 2 Lyrical)다.</span></li></ol></div>
+</aside>
+<div class="table-wrap"><table class="cols-4">
+<thead>
+<tr>
+<th>연도</th>
+<th>사건</th>
+<th>층</th>
+<th>근거</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2015-08</td>
+<td>Autoware 시작(나고야대). ROS 1 기반 첫 올인원 오픈소스 AD 스택</td>
+<td>L4–L5</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span> autoware.org</td>
+</tr>
+<tr>
+<td>2016-11</td>
+<td>comma.ai openpilot 공개</td>
+<td>L4–L6</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>2017-07</td>
+<td>Baidu Apollo 1.0 공개</td>
+<td>L3–L5</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span> technode</td>
+</tr>
+<tr>
+<td>2017-12</td>
+<td>ROS 2 첫 릴리스(Ardent)</td>
+<td>L3</td>
+<td class="src"><span class="ev" title="미확인·추정">⚠️</span> 일자 미재확인</td>
+</tr>
+<tr>
+<td>2018-12</td>
+<td>Autoware Foundation 설립</td>
+<td>—</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span> PRNewswire</td>
+</tr>
+<tr>
+<td>2022-05</td>
+<td>ROS 2 Humble LTS — Autoware Core/Universe의 기준 배포판</td>
+<td>L3</td>
+<td class="src"><span class="ev" title="미확인·추정">⚠️</span></td>
+</tr>
+<tr>
+<td>2023-06</td>
+<td>UniAD, CVPR 2023 최우수 논문 — "계획 지향" 단일 네트워크</td>
+<td>L4–L5</td>
+<td class="src"><span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span> README</td>
+</tr>
+<tr>
+<td>2024-03</td>
+<td>Tesla FSD v12 광역 배포 — 도심 주행을 단일 신경망으로</td>
+<td>L4–L5</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>2024-06</td>
+<td>NAVSIM 벤치마크(비반응 시뮬레이션, PDMS) — nuScenes 오픈루프 한계 대응</td>
+<td>L7</td>
+<td class="src"><span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span> README</td>
+</tr>
+<tr>
+<td>2024-12</td>
+<td>Apollo 10.0 — ADFM 중심, Cyber RT arena zero-copy, 단일 Orin BEV+OCC 5 Hz</td>
+<td>L3–L5</td>
+<td class="src"><span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span> RELEASE.md</td>
+</tr>
+<tr>
+<td>2025-02</td>
+<td>openpilot 0.9.8 — 모델 러너 tinygrad 전환, ISP 전처리 이관</td>
+<td>L3–L4</td>
+<td class="src"><span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span> RELEASES.md</td>
+</tr>
+<tr>
+<td>2025-04</td>
+<td>Huawei ADS 4 — WEWA(클라우드 World Engine + 차량 World Action)</td>
+<td>L5, L7</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>2025-05</td>
+<td>ROS 2 Kilted — rmw_zenoh_cpp Tier-1 승격(기본은 Fast DDS 유지)</td>
+<td>L3</td>
+<td class="src"><span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span> 릴리스 노트</td>
+</tr>
+<tr>
+<td>2025-07</td>
+<td>TIER IV, diffusion 기반 L4 E2E 아키텍처 발표 — 2026 초부터 일본 50개소</td>
+<td>L5</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span> PRNewswire</td>
+</tr>
+<tr>
+<td>2025-08</td>
+<td>openpilot 0.10 — 월드모델 기반 E2E 계획이 종방향 MPC 대체</td>
+<td>L5</td>
+<td class="src"><span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span> RELEASES.md</td>
+</tr>
+<tr>
+<td>2025-10</td>
+<td>Tesla FSD v14 배포 시작 · NVIDIA Alpamayo-R1 논문</td>
+<td>L5</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>2025-11</td>
+<td>XPeng VLA 2.0 공개(72B 클라우드 모델 → 차량 증류) · Eclipse S-CORE 0.5 알파</td>
+<td>L5, L3</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>2025-12</td>
+<td>AMD–Autoware(AutoDrive를 Instinct/ROCm으로) · 중국 MIIT 첫 L3 양산 허가 · comma four</td>
+<td>L7, 규제, L1</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>2026-01</td>
+<td>NVIDIA Alpamayo 1 + DRIVE AV가 Mercedes CLA에 첫 양산 · TIER IV Alpamayo ROS 2 패키지 · Apollo 11.0</td>
+<td>L5</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span><span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td>2026-03</td>
+<td>Tesla FSD v14.3(MLIR 컴파일러 재작성으로 반응 20% 단축) · Isuzu L4 버스에 Autoware+Thor · QNX Hypervisor 8.0 for Safety GA · openpilot 0.11(학습된 시뮬레이터로 전량 학습)</td>
+<td>L2–L5</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span><span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td>2026-05</td>
+<td>ROS 2 Lyrical LTS(EventsCBGExecutor, <code>rosidl::Buffer</code>) · Li Auto Mach M100 칩</td>
+<td>L3, L1</td>
+<td class="src"><span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>2026-06</td>
+<td>AWF <code>auto_drive</code>·<code>auto_speed</code>·<code>auto_steer</code> 공개(Vision Pilot L2 모델군)</td>
+<td>L4–L5</td>
+<td class="src"><span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span> GitHub</td>
+</tr>
+<tr>
+<td>2026-08</td>
+<td>Alpamayo 2 Super(34B) 상용 가중치 공개 · openpilot 0.11.2 880M 모델 + 외장 GPU · Waymo 자체 ASIC 공개 · TIER IV–Renesas 협력</td>
+<td>L1, L5</td>
+<td class="src"><span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>2026-09</td>
+<td>Renesas, Autoware Foundation 최상위 회원 가입(R-Car 사전 통합) · Wayve–Uber 런던 감독 서비스</td>
+<td>L1–L5</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+</tbody>
+</table></div>
+<aside class="callout hpc"><span class="lbl">HPC 메모</span><p>2026년의 사건 중 우리와 직접 닿는 것은 세 갈래다. 칩 벤더(Renesas·AMD)가 오픈 스택을 레퍼런스 SW로 삼는 흐름, NVIDIA가 칩+센서+스택(Hyperion + DRIVE AV + Alpamayo)을 번들로 파는 흐름, 그리고 미들웨어 세대교체(Zenoh·S-CORE·Lyrical)다. 세 갈래 모두 "HPC 플랫폼이 어떤 스택을 얼마나 쉽게 받아들이는가"를 시험한다.</p></aside>
+
+</section>
+<section id="sec-s3" class="chapter" data-num="3">
+<h2 id="s3"><a class="anchor" href="#s3">3. 열두 스택 한눈 비교 — 8축 매트릭스</a></h2>
+<aside class="callout qa">
+<div class="qa-q"><span class="lbl">이 장의 질문</span><p>열두 스택을 같은 자리에 놓으면 무엇이 보이나.</p></div>
+<div class="qa-a"><span class="lbl">세 줄 답</span><ol class="three"><li><span class="num">①</span><span>공개도는 오픈소스 3종과 학계만 높고, 상용 스택은 벤치마크·릴리스 노트·보도자료로만 밖을 본다.</span></li><li><span class="num">②</span><span>자체 실리콘이 기본값이 됐고, 자체 칩이 없는 스택 벤더(Wayve·Momenta·Autoware)는 NVIDIA Thor 또는 칩 벤더 파트너십에 묶인다.</span></li><li><span class="num">③</span><span>안전·폴백 구조를 공개한 곳은 오픈소스 3종과 Mobileye·Waymo·NVIDIA뿐이고, 나머지는 "미공개"다.</span></li></ol></div>
+</aside>
+<figure class="fig"><img src="images/stack-matrix.svg" alt="스택 비교 매트릭스" loading="lazy"><figcaption>그림 2. 열두 스택 × 여덟 축 비교 매트릭스(히트맵형). 색이 진할수록 공개 자료로 확인된 정도가 높다. 자체 작성. 세부 근거는 아래 표와 각 장.</figcaption></figure>
+<div class="table-wrap"><table class="cols-9">
+<thead>
+<tr>
+<th>스택</th>
+<th>① 아키텍처</th>
+<th>② 미들웨어·IPC</th>
+<th>③ OS</th>
+<th>④ 타깃 SoC</th>
+<th>⑤ 센서</th>
+<th>⑥ 안전·폴백</th>
+<th>⑦ 데이터·시뮬</th>
+<th>⑧ 공개도·라이선스</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Autoware</strong></td>
+<td>모듈형 + 학습 플래너 옵션(diffusion_planner), 2.0은 Generator–Selector <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span><span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td>ROS 2(CycloneDDS 기본) + Agnocast·cuda_blackboard <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>Ubuntu 22.04/24.04 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>Orin·Thor(sm_87/110), R-Car Gen 5, AMD <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>라이다 중심 + 카메라, Lanelet2 지도 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>system 모듈(MRM·진단 그래프·지연 감시) <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>scenario_simulator_v2·AWSIM, Co-MLOps <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>Apache-2.0 전 저장소 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+</tr>
+<tr>
+<td><strong>Apollo</strong></td>
+<td>모듈형(시나리오·스테이지·태스크 플러그인), BEV+OCC 옵션 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>Cyber RT(INTRA/SHM arena/RTPS) <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>Ubuntu 18~22.04 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td>x86+NVIDIA GPU, Orin(5 Hz BEV) <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td>라이다·카메라·레이더, HD 지도 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>monitor·guardian, RSS decider 태스크 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>Dreamview 시나리오·record <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>Apache-2.0 + 서드파티 혼재, 모델 "연구용" <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td><strong>openpilot</strong></td>
+<td>E2E 모델(궤적) + 규칙 제어기 하이브리드 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>msgq 공유메모리 + VisionIPC(ION) <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>AGNOS(Ubuntu 기반) <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>Snapdragon 845(comma 3X·four), 외장 AMD GPU <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>카메라 2~3대, 지도 없음 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>panda 펌웨어(MISRA C) + 3중 클램프 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>플릿 300M 마일, 학습된 시뮬레이터 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span><span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td>MIT(가중치 라이선스 문구 없음) <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+</tr>
+<tr>
+<td><strong>UniAD/VAD 계열</strong></td>
+<td>E2E(nuScenes 오픈루프) <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td>PyTorch 스크립트(미들웨어 없음) <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>—</td>
+<td>RTX 3090/A100 보고값 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>6카메라 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td>없음</td>
+<td>nuScenes <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td>Apache-2.0 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td><strong>NAVSIM 계열(DiffusionDrive 등)</strong></td>
+<td>E2E + 앵커 디퓨전, 어휘 스코어링 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>PyTorch, CPU 평가 경로 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>—</td>
+<td>RTX 4090 보고값 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td>3카메라 스티치 + 라이다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>PDM 스코어러(평가용 규칙) <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>OpenScene/nuPlan(HF) <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>MIT/Apache-2.0, Bench2Drive는 CC-BY-NC-ND <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td><strong>NVIDIA Alpamayo·DRIVE AV</strong></td>
+<td>VLA(teacher) + E2E 스택 + 클래식 안전 스택 병렬 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>DriveOS·DriveWorks(비공개) <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>DriveOS(하이퍼바이저 + QNX/Linux) <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>DRIVE AGX Thor, Hyperion 10 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>Hyperion 카메라·레이더·라이다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>Halos 가드레일 + 듀얼 스택 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>AlpaSim·Cosmos·NuRec <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td>모델 Apache-2.0/OpenMDW-1.1, 스택 비공개 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td><strong>Tesla FSD</strong></td>
+<td>단일 E2E 신경망(v12~), v14.3 RL <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>비공개</td>
+<td>비공개</td>
+<td>자체 HW4 → AI5 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>카메라 전용 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>규칙 폴백 없음, 원격 모니터 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>140억 마일, Cortex 클러스터 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span><span class="ev" title="미확인·추정">⚠️</span></td>
+<td>없음</td>
+</tr>
+<tr>
+<td><strong>Wayve</strong></td>
+<td>단일 파운데이션 모델(AV2.0) + VLA(LINGO-2) <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>비공개</td>
+<td>비공개</td>
+<td>NVIDIA Orin/Thor <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>카메라 중심, OEM 라이다 병행 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>안전운전자, 규칙 가드 미공개 <span class="ev" title="미확인·추정">⚠️</span></td>
+<td>GAIA-3/4 월드모델 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>논문·블로그만</td>
+</tr>
+<tr>
+<td><strong>Waymo</strong></td>
+<td>모듈형 + ML 하이브리드(EMMA는 연구) <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>비공개</td>
+<td>비공개</td>
+<td>자체 ASIC(1,000+ TOPS, 이중 엔진) <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>카메라 13·라이다 4·레이더 6 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>HW 이중화·백업 조향/제동 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>200M+ 무인 마일 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>WOD-E2E 데이터셋·코드 Apache-2.0 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td><strong>Mobileye</strong></td>
+<td>Compound AI(다중 독립 엔진) <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>비공개</td>
+<td>Linux(EyeQ6H 업스트림) <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>자체 EyeQ6H 34 TOPS × N <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>카메라 + 독립 레이더/라이다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>RSS 안전 포락선, 2차 지각계 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span><span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td>REM 지도 <span class="ev" title="미확인·추정">⚠️</span></td>
+<td>ad-rss-lib LGPL(유지보수 중단) <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td><strong>Huawei ADS 4</strong></td>
+<td>WEWA(World Engine + World Action), VLA 거부 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>비공개</td>
+<td>비공개</td>
+<td>자체 MDC/Ascend <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span><span class="ev" title="미확인·추정">⚠️</span></td>
+<td>고체 라이다 + 레이더 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>미공개 <span class="ev" title="미확인·추정">⚠️</span></td>
+<td>설치 140만 대, 100억 km <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>없음</td>
+</tr>
+<tr>
+<td><strong>Momenta / XPeng</strong></td>
+<td>R6 E2E → R7 월드모델 / VLA 2.0(암묵 토큰) <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>비공개</td>
+<td>비공개</td>
+<td>NVIDIA Orin·Thor / 자체 Turing ×1~4 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>차종별 / 카메라 전용·지도 없음 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>미공개 <span class="ev" title="미확인·추정">⚠️</span></td>
+<td>100만 대 설치 / 1억 클립·X-World <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>없음 / "오픈소스" 주장, 저장소 미확인 <span class="ev" title="미확인·추정">⚠️</span></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>층별 개방도.</strong> 표를 층으로 다시 읽으면 L3(미들웨어)와 L6(안전)이 가장 덜 열려 있다. 오픈소스 3종을 제외하면 미들웨어를 공개한 곳이 없고, 안전 구조는 Mobileye(RSS 수식)·Waymo(HW 이중화)·NVIDIA(듀얼 스택)만 "무엇이 있는지" 정도를 말한다. 반대로 L7(데이터·시뮬)은 모두가 앞다퉈 말한다. 벤더가 말하는 곳과 우리가 알아야 하는 곳이 어긋난다.</p>
+<aside class="callout hpc"><span class="lbl">HPC 메모</span><p>매트릭스에서 Tier-1이 개입할 수 있는 열은 ②③④⑥이다. 스택 벤더가 미들웨어·OS·SoC·폴백을 공개하지 않을수록 그 층을 "우리 플랫폼 기준으로" 정의할 여지가 생긴다. 반대로 NVIDIA처럼 ②③④⑥⑦을 모두 번들로 가져오는 벤더 앞에서는 Tier-1의 자리가 ECU 제작·통합 서비스로 좁아진다(§10 Magna 사례).</p></aside>
+
+</section>
+<section id="sec-s4" class="chapter" data-num="4">
+<h2 id="s4"><a class="anchor" href="#s4">4. 오픈소스 풀스택 3종 해부 — Autoware · Apollo · openpilot</a></h2>
+<aside class="callout qa">
+<div class="qa-q"><span class="lbl">이 장의 질문</span><p>코드를 열면 실제로 어떻게 조립돼 있나. 셋은 무엇이 같고 무엇이 다른가.</p></div>
+<div class="qa-a"><span class="lbl">세 줄 답</span><ol class="three"><li><span class="num">①</span><span>Autoware는 "많은 노드, 부분 컴포지션"의 ROS 2 스택이고 GPU 코드는 전부 Universe(확장)에만 있으며, 통신 비용은 Agnocast(CPU zero-copy)와 cuda_blackboard(GPU zero-copy) 두 층으로 따로 푼다.</span></li><li><span class="num">②</span><span>Apollo는 자체 미들웨어 Cyber RT가 사용자 공간 코루틴 스케줄러와 공유메모리 arena를 가지며, "어떤 컴포넌트를 어느 코어에 얼마의 우선순위로" 배치하는 설정 파일이 곧 실시간 설계도다.</span></li><li><span class="num">③</span><span>openpilot은 가장 작은 스택이면서 유일하게 양산차에서 매일 도는 E2E 스택이고, 30M 파라미터 모델을 SoC GPU에서 20 Hz로 돌리되 액추에이터 명령은 규칙 제어기와 안전 펌웨어가 낸다.</span></li></ol></div>
+</aside>
+<p>세 스택 모두 이 세션에서 <code>git clone --depth 1</code>로 받아 파이썬 표준 라이브러리 스크립트로 정적 측정했다. 빌드·실행은 하지 않았다(GPU 없음). 측정 정의와 전체 출력은 <code>reference/demo-logs/d1-*.md</code>, <code>d2-*.md</code>, <code>d3-*.md</code>에 있다.</p>
+<figure class="fig"><img src="images/three-stack-anatomy.svg" alt="오픈소스 3종 조립 방식 비교" loading="lazy"><figcaption>그림 3. 세 스택의 파이프라인·프로세스·IPC 비교. 숫자는 이 세션의 정적 측정(2026-09-08 main/master HEAD). 자체 작성.</figcaption></figure>
+<h3 id="s4-1"><a class="anchor" href="#s4-1">4.1 Autoware — ROS 2 위의 "많은 노드, 두 겹의 zero-copy"</a></h3>
+<p><strong>규모.</strong> 메타 저장소 <code>autoware</code>의 매니페스트 <code>autoware.repos</code>는 31개 저장소를 core 12 · universe 13 · launcher 1 · sensor_component 5로 나눈다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. 그중 핵심 7개(autoware, core, universe, launch, msgs, adapi_msgs, internal_msgs)를 받아 세어 보면 다음과 같다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> D1.</p>
+<div class="table-wrap"><table class="cols-6">
+<thead>
+<tr>
+<th>항목</th>
+<th>core</th>
+<th>universe</th>
+<th>launch</th>
+<th>msgs 3종</th>
+<th>합계</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ROS 패키지(package.xml)</td>
+<td>74</td>
+<td>241</td>
+<td>30</td>
+<td>20</td>
+<td><strong>365</strong></td>
+</tr>
+<tr>
+<td>노드 등록 매크로(<code>RCLCPP_COMPONENTS_REGISTER_NODE</code>)</td>
+<td>36</td>
+<td>251</td>
+<td>0</td>
+<td>0</td>
+<td><strong>287</strong></td>
+</tr>
+<tr>
+<td>런치 파일(.launch.xml / .py)</td>
+<td>39 / 10</td>
+<td>215 / 19</td>
+<td>124 / 1</td>
+<td>0</td>
+<td><strong>378 / 30</strong></td>
+</tr>
+<tr>
+<td>메시지·서비스 정의</td>
+<td>0</td>
+<td>14</td>
+<td>0</td>
+<td>176 msg · 39 srv</td>
+<td><strong>190 · 39</strong> (action 0)</td>
+</tr>
+<tr>
+<td>C++ 줄 수(cpp+hpp)</td>
+<td>149k</td>
+<td>507k</td>
+<td>0</td>
+<td>0</td>
+<td><strong>657k</strong></td>
+</tr>
+<tr>
+<td>CUDA 줄 수(.cu/.cuh)</td>
+<td><strong>0</strong></td>
+<td>16.7k(66 파일, 커널 171개)</td>
+<td>0</td>
+<td>0</td>
+<td>16.7k</td>
+</tr>
+<tr>
+<td>package.xml 의존 간선</td>
+<td>1,320</td>
+<td>4,376</td>
+<td>331</td>
+<td>175</td>
+<td><strong>6,202</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>세 가지가 눈에 띈다. 첫째, <strong>GPU 코드는 Universe에만 있다.</strong> Core는 CPU 전용 참조 구현이고, CUDA를 쓰는 17개 패키지(cuda_pointcloud_preprocessor, tensorrt_bevformer, lidar_centerpoint, bevfusion, ptv3 등)는 전부 확장이다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. 둘째, 추론 런타임은 ONNX → TensorRT 한 경로뿐이다(<code>autoware_tensorrt_common</code>). PyTorch나 ONNX Runtime은 차량 경로에 없다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. 셋째, 의존 그래프의 허브는 메시지 패키지(<code>autoware_perception_msgs</code>·<code>autoware_planning_msgs</code> 각 98개가 의존)와 core/common 유틸(<code>autoware_motion_utils</code> 94, <code>autoware_agnocast_wrapper</code> 78)이다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. 메시지 스키마와 IPC 래퍼가 바뀌면 스택의 1/4 이상이 다시 빌드된다.</p>
+<p><strong>Core와 Universe.</strong> <code>autoware_core</code> README는 "안정적이고 고품질인 기본 ROS 패키지 집합"이라면서도 "현재 이 저장소는 비어 있고 인터페이스가 확정되면 Universe에서 이식을 시작한다"고 적혀 있다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>. 실제 트리에는 이미 74개 패키지가 있고, Core만으로 map → sensing → localization → perception → planning → control → vehicle → api 전체를 띄우는 <code>autoware_core.launch.xml</code>도 있다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. README가 낡은 것이다. Universe에서 <code>autoware_universe_utils</code>를 의존하는 패키지는 5개, core 그룹의 <code>autoware_utils*</code>를 의존하는 패키지는 205개로, 유틸의 Core 이관은 거의 끝났다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>.</p>
+<p><strong>런치 그래프 — 실행 구성은 XML에 있다.</strong> 최상위 <code>autoware.launch.xml</code>은 12개 모듈을 include하고 각 모듈을 <code>launch_&lt;module&gt;</code> 인자로 켜고 끈다. 정적으로 4단계까지 풀면 XML 노드 167개, <code>.launch.py</code> 잎 24개, 미해결 4개(센서 킷·차량 인터페이스·플래닝 프리셋처럼 변수로 정해지는 것)가 나온다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. 시스템 모듈 런치 하나가 13개를 include하는데 그 이름이 곧 안전 감시층의 목록이다. command_mode_switcher·duplicated_node_checker·processing_time_checker·<strong>pipeline_latency_monitor</strong>·component_state_monitor·MRM 오퍼레이터·diagnostic_graph_aggregator·hazard_status_converter·mrm_handler <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. 다만 <code>processing_time_checker</code> README는 "현재 검증 기능이 없고 진단은 항상 OK"라고 적는다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>. 지연은 재지만 게이팅은 아직 없다.</p>
+<p><strong>학습 기반 플래너의 위치.</strong> <code>autoware.launch.xml</code> 11행에는 <code>planning_setting</code> 인자가 있고 기본값 <code>rule_based</code>, 대안 <code>diffusion_planner</code>다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. <code>diffusion_planner</code>를 고르면 시나리오 플래닝 체인 대신 학습 플래너(Diffusion Planner ONNX)와 궤적 후처리기가 뜨고, 검증기 입력 토픽도 바뀐다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>planning.launch.xml:153,164,190</code>. 즉 학습 플래너는 <strong>공식 런치의 1급 옵션</strong>이다. 반면 <code>e2e/autoware_tensorrt_vad</code>(VAD 모델을 TensorRT로 돌려 측위·인지·계획을 한 네트워크로 대체, README "~20 ms") <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>는 Universe에 유일한 e2e 패키지지만 <code>autoware_launch</code> 전체에서 참조가 0건이다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. 코드는 들어왔으나 런치 체인에 연결되지 않았다.</p>
+<p><strong>통신 비용은 두 층으로 푼다.</strong></p>
+<ul>
+<li><strong>Agnocast(CPU 메시지 zero-copy).</strong> <code>autoware_agnocast_wrapper</code> README는 "크기가 정해지지 않은 타입을 포함해 모든 ROS 2 메시지 타입에 대해 진짜 zero-copy pub/sub"이라고 정의한다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>. 기본 빌드에서는 꺼져 있고 <code>ENABLE_AGNOCAST=1</code>로 켜면 <code>agnocastlib 2.4.0</code>을 찾고 <code>USE_AGNOCAST_ENABLED</code>를 정의한다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>CMakeLists.txt:16-17,44</code>. 런치에서는 <code>LD_PRELOAD</code>에 <code>libagnocast_heaphook.so</code>를 앞세우고 컴포넌트 컨테이너를 <code>agnocast_component_container</code>로 바꾼다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. 이미 80개 패키지가 Agnocast를 언급하고 약 40개 패키지가 <code>agnocast_wrapper::Node</code>를 상속한다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. 매니페스트 주석은 "Agnocast 도입 전환기 동안 소스 빌드로 제공"이라고 쓴다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>autoware.repos:2-5</code>. 메커니즘은 §8.1에서 다룬다.</li>
+<li><strong>cuda_blackboard(GPU → GPU zero-copy).</strong> <code>cuda_pointcloud_preprocessor</code> 문서는 "입력·출력 모두 GPU 메모리 사이 zero-copy를 가능하게 하는 CUDA 전송 계층"이라고 설명하고, <code>negotiated</code> 토픽으로 CPU/GPU 경로를 협상한다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>. 사용 패키지는 7개(bevfusion, centerpoint, transfusion, ptv3, frnet, ground_segmentation_cuda, cuda_pointcloud_preprocessor) <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>.</li>
+</ul>
+<p><strong>프로세스 구조.</strong> 세 저장소의 런치 XML에 <code>&lt;node</code>가 329회, 컴포저블 노드 계열이 약 150회 등장한다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. 컴포지션(프로세스 내 공유)은 센싱·인지 포인트클라우드 파이프라인에 집중돼 있고, 나머지 다수는 개별 프로세스로 뜬다. <code>MultiThreadedExecutor</code> 54회 vs <code>SingleThreadedExecutor</code> 230회 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. 코어 수가 적은 임베디드에서 컨텍스트 스위치와 직렬화 비용이 남는 구간이다.</p>
+<p><strong>타깃 하드웨어.</strong> Docker 빌드는 <code>CMAKE_CUDA_ARCHITECTURES="86;87;89;90;110"</code>로 Orin(sm_87)부터 Thor(sm_110)까지 한 이미지에 담는다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>universe-cuda.Dockerfile:38,130</code>. Docker README는 "Jetson Thor와 DRIVE Thor는 같은 Blackwell SoC(sm_110)를 공유하며 universe-cuda-jazzy arm64 이미지가 둘 다의 지원 런타임"이라고 쓰고, Jetson Thor(CUDA 13.0)에서 검증했으며 DRIVE Thor는 "설계상 동작할 것으로 예상"이라고 적는다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>. Ansible 기본값은 CUDA 13.0, TensorRT 10.13, rmw는 <code>rmw_cyclonedds_cpp</code>, ROS 배포판 jazzy다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>.</p>
+<p><strong>Autoware 2.0과 AutoDrive의 실체.</strong> 공식 문서 <code>autoware-architecture-v2/roadmap</code>은 "전통적 로보틱스 기반 Autoware 1.0에서 데이터 중심 AI 기반 Autoware 2.0으로"라고 선언하고, 아키텍처 문서는 <strong>Generator–Selector</strong>를 제안한다. Generator는 규칙·최적화 플래너, E2E 모델(원시 센서 입력), 샘플링 플래너처럼 복수의 궤적 생성기이고, Selector가 후보를 규칙 준수·주행 가능 영역으로 검사해 고른다. 명시된 효과는 "블랙박스 모델을 명시적 검사로 안전하게 사용" <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>. 코드 트리에는 아직 "architecture v2"·"AutoDrive" 문자열이 없고 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>, 보이는 구조 변화는 <code>autoware_system_designer</code>(YAML로 시스템을 기술하면 런치 파일·파라미터 템플릿·도식을 생성) <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>이다. 한편 Foundation의 <code>auto_drive</code> 저장소(2026-06-09 생성)는 "ADAS L2/L2+용 소형 temporal 모델로 연속 전방 프레임에서 CIPO 거리·도로 곡률·CIPO 존재 확률 세 가지를 예측"하며 PyTorch·ONNX FP32·INT8 가중치를 제공한다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>. <code>autoware.privately-owned-vehicles</code>(Vision Pilot)는 이를 "인지 AI(안전)와 E2E AI(성능)를 병렬 처리하는 하이브리드 E2E"로 조립한 단안 카메라 L2 시스템이다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>. 이름과 달리 VLA급이 아니다.</p>
+<p><strong>파트너십이 말하는 것.</strong> AMD Silo AI는 "AutoDrive E2E 모델을 Instinct GPU에서 양산급 L2+로 최적화"를 첫 과제로 잡았고 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>, Renesas는 2026-09-01 최상위 회원으로 가입해 "Autoware E2E AI를 R-Car SoC에 사전 통합"한다고 발표했으며 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>, TIER IV는 2026-08-20 R-Car Gen 5(X5H) 포팅 협력을 발표하고 Automotive World 2026(9/9~11)에서 Orin과 R-Car 양쪽 데모를 예고했다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. 같은 스택이 NVIDIA·AMD·Renesas 세 칩에 올라간다는 것이 2026년 Autoware의 사업적 실체다.</p>
+<h3 id="s4-2"><a class="anchor" href="#s4-2">4.2 Apollo — 자체 미들웨어 Cyber RT, "설정 파일이 실시간 설계도"</a></h3>
+<p><strong>규모와 버전.</strong> master(커밋 <code>d53aa3d</code>, 2026-04-16)는 <code>RELEASE.md</code>가 11.0이고 원격 태그 <code>v11.0.0</code>(2026-01-28)이 있지만 <code>version.json</code>은 9.0.0으로 남아 있다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. <code>.dag</code> 파일 109개, dag에 선언된 컴포넌트 인스턴스 188개(타이머 컴포넌트 17), <code>CYBER_REGISTER_COMPONENT</code> 90개, 채널 문자열 128개, <code>.proto</code> 478개, Bazel BUILD 721개 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> D2. 줄 수는 perception 194.8k(CUDA 9.9k 포함) &gt; planning 150.6k &gt; control 117.8k(캘리브레이션 설정 95k) &gt; drivers 56.4k 순이고, <code>cyber/</code>는 72.2k인데 그중 transport(11.6k)가 scheduler(2.3k)의 5배다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>.</p>
+<p><strong>Cyber RT의 세 가지 구조.</strong></p>
+<ol>
+<li><strong>컴포넌트와 채널.</strong> <code>Component&lt;M0..M3&gt;</code> 템플릿은 최대 4개 채널을 받고, 첫 채널 도착이 <code>Proc()</code>를 트리거하며 나머지 채널은 <code>BlockerManager</code>에서 최신값을 가져와 붙인다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>component.h:169-188,286-300</code>. 시간 동기화가 아니라 "주 채널 도착 시점의 최신값 융합"이다. 그래서 인지의 센서 융합은 별도 컴포넌트다. <code>TimerComponent</code>는 밀리초 주기로 돌고 control·canbus dag는 <code>interval: 10</code>(100 Hz)이다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>.</li>
+<li><strong>스케줄러 — classic과 choreography.</strong> classic은 그룹별 우선순위 큐(<code>MAX_PRIO = 20</code>) + 워크 스틸링이고, choreography는 태스크를 특정 프로세서(스레드)에 고정한다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>scheduler_classic.cc</code>, <code>scheduler_choreography.cc</code>. 설정 <code>compute_sched.conf</code>는 그룹 <code>compute</code>에 프로세서 16개(cpuset 0-7,16-23)와 태스크 19개를 prio 10~20으로 배치하는데, 순서가 파이프라인을 따른다. velodyne convert 10 → Detection 13 → SensorFusion 15 → prediction 16 → planning 17 → localization 20 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. 하류가 상류를 선점해 end-to-end 지연을 줄이는 설계다. 코루틴 컨텍스트 스위치는 x86_64·aarch64 어셈블리로 직접 구현돼 있다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>croutine/detail/swap_*.S</code>.</li>
+<li><strong>전송 — INTRA/SHM/RTPS 3단.</strong> <code>cyber.pb.conf</code>는 <code>same_proc: INTRA, diff_proc: SHM, diff_host: RTPS</code>를 선언하고, 10.0에서 추가된 arena 공유메모리(<code>/apollo/msg</code>, 최대 메시지 32 MiB × 풀 32)가 protobuf arena를 공유메모리에 직접 배치해 직렬화·복사를 없앤다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>protobuf_arena_manager.h</code>, <code>shm_transmitter.h:79-85</code>. 릴리스 노트는 "µs 수준 지연, 10배 성능"이라 쓰지만 재현하지 않았다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span><span class="ev" title="미확인·추정">⚠️</span>. RTPS는 Fast-RTPS이고 서비스 디스커버리도 Fast-RTPS 참가자 기반이다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>.</li>
+</ol>
+<p>프로세스 경계는 코드가 아니라 <code>mainboard -d &lt;dag&gt; -p &lt;process_group&gt; -s &lt;sched_name&gt;</code> 배치로 정한다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>module_argument.cc:36-43</code>. 같은 바이너리로 "모두 한 프로세스(INTRA)"와 "모듈별 프로세스(SHM)"를 고를 수 있다.</p>
+<p><strong>주행 파이프라인.</strong> dag에서 파생한 간선은 <code>/apollo/perception/obstacles</code> → Prediction → <code>/apollo/prediction</code> → Planning → <code>/apollo/planning</code> → Control → <code>/apollo/control</code> → Canbus → <code>/apollo/canbus/chassis</code>로 이어지고, 11.0에는 control → planning 역방향 채널(<code>/apollo/control/interactive</code>)이 있다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. 인지는 LiDAR(전처리 → ROI → 지면 → CenterPoint 검출 → 필터 → 추적), 카메라(검출 → 위치 추정 → 정제 → 추적), 레이더가 각각 <code>PrefusedObjects</code>로 모여 <code>MultiSensorFusionComponent</code>가 합치는 구조인데, BEV(PETR, nuScenes식 6카메라)와 OCC 컴포넌트는 융합을 거치지 않고 <code>/apollo/perception/obstacles</code>에 직접 쓴다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. planning은 Scenario → Stage → Task 3단(시나리오 19개 중 12개 활성, 태스크 35, 교통규칙 10)이고 <code>learning_mode: NO_LEARNING</code>이 기본이며, 문서는 "E2E 방법은 도로에서 시험되지 않았다"고 쓴다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span><span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>.</p>
+<p><strong>GPU 경계.</strong> perception에 CUDA 41파일·TensorRT 79파일, prediction에 LibTorch 56파일이 몰려 있고 control·canbus·localization·routing은 GPU 코드 0이다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. 추론 백엔드는 <code>common/inference/{tensorrt, migraphx, libtorch, onnx, paddlepaddle}</code>로 추상화돼 AMD ROCm(MIGraphX)까지 포함한다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. 이기종 배치의 경계가 모듈 경계와 일치한다.</p>
+<p><strong>활동도와 방향.</strong> 최근 12개월(2025-09~2026-09) master 커밋은 21건, 작성자 5명이고, 2025년 1~6월과 9~12월은 커밋 0이다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>(shallow-since 클론). 11.0은 2026-01-27 하루에 대형 스쿼시 커밋 8개로 들어왔다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> — 내부에서 개발하고 릴리스 단위로 덤프하는 패턴이다. 릴리스 노트는 11.0의 초점을 "배송·청소·보안 순찰·캠퍼스 셔틀" 같은 저속 기능차량과 RTK/SLAM/비전/휠 오도메트리 융합 측위로 잡았고 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>, 9.0 이후 "모델은 연구 목적, 상용화는 권장하지 않음" 면책을 유지한다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>. 로보택시 Apollo Go(2026 Q2 완전무인 약 100만 회, 누적 2,300만 회 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>)의 ADFM은 오픈소스에 없다. 오픈소스 Apollo와 Apollo Go 스택의 거리가 커지고 있다.</p>
+<p><strong>라이선스 주의.</strong> 본체는 Apache-2.0이지만 <code>third_party/</code>가 53개 디렉터리이고 <code>ACKNOWLEDGEMENT.txt</code>는 <code>ad-rss-lib</code>을 "GPL 2.1"로 적어 놓았다(실제 업스트림은 LGPL-2.1로 알려짐, 이 세션에서 미확인 <span class="ev" title="미확인·추정">⚠️</span>). 이 라이브러리는 <code>planning/tasks/rss_decider</code>에 링크된다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>.</p>
+<h3 id="s4-3"><a class="anchor" href="#s4-3">4.3 openpilot — 가장 작은 스택, 유일하게 매일 양산차에서 도는 E2E</a></h3>
+<p><strong>구조.</strong> 저장소(커밋 <code>3eafb65</code>, 2026-09-07)는 <code>openpilot/</code> 파이썬 패키지(cereal·common·selfdrive·system·tools)와 서브모듈(panda·opendbc·msgq·rednose·tinygrad)로 이루어진다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. 모델 가중치는 git-LFS이고 LFS 서버는 GitHub가 아니라 GitLab이다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>.lfsconfig</code>. 이 덕분에 차단 환경에서도 가중치를 받아 실측할 수 있었다.</p>
+<p><strong>프로세스 44개.</strong> <code>process_config.py</code>는 네이티브 6개(loggerd, encoderd, stream_encoderd, camerad, <code>_pandad</code>, bridge), 데몬 1개, 파이썬 37개를 정의하고, 실행 조건은 온로드·차량 여부·토글의 람다 조합이다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. UI는 C++/Qt가 아니라 Python + raylib다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. <code>services.py</code>는 69개 서비스를 정의하고 주파수는 20 Hz 33개, 100 Hz 7개(can, controlsState, carState, carControl 등), 104 Hz 2개(IMU)이며, 큐 크기는 SMALL 250 KB 55개 · MEDIUM 2 MB 5개 · BIG 10 MB 9개(can, modelV2, 영상)다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>.</p>
+<div class="table-wrap"><table class="cols-4">
+<thead>
+<tr>
+<th>프로세스</th>
+<th>언어</th>
+<th>역할</th>
+<th>주기·입출력</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>camerad</td>
+<td>C++</td>
+<td>ISP 드라이버, VisionIPC 프레임 발행</td>
+<td>20 Hz, 카메라 2~3대</td>
+</tr>
+<tr>
+<td><strong>modeld</strong></td>
+<td>Python + tinygrad</td>
+<td>주행 모델 추론, plan → action, 차선변경 desire</td>
+<td>20 Hz, VisionIPC 2스트림 → <code>modelV2</code>(10 MB 큐)</td>
+</tr>
+<tr>
+<td>plannerd</td>
+<td>Python + acados</td>
+<td>종방향 MPC(N=12)와 E2E 후보 경합, LDW</td>
+<td>modelV2 폴링 → <code>longitudinalPlan</code></td>
+</tr>
+<tr>
+<td>controlsd</td>
+<td>Python</td>
+<td>횡(PID/Torque/Angle/Curvature)·종(PID) 제어기</td>
+<td><strong>100 Hz</strong> → <code>carControl</code></td>
+</tr>
+<tr>
+<td>selfdrived</td>
+<td>Python</td>
+<td>상태 머신, 이벤트, 과도 액추에이션 감시</td>
+<td>100 Hz</td>
+</tr>
+<tr>
+<td>card</td>
+<td>Python(opendbc)</td>
+<td>CAN 파싱·송신, 차량 핑거프린트</td>
+<td>100 Hz, <code>can</code> → <code>carState</code>·<code>sendcan</code></td>
+</tr>
+<tr>
+<td>pandad</td>
+<td>Python 래퍼 → C++</td>
+<td>panda 플래시, USB/SPI CAN 브리지, 안전 모드 설정</td>
+<td>100 Hz</td>
+</tr>
+<tr>
+<td>locationd·calibrationd·paramsd·torqued·lagd</td>
+<td>Python</td>
+<td>자세·캘리브레이션·차량 파라미터·토크·조향 지연 온라인 추정</td>
+<td>4~20 Hz</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>IPC.</strong> msgq는 <code>/dev/shm/msgq_&lt;endpoint&gt;</code>에 mmap한 링버퍼 pub/sub이고 직렬화는 Cap'n Proto다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>msgq.cc:91,111-118</code>. 카메라 프레임은 별도 VisionIPC로 전달되며 디바이스에서는 ION DMA 버퍼를 프로세스 간 공유한다(zero-copy) <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>visionbuf_ion.cc</code>. ZMQ는 원격 브리지에만 남아 있다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. 0.10.3 릴리스 노트는 msgq 메모리를 711 MB → 90 MB로 줄였다고 적는다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</p>
+<p><strong>주행 모델의 실체.</strong> <code>driving_supercombo.onnx</code>는 60.9 MB, 파라미터 30.0M(FLOAT16), 노드 351개, opset 20이다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> D3. 입력은 협각·광각 카메라 각 <code>(1,12,128,256)</code> uint8(2프레임 × 6채널 YUV), 과거 24스텝 hidden state <code>(1,24,512)</code>, desire 펄스, 교통 규약, action 시점이고 출력은 <code>(1,2576)</code> 벡터 하나를 메타데이터의 슬라이스로 나눠 쓴다(plan 990, lane_lines 528, lead 144, hidden_state 512 …) <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. 시간 컨텍스트는 재귀 hidden state 24스텝 × frame_skip 4 = 96프레임 ≈ 4.8초를 12 KB 입력으로 압축한다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>constants.py</code>, <code>modeld.py:189</code>.</p>
+<p>런타임은 <strong>tinygrad</strong>다. 빌드 시 <code>compile_modeld.py</code>가 ONNX를 tinygrad로 컴파일해 JIT 커널 묶음(<code>driving_tinygrad.pkl</code>)으로 만들고, 원근 워프와 YUV 텐서 변환까지 그래프 안에 넣는다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. 디바이스 플래그는 <code>DEV=QCOM IMAGE=1 FLOAT16=1</code>(Adreno OpenCL 이미지 타입), PC는 <code>DEV=CPU:LLVM</code>, big 모델은 <code>DEV=USB+AMD</code>다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>SConscript:29-45</code>. 코어 격리도 명시적이다. modeld는 core 7(isolcpus)에서 SCHED_FIFO 54, controlsd·selfdrived·card는 core 4 우선순위 53, plannerd는 core 5 우선순위 51 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>.</p>
+<p><strong>CPU 실측(D3).</strong> 같은 ONNX를 onnxruntime CPU EP로 이 샌드박스(Xeon 4코어, GPU 없음)에서 돌리면 supercombo는 평균 395 ms(4스레드)·406 ms(1스레드), dmonitoring은 56·49 ms다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>d3-openpilot-onnx.md</code>. 2.5 FPS. comma 디바이스가 이 모델을 20 Hz로 돌리는 것은 모델이 가벼워서가 아니라 tinygrad 커널 컴파일·OpenCL 이미지 텍스처·ISP 오프로드·코어 격리라는 하드웨어-런타임 공진화 위에 성립한다. 같은 가중치라도 런타임을 바꾸면 8배 이상 느려진다는 것이 이 실측의 요점이다.</p>
+<p><strong>E2E 모델은 "제안자", 명령은 규칙 제어기가 낸다.</strong> controlsd는 100 Hz로 <code>modelV2.action.desiredCurvature</code>를 받아 <code>clip_curvature</code>로 제한한 뒤 차량별 횡제어기에 넣고, 종방향은 <code>longitudinalPlan.aTarget</code>을 PID로 추종한다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>controlsd.py:117-138</code>. plannerd는 Chill 모드에서 acados MPC와 E2E 후보 중 최소 가속을 고르고 Experimental 모드에서 E2E 가속을 쓴다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. 횡방향 MPC는 0.9.5(2023-11)에서 이미 삭제됐다("Do lateral planning inside the model") <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span> RELEASES.md.</p>
+<p><strong>안전층은 다른 CPU에 있다.</strong> 안전 로직은 panda(STM32H7) 펌웨어의 C 코드이고 소스는 opendbc <code>safety/</code>에 있다. 차량별 safety mode 26개, 파이썬 단위 테스트 24개, MISRA C:2012 cppcheck와 뮤테이션 테스트를 거친다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span><span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>. 펌웨어는 openpilot이 무엇을 보내든 독립적으로 (1) 크루즈·브레이크·가스 CAN을 읽어 <code>controls_allowed</code>를 판정하고 (2) 송신 메시지 화이트리스트를 검사하며 (3) 토크 크기·변화율, 각도, 곡률(ISO 11270 횡가속 3.0 m/s²), 가속 한도(ISO 15622)를 강제하고 (4) 운전자 개입 시 즉시 차단하며 (5) heartbeat 손실 시 SILENT로 간다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>safety.h</code>, <code>lateral.h</code>, <code>longitudinal.h</code>. 포크가 이 코드를 고치면 openpilot 상표를 쓸 수 없다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span> <code>docs/SAFETY.md</code>.</p>
+<p><strong>모델 릴리스 이력이 곧 E2E 진화사다.</strong> 0.8.14(2022-06) 두 카메라 사용 → 0.9.0(2022-11) E2E 종방향(Experimental 모드) → 0.9.5(2023-11) 횡방향 계획을 모델 안으로, ViT 아키텍처 → 0.9.8(2025-02) ISP 오프로드·tinygrad → 0.10.0(2025-08) "Learning to Drive from a World Model", 종방향 MPC를 월드모델 E2E 계획으로 대체 → 0.11.0(2026-03) 학습된 시뮬레이터로 전량 학습 → <strong>0.11.2(2026-08) 880M 파라미터 big 모델 + 외장 GPU</strong> <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span> RELEASES.md. 학습에 쓴 월드모델은 2B 파라미터 디퓨전 트랜스포머, 250만 분 플릿 영상이다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. 외장 GPU "chestnut"은 USB4↔PCIe 독에 AMD RX 9060을 꽂는 방식으로 컴퓨트 예산을 10 W에서 100 W로 올린다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. 자동차용으로는 이례적인 "PC식 가속기 확장"이다.</p>
+<p><strong>차량 지원과 라이선스.</strong> opendbc의 <code>CAR</code> 플랫폼 열거형은 260개(hyundai 70, toyota 39, honda 39, volkswagen 32 …) <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. openpilot·panda·opendbc·msgq는 모두 MIT이지만, <strong>모델 가중치에 대한 라이선스 문구는 저장소 어디에도 없다</strong> <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>(부재의 확인). 플릿은 사용자 2만 명 이상, 누적 3억 마일, 그중 56%가 openpilot 주행이라고 comma는 밝힌다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</p>
+<h3 id="s4-4"><a class="anchor" href="#s4-4">4.4 세 스택 나란히</a></h3>
+<div class="table-wrap"><table class="cols-4">
+<thead>
+<tr>
+<th>축</th>
+<th>Autoware</th>
+<th>Apollo</th>
+<th>openpilot</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>조립 단위</td>
+<td>ROS 2 노드(365 pkgs, 287 등록) + 런치 XML</td>
+<td>Cyber 컴포넌트(188 인스턴스) + dag/launch</td>
+<td>프로세스 44개 + 서비스 69개</td>
+</tr>
+<tr>
+<td>IPC</td>
+<td>DDS(CycloneDDS 기본) → Agnocast·cuda_blackboard로 zero-copy</td>
+<td>INTRA/SHM(arena)/RTPS 자동 선택</td>
+<td>msgq 공유메모리 + VisionIPC(ION)</td>
+</tr>
+<tr>
+<td>스케줄링</td>
+<td>ROS 2 Executor(Single 230 vs Multi 54 언급) + OS</td>
+<td>사용자 공간 코루틴, classic prio 20단계 / choreography 코어 핀</td>
+<td>Linux SCHED_FIFO + isolcpus 코어 고정</td>
+</tr>
+<tr>
+<td>인지 → 계획</td>
+<td>모듈형, 학습 플래너 옵션</td>
+<td>모듈형, BEV+OCC 옵션, E2E 미시험</td>
+<td>E2E 모델(30M) + 규칙 제어기</td>
+</tr>
+<tr>
+<td>GPU 경계</td>
+<td>Universe 17 pkgs(TensorRT)</td>
+<td>perception·prediction만</td>
+<td>modeld(tinygrad, Adreno)</td>
+</tr>
+<tr>
+<td>안전층</td>
+<td>system 모듈(MRM·진단), 같은 SoC</td>
+<td>monitor/guardian + RSS decider, 같은 SoC</td>
+<td><strong>별도 MCU 펌웨어</strong>(panda) + SW 클램프</td>
+</tr>
+<tr>
+<td>데이터 루프</td>
+<td>scenario_simulator_v2, Co-MLOps(TIER IV)</td>
+<td>Dreamview·record, Baige(비공개)</td>
+<td>플릿 로그 3억 마일, 학습된 시뮬레이터</td>
+</tr>
+<tr>
+<td>최근 활동</td>
+<td>main 매일 커밋</td>
+<td>12개월 21커밋, 릴리스 단위 덤프</td>
+<td>매일 커밋, 월간 릴리스</td>
+</tr>
+</tbody>
+</table></div>
+<aside class="callout hpc"><span class="lbl">HPC 메모</span><p>세 스택은 "통신 비용을 어디서 없애는가"에서 갈린다. Autoware는 미들웨어를 유지한 채 zero-copy 층을 두 겹 끼워 넣고(플랫폼에 커널 모듈·GPU 버퍼 공유를 요구), Apollo는 미들웨어 자체가 공유메모리 arena와 코어 핀을 갖고(플랫폼에 cpuset·SCHED 정책 노출을 요구), openpilot은 프로세스 수를 줄이고 코어를 격리한다(플랫폼에 isolcpus·ISP 오프로드를 요구). 우리 HPC가 어느 스택을 받든 "공유메모리 + 코어 파티셔닝 + 안전층 분리"라는 요구는 같다. 다른 것은 그 요구가 커널 모듈(Agnocast)인지, 설정 파일(Cyber)인지, 별도 MCU(panda)인지다.</p></aside>
+
+</section>
+<section id="sec-s5" class="chapter" data-num="5">
+<h2 id="s5"><a class="anchor" href="#s5">5. 학계 오픈 E2E 계보 — UniAD에서 DiffusionDrive까지</a></h2>
+<aside class="callout qa">
+<div class="qa-q"><span class="lbl">이 장의 질문</span><p>논문 스택은 무엇을 증명했고 무엇을 증명하지 못했나. 코드를 열면 차에 실을 수 있는 것인가.</p></div>
+<div class="qa-a"><span class="lbl">세 줄 답</span><ol class="three"><li><span class="num">①</span><span>2023~2026년 계보는 "nuScenes 오픈루프(UniAD·VAD) → 벤치마크 붕괴(에고 상태만으로 SOTA) → NAVSIM 비반응 시뮬(PDMS) → 앵커 디퓨전·어휘 스코어링 → VLA·월드모델·RL"로 이어진다.</span></li><li><span class="num">②</span><span>NAVSIM 계열 SOTA는 놀랄 만큼 작다(ResNet-34, 50~60M 파라미터). 성능은 백본 크기보다 후보 생성·스코어링 설계에서 나온다.</span></li><li><span class="num">③</span><span>조사한 오픈 코드베이스 중 실차 양산 배포를 명시한 것은 없고, PyTorch·timm·nuplan-devkit 의존에 TensorRT·양자화·결정적 스케줄 검증이 전무하다. 이식 가능한 자산은 가중치가 아니라 평가기(PDM 스코어러)와 헤드 설계다.</span></li></ol></div>
+</aside>
+<figure class="fig"><img src="images/e2e-lineage.svg" alt="학계 E2E 계보" loading="lazy"><figcaption>그림 4. 학계 오픈 E2E 스택 계보와 벤치마크 전환. 자체 작성. 점수는 각 README·논문 보고값(<span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span><span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>).</figcaption></figure>
+<h3 id="s5-1"><a class="anchor" href="#s5-1">5.1 계보 — 여섯 번의 방향 전환</a></h3>
+<div class="table-wrap"><table class="cols-4">
+<thead>
+<tr>
+<th>시기</th>
+<th>모델</th>
+<th>핵심 아이디어</th>
+<th>대표 수치(보고값)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2021~23</td>
+<td>TransFuser(Tübingen)</td>
+<td>카메라+LiDAR 트랜스포머 융합, CARLA 모방학습</td>
+<td>CARLA LB1.0 DS 61.2 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>2023 CVPR</td>
+<td><strong>UniAD</strong>(OpenDriveLab)</td>
+<td>"계획 지향": 검출·추적·지도·모션·점유를 쿼리로 연결, 최우수 논문</td>
+<td>nuScenes avg L2 1.03 m, A100 1.8 FPS <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>2023 ICCV</td>
+<td>VAD(HUST)</td>
+<td>완전 벡터화 장면 표현</td>
+<td>VAD-Tiny 16.8 FPS(3090) <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td>2024 CVPR</td>
+<td>"Is Ego Status All You Need?"</td>
+<td>에고 상태만 쓰는 MLP가 UniAD/VAD급 → 벤치마크 비판</td>
+<td>nuScenes 장면 73.9%가 직진 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>2024 NeurIPS</td>
+<td><strong>NAVSIM</strong>(비반응 시뮬), Bench2Drive(CARLA 폐루프)</td>
+<td>PDMS = NC×DAC×(5·EP+5·TTC+2·C)/12 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td>Human 94.8, PDM-Closed 89.1, Ego-MLP 65.6 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>2024</td>
+<td>Hydra-MDP(NVIDIA)</td>
+<td>인간+규칙 다중 교사 증류, 메트릭별 궤적 점수화</td>
+<td>NAVSIM 86.5, CVPR24 AGC 1위 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span><span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td>2025 CVPR</td>
+<td><strong>DiffusionDrive</strong>(HUST)</td>
+<td>20개 kmeans 앵커에서 2스텝 디노이징</td>
+<td>88.1 PDMS, 45 FPS(4090), 60M <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td>2025</td>
+<td>WoTE, GTRS, SimLingo, Epona</td>
+<td>BEV 월드모델 평가 / 어휘 스코어링(V2-99) / 비전 VLA / 2.5B 월드모델</td>
+<td>88.3 / navhard 42.1 EPDMS / LB2 1위 / — <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td>2025~26</td>
+<td>AutoVLA, OpenDriveVLA, ReCogDrive, DriveAgent-R1</td>
+<td>VLM(2~8B) + 액션 토큰·디퓨전 플래너 + RL</td>
+<td>ReCogDrive 90.8 PDMS <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td>2026</td>
+<td>SparseDriveV2, DiffusionDriveV2, WOD-E2E(Waymo)</td>
+<td>경로×속도 어휘 + 계층 스코어링 / RL 제약 디퓨전 / 평가자 선호 점수(RFS)</td>
+<td>92.2 PDMS(ResNet-34) <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span> / 91.2 / —</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="s5-2"><a class="anchor" href="#s5-2">5.2 벤치마크 논쟁 — 무엇을 재고 있었나</a></h3>
+<p><strong>오픈루프의 붕괴.</strong> nuScenes 오픈루프 지표(L2 오차·충돌률)는 2023년까지 E2E의 표준이었지만, 2024년 CVPR 논문은 속도·가속·요·명령만 쓰는 Ego-MLP가 UniAD·VAD와 대등하다고 보였다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. 프로토콜 불일치도 있었다. UniAD 보고값(avg L2 1.03 / Col 0.31)과 ST-P3 프로토콜 재계산값(0.69 / 0.12)이 공존한다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. Bench2Drive 팀은 README에 "L2 오차는 의미 있는 지표가 전혀 아니며, 저자들은 nuScenes 오픈루프 결과 보고를 멈춰야 한다"고 썼다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>. 그럼에도 2025년 논문들도 nuScenes 표를 병기한다.</p>
+<p><strong>폐루프의 비용.</strong> CARLA 폐루프는 재현성과 비용 문제가 있다. Longest6 평가는 SLURM 병렬화가 필요하고 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>, Bench2Drive는 220개 루트를 CARLA 인스턴스로 돌리며 "특정 루트는 재시작해도 못 끝내는 게 정상"이라고 적는다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>. CARLA 리더보드 2.0 공식 서버는 2024-12 기준 일시 폐쇄됐다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</p>
+<p><strong>NAVSIM의 절충.</strong> nuPlan/OpenScene 실데이터 위에서 4초 비반응 시뮬레이션(배경 차량은 로그 재생, 에고는 LQR 추종)을 돌린 뒤 nuPlan 폐루프 지표를 재구현한 PDMS로 채점한다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span> <code>pdm_scorer.py:77</code>. NAVSIM v2(CoRL 2025)는 3DGS로 계획 궤적 주변 합성 관측을 미리 만들어 2단계 EPDMS를 계산하며 폐루프와 Pearson 0.89를 보고한다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. 2026-04 교차 연구는 PDMS와 Bench2Drive DS의 Spearman 상관이 0.90이지만, 진행(EP)이 충돌(NC)보다 폐루프 성능을 더 잘 예측한다(ρ 0.83 vs 0.45)는 불편한 결과를 냈다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. 산업 측 대안으로 Waymo WOD-E2E(CVPR 2026)는 로그 거리 대신 <strong>평가자 선호 점수(RFS)</strong> 로 롱테일 4,021 세그먼트를 채점한다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</p>
+<h3 id="s5-3"><a class="anchor" href="#s5-3">5.3 코드 해부 — NAVSIM + DiffusionDrive</a></h3>
+<p><code>autonomousvision/navsim</code>(main <code>0a380a90</code>)과 <code>hustvl/DiffusionDrive</code>(main <code>9b52ed0e</code>)를 받아 읽었다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>.</p>
+<p><strong>에이전트 인터페이스.</strong> <code>AbstractAgent(torch.nn.Module)</code>는 <code>name</code>·<code>get_sensor_config</code>·<code>initialize</code>를 필수로 요구하고, <code>compute_trajectory()</code>는 feature builder → 배치 → <code>forward</code> → <code>predictions["trajectory"].squeeze(0).numpy()</code> → <code>Trajectory(8 포즈, 4 s @ 0.5 s)</code> 순으로 흐른다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>abstract_agent.py:63-84</code>. 81행이 <code>.cpu()</code> 없이 <code>.numpy()</code>를 부르고 <code>run_pdm_score.py</code>에는 <code>.cuda()</code> 호출이 없다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. <strong>PDM 평가는 기본이 CPU 추론</strong>이다. 새 정책 추가는 이 클래스 상속 + Hydra YAML 한 장이다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>.</p>
+<p><strong>입력의 실체.</strong> TransFuser 베이스라인은 8카메라 중 전방 좌·중·우 3대만 쓰고(cam_f0/l0/r0, 후방 미사용) 1024×256으로 스티치하며, LiDAR는 ±32 m 256×256 BEV 히스토그램 2채널이다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>transfuser_config.py</code>, <code>transfuser_features.py:65-108</code>. 백본은 <code>timm.create_model("resnet34", pretrained=True)</code> <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> — 사전학습 가중치를 Hugging Face에서 받아야 하므로 이 환경에서는 실행 불가.</p>
+<p><strong>PDM 스코어러.</strong> <code>PDMScorerConfig</code>는 가중치 progress 5.0·ttc 5.0·lane_keeping 2.0·comfort 2.0, 임계값(주행 방향 1 s/2 m/6 m, TTC 1 s, 차선 유지 0.5 m·2 s)을 갖고 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>pdm_scorer.py:41-73</code>, <code>_aggregate_pdm_scores</code>가 승수 지표(충돌·주행 가능 영역·신호·방향)의 곱에 가중 지표의 가중평균을 곱한다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>:223-249</code>. 시뮬레이터는 배치 자전거 모델 + LQR 추종기다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>pdm_simulator.py:28-31</code>. 이 부분은 torch 연산이 없어 CPU에서 돈다.</p>
+<p><strong>DiffusionDrive 모델.</strong> <code>TrajectoryHead</code>는 <code>ego_fut_mode = 20</code>, <code>DDIMScheduler(1000 steps, prediction_type="sample")</code>, kmeans 앵커 <code>(20, 8, 2)</code>, <strong>2층</strong> 커스텀 트랜스포머 디코더로 구성된다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>transfuser_model_v2.py:382-432</code>. 학습은 1000 스텝 중 앞 50만 쓰는 절단 디퓨전(<code>timesteps = randint(0, 50)</code>) <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>:465-468</code>, 추론은 <code>step_num = 2</code>로 타임스텝 [10, 0] 두 번만 디노이징한 뒤 분류 헤드 argmax로 모드를 고른다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>:504-558</code>. README의 "10배 적은 스텝" 주장과 코드가 일치한다. 디코더 층은 궤적 점 위치에서 BEV 특징을 샘플링하는 <code>GridSampleCrossBEVAttention</code>, 에이전트·에고 교차 어텐션, 시간 조건 변조로 이루어진다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>:270-343</code>. 라이선스는 DiffusionDrive MIT, NAVSIM Apache-2.0, 단 Bench2Drive는 코드·자산이 CC-BY-NC-ND(상업 이용·파생 금지)다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>.</p>
+<p><strong>GPU가 필요한 곳.</strong> 데이터·메트릭 캐싱(CPU), PDM 스코어링(CPU, numpy/shapely), 평가 시 정책 추론(기본 CPU)은 GPU가 필요 없고, 훈련(<code>accelerator: gpu, strategy: ddp, precision: 16-mixed</code>)과 논문 FPS(4090)만 GPU다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. 벤치마크 스크립트는 저장소에 없다 <span class="ev" title="미확인·추정">⚠️</span>.</p>
+<h3 id="s5-4"><a class="anchor" href="#s5-4">5.4 차량 HPC 관점에서 읽는 학계 스택</a></h3>
+<ul>
+<li><strong>크기.</strong> DiffusionDrive 60M(ResNet-34), SparseDriveV2 50M, ReCogDrive 플래너 35M(+VLM 2B/8B) <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>. nuScenes 계열 UniAD는 ResNet-101 + BEVFormer로 A100에서 556 ms <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. SparseDriveV2가 ResNet-34로 V2-99(약 97M) 모델을 앞서 "백본 크기 ≠ 성능"을 보였다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</li>
+<li><strong>보고 FPS의 하드웨어.</strong> 전부 RTX 3090/4090·A100·L20이고 Orin·Thor 수치는 어느 README에도 없다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>. 45 FPS(4090)가 Orin에서 몇 배 느려질지는 추정뿐이다 <span class="ev" title="미확인·추정">⚠️</span>.</li>
+<li><strong>온보드 배포 함의.</strong> PyTorch 2.0.1 핀, timm, nuplan-devkit v1.2, diffusers 의존 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. TensorRT·ONNX 변환·INT8·결정적 스케줄 검증이 전무하다. 어휘 스코어링(8k~16k 후보) 계열은 메모리 대역폭 부담이 크다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</li>
+<li><strong>실차.</strong> SenseTime이 2024년 "UniAD" 이름의 양산형 E2E를 시연했으나 사내 재구현이며 오픈소스 코드와의 동일성은 미확인이다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span><span class="ev" title="미확인·추정">⚠️</span>. Bench2Drive-Robust(2026-05)가 처음으로 연산-제어 지연·카메라 스트림 실패를 벤치마크에 넣기 시작했다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>.</li>
+</ul>
+<aside class="callout hpc"><span class="lbl">HPC 메모</span><p>학계 계보에서 우리가 가져올 것은 세 가지다. (1) PDM 스코어러 같은 규칙 기반 평가기 — Autoware 2.0의 Selector, DRIVE AV의 클래식 안전 스택과 같은 역할이며 CPU에서 돈다. (2) 앵커 + 짧은 디노이징처럼 "작은 헤드로 다중 모드"를 내는 설계 — 온보드 지연 예산에 맞는 형태다. (3) navhard·롱테일 같은 데이터 커리큘럼. 가중치 자체는 nuPlan 좌표계·센서 배치에 묶여 있어 그대로 옮길 수 없다.</p></aside>
+
+</section>
+<section id="sec-s6" class="chapter" data-num="6">
+<h2 id="s6"><a class="anchor" href="#s6">6. 신세대 상용 E2E/VLA — NVIDIA Alpamayo·DRIVE AV, Tesla, Wayve, Waymo</a></h2>
+<aside class="callout qa">
+<div class="qa-q"><span class="lbl">이 장의 질문</span><p>차에 실리는 E2E는 어떤 모양인가. "추론하는 모델"은 실시간에 들어오나.</p></div>
+<div class="qa-a"><span class="lbl">세 줄 답</span><ol class="three"><li><span class="num">①</span><span>NVIDIA는 VLA(Alpamayo)를 차에 직접 싣는 것이 아니라 teacher로 두고, 차량에는 증류·양자화된 student가 DRIVE AV E2E 스택 안에서 클래식 안전 스택과 병렬로 돈다.</span></li><li><span class="num">②</span><span>Tesla는 단일 신경망 + 원격 인간 폴백, Wayve는 단일 파운데이션 모델 + 안전운전자, Waymo는 모듈형·ML 하이브리드 + 하드웨어 이중화로 폴백의 위치가 세 곳이 다 다르다.</span></li><li><span class="num">③</span><span>추론형 VLA의 지연은 데스크톱 GPU에서 0.6~3.4초, 최적화해도 Jetson Thor에서 약 0.9초다. 세대가 올라갈수록 느려지고, 그래서 양산 스택은 언어 토큰을 우회하거나 월드모델을 오프보드로 밀어낸다.</span></li></ol></div>
+</aside>
+<h3 id="s6-1"><a class="anchor" href="#s6-1">6.1 NVIDIA Alpamayo — 추론형 VLA의 실체</a></h3>
+<p><strong>정의와 위치.</strong> NVIDIA는 CES 2026에서 Alpamayo를 "안전하고 추론 기반인 차세대 AV 개발을 가속하기 위한 오픈 AI 모델·시뮬레이션 도구·데이터셋 패밀리"로 소개했다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. GitHub README는 더 구체적이다. "Alpamayo 1 Nano는 주행 궤적과 Chain-of-Causation 추론을 짝지은 10B 오픈 추론 VLA 모델로, 다중 카메라 영상과 자차 운동 이력으로부터 궤적과 CoC 추론 트레이스를 생성한다" <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>. 스택 안의 위치는 셋으로 정리된다. VLM 백본은 Cosmos-Reason 계열이고(Alpamayo 1 → Cosmos-Reason1, 1.5 → Cosmos-Reason2, 2 Super → Cosmos 3 Super Reasoner) <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>, DRIVE AV 제품 페이지는 "Alpamayo VLA가 E2E 스택에 배포되어 롱테일 주행이 요구하는 맥락 추론을 제공한다"고 쓰며 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>, Hyperion은 "Alpamayo 추론 모델과 함께 L4에 도달하는 양산 준비 플랫폼"으로 소개된다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</p>
+<p><strong>세대별 사양.</strong></p>
+<div class="table-wrap"><table class="cols-4">
+<thead>
+<tr>
+<th></th>
+<th>Alpamayo 1 (R1)</th>
+<th>Alpamayo 1.5</th>
+<th>Alpamayo 2 Super</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>공개</td>
+<td>2025-12(NeurIPS) → 2026-01 CES에서 개명</td>
+<td>2026-03-20(GTC)</td>
+<td>발표 2026-05-31, 상용 가중치 2026-08-04</td>
+</tr>
+<tr>
+<td>파라미터</td>
+<td>10B <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td>약 10.5B = Cosmos-Reason2 백본 8.2B + flow matching 액션 디코더 2.3B <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td><strong>34B</strong> = 32B Qwen3-VL 백본 + 2.3B flow matching action expert <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td>입력</td>
+<td>카메라 4대(cross-left·front-wide·cross-right 120°, front-tele 30°) + 1.6초 자차 이력 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td>4대(설정 가능), 1080×1920 → 320×576 다운샘플, 10 Hz × 0.4초 창 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td><strong>정확히 6대</strong>(ID 0,1,2,3,5,6 고정) × 4프레임, 이력 토큰 48·미래 토큰 128 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td>출력</td>
+<td>6.4초 궤적(64점 @10 Hz) + CoC 트레이스 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td>동일 + 내비 조건·VQA <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td>궤적 + CoC + 메타액션(종·횡·차선) + VQA + 2D 그라운딩 + 자동 라벨 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td>가중치 크기·VRAM</td>
+<td>≥24 GB <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td>약 21~22 GB, 단일 24 GB / CFG 60 GB <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td>약 72 GB(bf16), <strong>80 GB+</strong>, 피크 69.1 GiB <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td>라이선스</td>
+<td>코드 Apache-2.0 / 가중치 OpenMDW-1.1 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>(초기 HF 카드는 "비상용" 문구 <span class="ev" title="미확인·추정">⚠️</span>)</td>
+<td>HF 카드 "비상용, 상용은 요청 시" <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td><strong>OpenMDW-1.1, 상용 허용</strong> <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>아키텍처.</strong> 논문 초록은 "Physical AI용으로 사전학습된 VLM(Cosmos-Reason)과, 실시간으로 동역학적으로 실현 가능한 궤적을 생성하는 디퓨전 기반 궤적 디코더를 결합한 모듈형 VLA"라고 요약한다 <span class="ev" title="복수 출처 교차 확인">✅</span><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. 흐름은 세 단계다. (1) 다중 카메라 이미지와 자차 운동이 비전 인코더를 거쳐 시각 토큰이 되고, (2) VLM 백본이 <strong>CoC 추론 텍스트와 이산 궤적 토큰을 자기회귀로 생성</strong>하며, (3) action expert가 VLM의 KV 캐시를 조건으로 미래 토큰만 비인과 어텐션으로 노이즈 제거해 64점 궤적으로 만든다. 매체와 모델 카드는 이 디코더를 "diffusion"이라 부르지만 코드에서 실행되는 클래스는 <code>FlowMatching</code>이고 적분법은 Euler다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>alpamayo1_5/diffusion/flow_matching.py:22-50</code>. 1에서는 expert가 VLM 텍스트 설정을 복제한 부속 모듈이고, 2 Super에서는 자체 설정을 가진 별도 2B 모델로 classifier-free guidance(내비 조건)를 지원한다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>.</p>
+<p><strong>Chain of Causation.</strong> 일반 Chain-of-Thought가 "그럴듯한 설명"을 만드는 데 그친다면, CoC는 "자동 라벨링 + 사람 개입 파이프라인으로 만든, 주행 행동과 정렬된 결정 근거형 인과 추론 트레이스"다 <span class="ev" title="복수 출처 교차 확인">✅</span><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. Alpamayo 2의 자동 라벨링 코드는 <code>critical_components_analysis → ego_vehicle_motion_analysis → trajectory_analysis → chain_of_causation</code> 4단계로 "무엇이 중요한가 → 자차가 무엇을 하고 있나 → 궤적은 어떤가 → 왜 그렇게 하는가"를 서술한다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span> <code>text_tasks.py</code>. 논문 보고값은 어려운 케이스 계획 정확도 +12%, 폐루프 근접 조우 −35%, RL 후 추론 품질 +45%, 추론–행동 일관성 +37%다 <span class="ev" title="복수 출처 교차 확인">✅</span><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</p>
+<p><strong>학습 레시피와 데이터.</strong> Alpamayo 1은 "80,000시간 주행 데이터의 10억 장 이상 이미지"로, 2 Super는 "110,000시간 이상"으로 학습했다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>. 공개 SFT 레시피는 Stage 1 VLM 파인튜닝 → Stage 2 VLM 동결 후 디퓨전 expert 학습이고 8×H100, 데이터셋 약 97 TB다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>. 오픈루프 RL 레시피는 GRPO를 Cosmos-RL로 돌리며 보상은 ADE + 승차감(가속·저크·요레이트 범위 내 비율), 대규모 학습은 640 GPU다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>. 공개 데이터셋 <code>PhysicalAI-Autonomous-Vehicles</code>는 1,727시간, 25개국 2,500개 도시, 20초 클립 31만 개다 <span class="ev" title="복수 출처 교차 확인">✅</span><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. 폐루프 도구로 AlpaSim(NuRec 렌더러 기본, "연구·개발 전용")과 AlpaGym(AlpaSim 환경 + Cosmos-RL 학습기, Alpamayo 1.5만 지원)이 있다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>.</p>
+<p><strong>차량 배포 경로.</strong> 공식 문구는 "DRIVE AGX Thor로의 검증된 배포 경로"지만 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>, README는 "Thor에서 차량 내 지연·안전 요구를 만족하는 student로 증류·양자화"라고 쓴다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>. 양자화 레시피는 FP8(약 11 GB, 2.0×)과 FP8+NVFP4(약 9 GB, 2.44×)를 ModelOpt로 제공하고 <code>--fake_quant</code>로 TensorRT용 Q/DQ 노드를 삽입한다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>. 온보드 런타임 후보는 DriveOS 7의 LLM SDK(순수 C++, 추측 디코딩·KV 캐시·FP8/NVFP4/INT4)다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. <strong>Thor에서의 공식 지연 수치는 미공개</strong>다 <span class="ev" title="미확인·추정">⚠️</span>. 저장소는 "Alpamayo 1은 완전한 주행 스택이 아니며, 실세계 센서 입력이 부족하고, 필요한 중복 안전 메커니즘을 포함하지 않으며, 자동차급 검증을 거치지 않았다"고 못박는다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>.</p>
+<p><strong>DRIVE AV — Alpamayo를 담는 그릇.</strong> DRIVE AV는 "코어 주행용 AI E2E 스택 + Halos 위 병렬 클래식 안전 스택"이 제품 정의다 <span class="ev" title="복수 출처 교차 확인">✅</span><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. L4 블로그는 "독립적인 모듈형 스택이 E2E 모델과 병렬로 돌며 주 모델에 중복성과 가드레일을 제공"한다고 쓰고 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>, Halos 블로그는 "정의된 범위 안에서 동작하도록 설계된 결정론적 규칙 기반 기능으로 AI에 안전 가드레일을 제공"한다고 쓴다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. 첫 양산차는 Mercedes CLA다. NVIDIA = 풀 DRIVE AV 스택 + DRIVE AGX + DGX/Omniverse/Cosmos 인프라, Mercedes = MB.OS·센서 통합(카메라 10·레이더 5·초음파 12, 라이다·사전 지도 없음)·HMI·형식승인이고, 중국 CLA는 Momenta다 <span class="ev" title="복수 출처 교차 확인">✅</span><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. 2026-09 기준 Thor 기반 Mercedes 양산차는 확인되지 않으며 확인된 Thor 양산차는 Zeekr 9X(자체 소프트웨어)뿐이다 <span class="ev" title="미확인·추정">⚠️</span>. Uber는 "DRIVE Hyperion과 Alpamayo를 핵심으로 2027 상반기 LA·SF에서 시작해 2028년까지 28개 도시"를 발표했다 <span class="ev" title="복수 출처 교차 확인">✅</span>.</p>
+<p><strong>Autoware에 얹어 본 실측.</strong> TIER IV의 <code>alpamayo-autoware</code> 저장소는 Alpamayo 1.5를 ROS 2 노드로 감싼 것이다. 노드는 자기 네임스페이스로만 발행하고 Autoware 플래너·제어를 대체하지 않는다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. RTX PRO 6000(96 GB)에서 카메라 4대 × 4프레임, rosbag 재생 기준 지연은 다음과 같다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span> README.</p>
+<div class="table-wrap"><table class="cols-4">
+<thead>
+<tr>
+<th>구성</th>
+<th>지연</th>
+<th>FPS</th>
+<th>궤적 편차</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>원본(CPU 전처리·샘플링·native·10스텝)</td>
+<td>0.820 s</td>
+<td>1.22</td>
+<td>기준</td>
+</tr>
+<tr>
+<td>GPU 전처리 + greedy + native + 5스텝</td>
+<td>0.720 s</td>
+<td>1.39</td>
+<td>~0.4%</td>
+</tr>
+<tr>
+<td>GPU 전처리 + greedy + TensorRT + 5스텝</td>
+<td>0.660 s</td>
+<td>1.52</td>
+<td>~1.8%</td>
+</tr>
+<tr>
+<td><strong>전면 최적화</strong></td>
+<td><strong>0.600 s</strong></td>
+<td><strong>1.67</strong></td>
+<td>~1.8%</td>
+</tr>
+<tr>
+<td><strong>Alpamayo 2 Super 노드</strong>(2026-08, 304회 측정)</td>
+<td><strong>3.35 s</strong></td>
+<td><strong>0.30</strong></td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<p>5스텝 전환은 거의 공짜(편차 0.4% 유지)지만 TensorRT FP16은 편차를 4배 넓히며 60 ms를 산다. 논문의 "99 ms"와 저장소의 600 ms는 다른 것을 잰다. 노드는 매 추론마다 최대 64토큰(2 Super는 256)의 CoC 텍스트를 자기회귀로 뽑고, 그 비용이 지연의 큰 몫이다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. 모델이 커지고(10B → 34B) 카메라가 늘고(4 → 6) 토큰 예산이 늘면서 지연은 5.6배가 됐다. <strong>세대가 올라갈수록 느려진다.</strong></p>
+<p><strong>FlashDrive — 얼마나 줄일 수 있나.</strong> UCSD Z Lab의 FlashDrive는 Alpamayo 1.5의 추론 4단계(비전 인코딩 88 ms → 프리필 177 ms → 디코딩 264 ms → 액션 생성 187 ms, 합 716 ms)에 각각 다른 중복성을 찾아 제거했다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>. 연속 프레임 75% 중복 → KV 캐시 재사용(streaming), 추론 토큰의 낮은 엔트로피 → 블록 확산 드래프터로 8토큰씩 추측 디코딩, flow matching 중간 스텝의 속도장 평탄성 → 적응 스텝, 가중치 여유 → W4A8 양자화, 커널 디스패치 → CUDA Graphs. 결과는 RTX PRO 6000에서 716 → <strong>159 ms(4.5×)</strong>, 정확도는 ADE@6.4s 1.72 → 1.56 m로 소폭 개선, 5개 플랫폼에서 4.0~5.7× 가속이다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>. 그러나 <strong>Jetson Thor에서는 944 ms(약 1 Hz)</strong> 로 여전히 실시간 미달이며, 공개 지표는 오픈루프 평균뿐이고 최악 지연·전력·폐루프 안전성은 미공개다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>. 코드는 MIT다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>.</p>
+<h3 id="s6-2"><a class="anchor" href="#s6-2">6.2 Tesla FSD — 단일 신경망, 폴백은 사람</a></h3>
+<ul>
+<li>v12(2024-03 광역 배포)에서 규칙 기반 C++ 플래너를 걷어내고 카메라 → 제어 단일 신경망으로 전환했다는 것이 Tesla와 해설가의 공통 서술이다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. v13(2024-11, HW4 전용)은 "E2E 네트워크의 모든 부분 업그레이드", v14(2025-10)는 "파라미터 10배"(Musk 사전 예고, 공개 주장 <span class="ev" title="미확인·추정">⚠️</span>)와 로보택시 학습의 소비자 이식이다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</li>
+<li><strong>v14.3(2026-04)의 흥미로운 대목</strong>: RL 학습 강화·비전 인코더 교체와 함께 <strong>AI 컴파일러·런타임을 MLIR로 전면 재작성해 반응 시간 20% 단축</strong> — 모델을 바꾸지 않고 툴체인만으로 얻은 수치를 릴리스 노트에 적었다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. HW3는 v14.1 Lite, HW4는 v14.3.x로 두 트랙이 갈라져 있다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</li>
+<li>컴퓨트: HW4 약 500 TOPS급(추정 <span class="ev" title="미확인·추정">⚠️</span>), AI5는 2,000~2,500 TOPS 목표·2026-04 테이프아웃·2027 중반 양산(단일 출처 <span class="ev" title="미확인·추정">⚠️</span>) <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. 센서는 카메라 전용, 지도 없음.</li>
+<li>데이터: FSD(Supervised) 누적 100억 마일(2026-05) → 140억 마일(2026-08), Cortex 클러스터 H100 10만 장+(2차 출처 <span class="ev" title="미확인·추정">⚠️</span>) <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</li>
+<li><strong>폴백의 실체</strong>: 규칙 기반 안전층이 아니라 사람이다. 로보택시 안전요원은 차내 → 추적 차량(2026-01) → 원격 모니터링·원격 조작(10 mph 이하 재배치)으로 이동했고, NHTSA 자료로 원격조작자 관여 사고 2건이 확인됐다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. 무감독 로보택시는 Austin 전 도시권(245 sq mi, 약 20대) · Dallas·Houston(2026-04)이다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. 유럽은 2026-04-10 네덜란드 RDW가 UN R-171 + Art.39 예외로 FSD Supervised를 형식승인했다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>.</li>
+<li>공개도: 없음. 릴리스 노트가 유일한 1차 자료다.</li>
+</ul>
+<h3 id="s6-3"><a class="anchor" href="#s6-3">6.3 Wayve — 단일 파운데이션 모델, 월드모델은 검증용</a></h3>
+<ul>
+<li>"AV2.0" — 단일 파운데이션 모델을 글로벌 데이터로 학습해 HD 지도·지역 특화 엔지니어링 없이 차종·시장 간 일반화한다는 노선 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. LINGO-2(2024-04)는 "공도에서 폐루프 시험된 최초의 VLA" 주장으로 주행 액션과 자연어 해설을 함께 낸다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</li>
+<li>GAIA-3(2025-12, 15B)은 주행 모델이 아니라 <strong>평가·검증용 생성 월드모델</strong>이고, GAIA-4(2026-08)는 AI Driver를 루프 안에 넣는 폐루프 시뮬레이션에 카메라+레이더를 동시에 생성한다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. 시뮬레이션의 용도가 "장면 생성"에서 "E2E 안전 측정"으로 옮겨가는 표본이다.</li>
+<li>컴퓨트: 자체 칩 없음, NVIDIA Orin/Thor(Gen-3 플랫폼은 DRIVE AGX Thor) <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. 센서는 카메라 중심이나 Nissan 차세대 ProPILOT은 Nissan 라이다("Ground Truth Perception") + Wayve AI Driver 조합이다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</li>
+<li>양산·서비스: Nissan FY2027 일본 출시, Wayve–Uber–Nissan 도쿄 파일럿 2026 말, 2026-09-03 런던에서 Uber 앱으로 <strong>감독(안전운전자 탑승)</strong> 서비스 개시 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. Series D $1.2B(2026-02, NVIDIA·MS·Uber·Mercedes·Nissan·Stellantis) <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</li>
+<li>안전·폴백: 공개 구조 없음. 현재 모든 공도 서비스는 안전운전자 탑승이다 <span class="ev" title="미확인·추정">⚠️</span>.</li>
+</ul>
+<h3 id="s6-4"><a class="anchor" href="#s6-4">6.4 Waymo — 하이브리드, 폴백은 하드웨어</a></h3>
+<ul>
+<li>양산 스택은 <strong>모듈형 + ML 하이브리드</strong>로, 공식적인 E2E 전환 선언은 없다. EMMA(2024-10, Gemini 기반)는 카메라 → 궤적·객체·로드그래프를 텍스트로 내는 E2E <strong>연구</strong> 모델이며 "Waymo Driver에 탑재"라고 말한 적이 없다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</li>
+<li>6세대 Driver(Zeekr 기반 "Ojai"): 카메라 13·라이다 4·레이더 6, 5세대 대비 센서 42% 감소, 시야 500 m <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. 2026-02 6세대로 완전 무인 운행 개시 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</li>
+<li><strong>자체 ASIC(2026-08 공개)</strong>: TSMC 5 nm, 1,000 TOPS 초과, 6세대 차량 양산 탑재, <strong>이중 독립 엔진 병렬 구동</strong>(한쪽 실패 시 즉시 인계) <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. 폴백 구조가 하드웨어에 박혀 있다. 원격은 "지원"이지 원격 조작이 아니다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</li>
+<li>규모: 2026-09-01 기준 14개 도시, 주 50만 회, 연말 주 100만 유료 탑승 목표 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. Hyundai IONIQ 5 5만 대 공급 보도(2028까지) <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. 런던 2026-04 시험 시작, 9월 상업 서비스 목표 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</li>
+<li>공개도: Waymo Open Dataset — Perception·Motion·<strong>End-to-End Driving</strong> 3종, 코드 Apache-2.0(일부 폴더 제한 특허) <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>. WOD-E2E는 롱테일 4,021 세그먼트를 평가자 선호 점수(RFS)로 채점한다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</li>
+</ul>
+<h3 id="s6-5"><a class="anchor" href="#s6-5">6.5 온보드 추론의 현실 — 숫자로</a></h3>
+<div class="table-wrap"><table class="cols-5">
+<thead>
+<tr>
+<th>모델</th>
+<th>파라미터</th>
+<th>하드웨어</th>
+<th>지연</th>
+<th>근거</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>openpilot supercombo</td>
+<td>30M</td>
+<td>Snapdragon 845 Adreno(tinygrad)</td>
+<td>20 Hz(50 ms 예산)</td>
+<td class="src"><span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+</tr>
+<tr>
+<td>같은 모델, onnxruntime CPU</td>
+<td>30M</td>
+<td>Xeon 4코어</td>
+<td>395 ms</td>
+<td class="src"><span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> D3</td>
+</tr>
+<tr>
+<td>DiffusionDrive</td>
+<td>60M</td>
+<td>RTX 4090</td>
+<td>22 ms(45 FPS)</td>
+<td class="src"><span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td>UniAD</td>
+<td>ResNet-101+BEVFormer</td>
+<td>A100</td>
+<td>556 ms</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>Alpamayo-R1 논문</td>
+<td>10B</td>
+<td>미상</td>
+<td>99 ms(범위 불명)</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>Alpamayo 1.5 노드</td>
+<td>10B</td>
+<td>RTX PRO 6000</td>
+<td>600 ms</td>
+<td class="src"><span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td>Alpamayo 1.5 + FlashDrive</td>
+<td>10B</td>
+<td>RTX PRO 6000 / <strong>Jetson Thor</strong></td>
+<td>159 ms / <strong>944 ms</strong></td>
+<td class="src"><span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td>Alpamayo 2 Super 노드</td>
+<td>34B</td>
+<td>RTX PRO 6000</td>
+<td>3,350 ms</td>
+<td class="src"><span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td>XPeng VLA 2.0 차량 모델</td>
+<td>"수십억"(72B 클라우드 → 증류)</td>
+<td>Turing ×3(2,250 TOPS)</td>
+<td>미공개</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+</tbody>
+</table></div>
+<aside class="callout hpc"><span class="lbl">HPC 메모</span><p>이 표가 말하는 것은 세 가지다. (1) 온보드 파라미터 예산은 "수십억"이 현실 상한이며, 72B는 증류 없이 차에 못 들어간다. (2) 지연은 모델 크기보다 <strong>컴파일러·런타임</strong>이 먼저 결정한다 — 같은 30M 모델이 런타임에 따라 8배, Tesla가 MLIR 재작성만으로 20%, FlashDrive가 알고리즘-시스템 공동 설계로 4.5×. (3) 세대가 올라갈수록 느려지는 압력(VLA·CoT·월드모델) 때문에 양산 스택은 언어 토큰을 우회(XPeng)하거나 월드모델을 오프보드에 둔다(Wayve·Huawei·XPeng). 우리 HPC의 "E2E 준비"란 TOPS가 아니라 KV 캐시 대역폭, FP8/NVFP4 경로, 그리고 폴백 컴퓨터다.</p></aside>
+
+</section>
+<section id="sec-s7" class="chapter" data-num="7">
+<h2 id="s7"><a class="anchor" href="#s7">7. 상용·중국 스택 — Mobileye, Huawei, Momenta, XPeng, 그리고 Li Auto·NIO·Horizon</a></h2>
+<aside class="callout qa">
+<div class="qa-q"><span class="lbl">이 장의 질문</span><p>공개 자료로 확인되는 실체는 어디까지이고, 공통 패턴은 무엇인가.</p></div>
+<div class="qa-a"><span class="lbl">세 줄 답</span><ol class="three"><li><span class="num">①</span><span>"E2E"라는 한 단어가 네 가지 구조(단일망·2단망·다중 엔진 합성·하이브리드)를 가리킨다.</span></li><li><span class="num">②</span><span>자체 실리콘이 기본값이 됐고, 플라이휠의 주어는 "마일 수"에서 "월드모델"로 바뀌었다.</span></li><li><span class="num">③</span><span>규칙 기반 가드는 사라진 게 아니라 위치를 옮겼다 — Mobileye는 수식(RSS), Waymo는 하드웨어, E2E 진영은 원격 인간·안전운전자. 이 장의 벤더 사실은 대부분 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>이며 "공개 주장"으로 읽어야 한다.</span></li></ol></div>
+</aside>
+<h3 id="s7-1"><a class="anchor" href="#s7-1">7.1 Mobileye — 다중 독립 엔진과 34 TOPS의 역설</a></h3>
+<ul>
+<li><strong>Compound AI System(CAIS)</strong>: 단일 E2E 대신 카메라 전용 엔진과 레이더+라이다 전용 엔진(True Redundancy)을 조합한다. SuperVision(L2+) → Chauffeur(eyes-off) → Drive(L4)가 같은 프레임워크다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</li>
+<li>SoC: EyeQ6H — 8코어/32스레드, LPDDR5, <strong>34 DL TOPS(int8)</strong> <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. ECU는 EyeQ6H ×2 + MCU, Drive 로보택시(VW ID.Buzz AD)는 EyeQ6H ×4 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. Linux 6.11에 EyeQ6H가 업스트림됐다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. TOPS 경쟁(1,000~2,500)과 정반대로 "구조로 버틴다"는 노선이다.</li>
+<li>안전: RSS(Responsibility-Sensitive Safety)는 수식화된 안전 포락선이고, Chauffeur는 SuperVision 위에 "두 번째 독립 지각계 + 추가 컴퓨트"를 얹는다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. 오픈소스 <code>intel/ad-rss-lib</code>(C++, LGPL-2.1)는 객체 리스트 → 종·횡 가속 제한을 내며 Apollo에 링크돼 있지만, <strong>Intel이 유지보수를 중단하고 포크를 권장</strong>한다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span> README.</li>
+<li>수주·양산: 2025-09 대형 서구 OEM 17개 모델(2026 출시), 2026-01 미국 Top-10 OEM EyeQ6H Surround ADAS(누적 1,900만 유닛 전망), Chauffeur 양산 2026 예정(차종 미공개 <span class="ev" title="미확인·추정">⚠️</span>), MOIA ID.Buzz LA 2026 말 → 2027 무인 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. CES 2026에서 휴머노이드 Mentee Robotics 인수(약 $900M 보도) <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</li>
+</ul>
+<h3 id="s7-2"><a class="anchor" href="#s7-2">7.2 Huawei Qiankun ADS 3.0 / 4.0 — "VLA 대신 World-Action"</a></h3>
+<ul>
+<li>ADS 3.0(2024-04): GOD(일반 장애물 검출) 인지망 + PDP(예측-결정-계획) 망의 <strong>2단 구성</strong>이다. "E2E"라 부르지만 단일망이 아니다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</li>
+<li>ADS 4.0(2025-04): <strong>WEWA</strong> — 클라우드 World Engine(확산 생성으로 고난도 시나리오 대량 생성) + 차량 World Action/Behavior 모델. 진위즈(Jin Yuzhi)는 2025-08 "VLA를 건너뛰고 WA로 간다"고 명시했다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. 등급은 SE/Pro/Max/Ultra 4단, Ultra만 고속 L3 지원 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</li>
+<li>컴퓨트: 자체 MDC + Ascend. "MDC 1000 + Ascend 910B, 1,000 TOPS"는 단일 2차 출처다 <span class="ev" title="미확인·추정">⚠️</span>. 센서는 고체 라이다 + 분산 레이더 조합으로 라이다를 유지한다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</li>
+<li>규모·로드맵: 설치 140만 대(2025 말), 2026 말 300만·80개 모델 목표, 누적 100억 km 근접 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. 2026 고속 L3 파일럿 + 도심 L4 파일럿, 2027 L3 대량 상용화, 7개 도시에서 L3 도로 시험 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. 공개도는 전무하다.</li>
+</ul>
+<h3 id="s7-3"><a class="anchor" href="#s7-3">7.3 Momenta — 플라이휠과 "두 다리"</a></h3>
+<ul>
+<li>"Flywheel &amp; Two Legs" — 데이터 플라이휠로 양산 ADAS(한 다리)와 로보택시(다른 다리)를 동시에 진화시킨다. R6 "E2E Flywheel Big Model"은 실주행 데이터 기반 시뮬레이션에서 RL로 학습했고, <strong>R7 World Model</strong>을 2026-Q3부터 양산차에 배치한다고 주장한다(<span class="ev" title="미확인·추정">⚠️</span> 실체 미확인) <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</li>
+<li>컴퓨트: 자체 칩 없음. NVIDIA Orin 주력, IM·NVIDIA·Momenta 3자 협약으로 DRIVE AGX Thor 양산 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. Qualcomm Ride 탑재 여부는 미확인 <span class="ev" title="미확인·추정">⚠️</span>.</li>
+<li>규모: 2026-H1 신규 설치 32.1만 대(+83.7%), <strong>누적 100만 대 돌파</strong>, OEM 고객 26개·양산 모델 105개 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. Mercedes(중국 CLA), BMW·Audi·Toyota·GM·Hyundai(IONIQ 중국) <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. 2026-07 홍콩 상장($752M), 2026-09 L3 양산·구독 모델 계획 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. 로보택시는 아부다비 S-Class(2025-12), 뮌헨 Uber 시험(2026) <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</li>
+<li>안전·폴백 구조는 미공개다 <span class="ev" title="미확인·추정">⚠️</span>.</li>
+</ul>
+<h3 id="s7-4"><a class="anchor" href="#s7-4">7.4 XPeng — 카메라 전용 VLA와 자체 Turing 칩</a></h3>
+<ul>
+<li><strong>VLA 2.0(2025-11)</strong>: "Vision–Implicit Token–Action" — 언어 토큰 병목을 우회해 시각 → 암묵 토큰 → 액션. 클라우드 베이스 모델 <strong>72B</strong>(1억 클립)를 증류해 차량에 싣고, 차량 측은 "수십억(billions)" 파라미터라고 밝힌다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. 일부 매체의 "720B"는 오기 가능성이 크다 <span class="ev" title="미확인·추정">⚠️</span>.</li>
+<li>컴퓨트: 자체 <strong>Turing</strong> 칩(약 750 TOPS/개 공개 주장) ×1~4. Ultra 3개 = 2,250 TOPS, 로보택시 4개 ≈ 3,000 TOPS <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. 센서는 <strong>카메라 전용, HD 지도 없음</strong>(P7+부터 라이다 제거, 로보택시도 없음) <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</li>
+<li>배포: 2026-Q1 Ultra 모델 전면 배포, 2026-01 VLA 2.0 탑재 개정 P7+/G7/G6/G9, VW가 VLA 2.0 첫 고객·Turing 첫 외부 고객(2026-03, 글로벌 인도 2027), 2026-07 광저우 로보택시 직원 시험 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. X-World 월드모델 기술보고서(2026-04), AI 학습 연 $500M 주장 <span class="ev" title="미확인·추정">⚠️</span> <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</li>
+<li>"VLA 2.0 오픈소스" 주장은 저장소 URL이 확인되지 않는다 <span class="ev" title="미확인·추정">⚠️</span>. 안전·폴백 구조 미공개.</li>
+</ul>
+<h3 id="s7-5"><a class="anchor" href="#s7-5">7.5 약술 — Li Auto · NIO · Horizon Robotics</a></h3>
+<ul>
+<li><strong>Li Auto</strong>: MindVLA(2025) → MindVLA-o1(2026-03 GTC, 비디오·언어·액션을 단일 트랜스포머로 네이티브 멀티모달 사전학습). 자체 칩 <strong>Mach M100</strong>(2026-05, 5 nm, 단일 1,280 TOPS·듀얼 2,560, GPU가 아닌 데이터플로 아키텍처), 2026-07 칩 자회사 분사 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</li>
+<li><strong>NIO</strong>: NWM(NIO World Model) 2026-01 대규모 업데이트, Onvo L90(2026-04)에 자체 Shenji NX9031 탑재. NX9031이 <strong>메모리 대역폭 546 GB/s</strong>를 전면에 내세운 점이 대형 모델 추론 관점에서 눈에 띈다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</li>
+<li><strong>Horizon Robotics(공급자 스택)</strong>: HSD(Horizon SuperDrive)는 Journey 6P(560 TOPS, Cortex-A78AE 18코어 + BPU 4코어) 위 <strong>one-stage E2E이며 "규칙을 폴백으로 쓰지 않는다"</strong> 는 공식 문구. 2025-09 Chery EXEED E05 양산, ZF coPILOT(2026), Bosch·VW CARIZON 협업 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</li>
+</ul>
+<h3 id="s7-6"><a class="anchor" href="#s7-6">7.6 공통 패턴 여덟 가지</a></h3>
+<ol>
+<li><strong>자체 실리콘이 기본값</strong> — Tesla(AI5), Waymo(ASIC), XPeng(Turing), Li Auto(M100), NIO(NX9031), Mobileye(EyeQ6), Huawei(Ascend/MDC), Horizon(J6P). 자체 칩이 없는 Wayve·Momenta는 NVIDIA Thor에 묶인다.</li>
+<li><strong>플라이휠의 주어가 "마일"에서 "월드모델"로</strong> — Tesla만 마일(140억)을 앞세우고, Wayve(GAIA-4)·Huawei(World Engine)·Momenta(R7)·XPeng(X-World)은 생성형 시뮬레이션을 말한다. 검증 지표는 없다.</li>
+<li><strong>"E2E"는 네 가지 구조</strong> — 단일망(Tesla·Horizon·XPeng), 2단망(Huawei ADS 3), 다중 엔진 합성(Mobileye), 하이브리드(Waymo·NVIDIA·Autoware 2.0).</li>
+<li><strong>규칙 가드는 위치를 옮겼다</strong> — 수식(RSS), 하드웨어(Waymo 이중 엔진), 병렬 클래식 스택(NVIDIA), 원격 인간(Tesla), 안전운전자(Wayve·Momenta).</li>
+<li><strong>VLA 마케팅 vs 실제</strong> — VLA를 전면에 세운 곳은 XPeng·Li Auto·Wayve뿐이고 XPeng도 언어 토큰을 뺐다. Huawei는 거부, Waymo EMMA는 연구.</li>
+<li><strong>라이다 노선이 갈렸다</strong> — 카메라 전용: Tesla·XPeng. 라이다 유지: Waymo·Huawei·Mobileye Chauffeur/Drive·Nissan-Wayve. "중국 = 라이다"라는 단순화는 틀리다.</li>
+<li><strong>L3는 2026 파일럿, 2027 양산으로 수렴</strong> — Huawei(2027), Momenta(L3 양산 계획), Mobileye Chauffeur(2026), Nissan-Wayve(FY2027), XPeng-VW(2027).</li>
+<li><strong>공개도는 거의 0</strong> — 코드·가중치 공개는 Waymo Open Dataset과 유지보수가 끊긴 ad-rss-lib뿐이다.</li>
+</ol>
+<aside class="callout hpc"><span class="lbl">HPC 메모</span><p>(1) TOPS 경쟁은 1,000~2,500 구간으로 갔지만 Mobileye는 34 TOPS ×N으로 반대 노선을 간다 — "구조 vs 연산"의 두 답이 공존한다. (2) NIO가 메모리 대역폭을 전면에 세운 것은 대형 자기회귀 모델에서 연산보다 KV 캐시·가중치 스트리밍이 병목이기 때문이다. TOPS 단독 비교는 무의미해진다. (3) 이중화는 컴퓨트 예산을 2배로 만든다(Waymo 이중 엔진, Mobileye ×2~4). E2E 단일망은 이 비용을 아끼는 대신 폴백을 사람에게 넘긴다 — 규제(§10 NHTSA·UNECE)가 그 선택을 언제까지 허용할지가 변수다. (4) 학습 컴퓨트(Tesla Cortex, XPeng $500M/년)가 온보드 SoC보다 스택 경쟁력을 더 갈라놓는다는 것이 벤더들의 공통 주장이다.</p></aside>
+
+</section>
+<section id="sec-s8" class="chapter" data-num="8">
+<h2 id="s8"><a class="anchor" href="#s8">8. 미들웨어·OS 층 — 스택이 플랫폼에 요구하는 것</a></h2>
+<aside class="callout qa">
+<div class="qa-q"><span class="lbl">이 장의 질문</span><p>HPC 위에서 스택을 돌리는 "배관"은 무엇이고, 2026년에 무엇이 바뀌고 있나.</p></div>
+<div class="qa-a"><span class="lbl">세 줄 답</span><ol class="three"><li><span class="num">①</span><span>ROS 2의 표준 경로(Fast DDS + wait-set executor)는 그대로 쓰면 최대 50% 미들웨어 오버헤드와 하드코딩된 콜백 순서 문제가 있어, 양산 스택은 rmw 교체(Zenoh·iceoryx)나 우회(Agnocast·Apex.Ida)로 수렴한다.</span></li><li><span class="num">②</span><span>AUTOSAR Adaptive의 ara::com은 바인딩(SOME/IP·DDS·IPC) 교체가 가능한 API이고, 오픈 구현(Eclipse S-CORE LoLa)은 "ASIL별 공유메모리 세그먼트 분리"를 핵심 설계로 잡았다.</span></li><li><span class="num">③</span><span>SOAFEE는 아키텍처 v1.0에서 OCI 컨테이너·Kubernetes API·환경 동등성만 필수로 정의했고 혼합 중요도 오케스트레이션은 Future Work다 — 컨테이너는 배포 단위이지 격리 수단이 아니다.</span></li></ol></div>
+</aside>
+<figure class="fig"><img src="images/middleware-landscape.svg" alt="미들웨어 지형" loading="lazy"><figcaption>그림 5. 미들웨어·OS 층 지형 — ROS 2 rmw 계열, 자체 미들웨어, AUTOSAR Adaptive 계열, SDV 프레임워크, OS/하이퍼바이저. 인증 상태와 zero-copy 범위를 표시. 자체 작성.</figcaption></figure>
+<h3 id="s8-1"><a class="anchor" href="#s8-1">8.1 ROS 2 — rmw, QoS, Executor, zero-copy의 한계, 그리고 Agnocast</a></h3>
+<p><strong>rmw 추상화.</strong> rmw는 rcl 아래에서 벤더별 미들웨어를 감추는 C API이고, <code>RMW_IMPLEMENTATION</code> 환경변수로 런타임 전환한다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>design/articles/060_ros_middleware_interface.md</code>. rmw 헤더 목록이 곧 플랫폼에 요구하는 기능 표면이다. QoS 프로파일, 디스커버리 범위, 동적 타입, 콘텐츠 필터, <strong>네트워크 플로우 식별(TSN·QoS 매핑용)</strong>, 보안(SROS2), QoS 불일치 이벤트, loan 시퀀스 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>rmw/include/rmw/</code>. 지원 등급은 Foxy·Humble 이후 기본 <code>rmw_fastrtps_cpp</code>, Galactic만 CycloneDDS 기본, <strong>Kilted(2025-05)부터 <code>rmw_zenoh_cpp</code> Tier-1</strong>이다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span> 릴리스 노트. Lyrical(2026-05, LTS 2031)에서도 기본은 Fast DDS이며 Tier-1은 Fast DDS·Connext·CycloneDDS·Zenoh 넷이다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>.</p>
+<p><strong>QoS.</strong> ROS 2 QoS는 DDS의 부분집합(History·Depth·Reliability·Durability + Deadline·Liveliness·Lifespan)이고 Request-vs-Offer로 호환될 때만 매칭된다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>qos.md</code>. rmw_zenoh 설계 문서는 RELIABLE → TCP 링크, BEST_EFFORT → UDP 링크가 있을 때만, KEEP_ALL+RELIABLE → <code>CongestionControl::BLOCK</code>(발행자 블로킹 백프레셔), TRANSIENT_LOCAL → AdvancedPublisher 캐시, DEADLINE·LIFESPAN 미구현, 그리고 "Zenoh에는 사실상 비호환 QoS가 없다"고 쓴다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>rmw_zenoh/docs/design.md</code>.</p>
+<p><strong>Executor.</strong> 메시지는 클라이언트 라이브러리 큐에 쌓이지 않고 콜백이 take할 때까지 미들웨어에 보관되며, Executor는 wait set으로 준비 여부를 본다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. 2020년 API 리뷰는 "타이머 → 구독 → … 순서가 하드코딩되어 사용자 오버라이드가 어렵다"고 지적했다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>api_review_march_2020.md</code>. Lyrical은 <strong>EventsCBGExecutor</strong>(wait set 대신 FIFO 이벤트 큐, 멀티스레드, MultiThreadedExecutor의 drop-in 대체)를 도입했고 릴리스 노트는 "CPU 10~15% 절감"을 적으며, 단 큐 길이가 무제한이라 과부하 시 무한 증가를 경고한다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. 실시간 배경 문서는 "실시간은 낮은 지연이 아니라 결정적 스케줄"이라며 mlockall·힙 사전할당·TLSF O(1) 할당자를 권장한다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>120_realtime_background.md</code>. 콜백당 스레드 하나를 두어 Executor 내부 스케줄과 OS 스케줄의 "이중 스케줄링"을 없애는 <strong>CallbackIsolatedExecutor</strong>(RTAS 2025 WiP)가 Agnocast에 통합돼 있다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> README.</p>
+<p><strong>Intra-process와 loaned message — 어디까지 zero-copy인가.</strong> 프로세스 안에서는 <code>publish(unique_ptr)</code> 시 마지막 구독자에게 소유권 이전(복사 0)이 된다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>intraprocess_communication.md</code>. 프로세스 경계를 넘는 zero-copy는 <code>rmw_borrow_loaned_message</code>(2020 설계)로, Fast DDS는 XML로 data-sharing을 켜야 하고(기본 OFF) <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>rmw_fastrtps/README.md</code>, CycloneDDS는 iceoryx PSMX 플러그인을 빌드해야 한다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. 문제의 본질은 rosidl 생성 C++ 구조체의 <code>std::vector</code>/<code>std::string</code>이 힙 포인터를 품어 공유메모리에 그대로 둘 수 없다는 것이다. 그래서 iceoryx/Fast DDS data-sharing은 <strong>고정 크기 타입에서만</strong> 진짜 zero-copy이고, 포인트클라우드·이미지처럼 가변 타입에 의존하는 Autoware에는 Agnocast가 필요했다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span> AWF 토론 #5835. Lyrical의 <code>rosidl::Buffer</code>/<code>BufferBackend</code>는 <code>uint8[]</code> 필드를 CUDA 같은 버퍼 백엔드로 실어 나르는 새 경로이고, rmw_zenoh는 0.12.0(2026-07)에 합류했다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span><span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>.</p>
+<p><strong>Agnocast의 메커니즘.</strong> 세 요소다. ① 커널 모듈 <code>agnocast.ko</code>가 ioctl로 프로세스별 가상주소 영역 배정, 토픽별 publisher/subscriber 레지스트리, QoS depth 관리를 한다(모듈 파라미터 <code>mempool_num</code> 4096, <code>mempool_size_gb</code>). ② 프로세스당 공유메모리 <code>/agnocast@&lt;pid&gt;</code>를 쓰기는 소유 프로세스만, 구독자는 read-only mmap하되 <code>MAP_FIXED_NOREPLACE</code>로 같은 가상주소에 고정해 <strong>포인터를 그대로 공유</strong>한다. ③ heaphook <code>libagnocast_heaphook.so</code>가 <code>borrow_loaned_message()</code>~<code>publish()</code> 사이의 힙 할당을 TLSF 할당자로 공유메모리에 리다이렉트한다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>agnocast/docs/shared_memory.md</code>, <code>heaphook_alignment.md</code>. <code>agnocast::Node</code>는 RMW 계층을 완전히 우회하고(DDS participant 미생성), 구독자는 <code>ipc_shared_ptr&lt;const M&gt;</code>만 받으며, 전용 Executor와 ROS 2 브리지(R2A/A2R)를 제공한다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. 주장 수치는 IPC 지연 메시지 크기 무관 약 0.2 ms 상수, Autoware 응답시간 평균 약 4 ms 개선, CPU 부하 하 지터 CV &lt;5%(DDS/iceoryx 20~50%)이며 조건은 원문 미열람이다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span><span class="ev" title="미확인·추정">⚠️</span>. 운영 주의: 정리 데몬이 <code>killall</code>에 같이 죽을 수 있어 <code>/dev/shm/agnocast@*</code> 수동 삭제 절차가 README에 있다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>.</p>
+<h3 id="s8-2"><a class="anchor" href="#s8-2">8.2 Zenoh — 프로토콜, rmw_zenoh 토폴로지, 벤치마크</a></h3>
+<ul>
+<li>모델: "Zero Overhead Pub/Sub, Store/Query and Compute" — pub/sub + 분산 저장·질의(queryable) + 연산을 key expression으로 통합. 레퍼런스 구현 Rust(1.10.0), MCU용 zenoh-pico, 공유메모리는 <code>shared-memory</code> feature 빌드 필요, 라이선스 EPL-2.0/Apache-2.0 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>.</li>
+<li><strong>rmw_zenoh 기본 토폴로지</strong>: 호스트당 Zenoh router(<code>rmw_zenohd</code>, tcp/7447)는 디스커버리·호스트 간 통신 전용이고 호스트 내 데이터는 세션 간 p2p(loopback TCP) 직결이다. UDP 멀티캐스트 스카우팅은 <strong>의도적으로 비활성</strong>(오구성 네트워크·컨테이너 문제·같은 LAN 로봇 간 간섭 방지) <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>design.md</code>. 페이로드는 CDR(DDS와 재직렬화 없이 브리징), 키는 <code>&lt;domain&gt;/&lt;fqn&gt;/&lt;type&gt;/&lt;type_hash&gt;</code>, 그래프 인트로스펙션은 liveliness 토큰으로 각 컨텍스트가 캐시를 유지한다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. 공유메모리는 opt-in이며 임계값 이상 메시지만 공유메모리에 직접 직렬화하고 풀 고갈 시 네트워크로 폴백한다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>.</li>
+<li>와이어 오버헤드: Zenoh 최소 5바이트 vs RTPS 약 56바이트 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span> zenoh.io.</li>
+<li>벤치마크(2023 블로그 = arXiv 2303.09419): 처리량 Zenoh 단일머신 67 Gbps·다중머신 51 Gbps vs DDS 26 Gbps. 지연은 <strong>단일머신에서 CycloneDDS가 최저</strong>, zenoh-pico(UDP 멀티캐스트)가 전 케이스 최저, Rust Zenoh는 router 경유 시 증가 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. 정확한 µs 표는 원문 미열람 <span class="ev" title="미확인·추정">⚠️</span>.</li>
+<li>자동차: GM Eclipse uProtocol의 표준 전송 중 하나(Zenoh/MQTT 5/SOME/IP/Binder), ZettaScale이 zenoh-pico ASIL D 인증 작업 착수(완료 아님) <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. Autoware가 rmw_zenoh를 기본 rmw로 채택했다는 근거는 없고, 외부(V2X·클라우드) 브리지 사례만 확인된다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span><span class="ev" title="미확인·추정">⚠️</span>. TIER IV는 호스트 내 IPC로 Agnocast를 골랐다.</li>
+</ul>
+<h3 id="s8-3"><a class="anchor" href="#s8-3">8.3 D4 실측 — 같은 호스트, 같은 4코어, 전송만 바꾸면</a></h3>
+<p>방법: ping 프로세스가 페이로드를 보내고 pong 프로세스가 같은 크기로 되돌리는 왕복 지연(RTT). 워밍업 50회 제외 1,000회(1 MB는 200회), Zenoh 1.10.1(peer, IPv4 루프백 고정, 멀티캐스트 끔), CycloneDDS 11.0.1(Reliable·KeepLast 16, <code>sequence&lt;uint8&gt;</code> IDL), 기준선은 <code>multiprocessing.Pipe</code> 바이트 전송. <strong>Python 바인딩·GIL 오버헤드가 포함되므로 절대치가 아니라 같은 조건의 상대 비교</strong>로 읽는다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>d4-ipc-bench.md</code>.</p>
+<figure class="fig"><img src="images/ipc-latency-bench.svg" alt="IPC 지연 벤치" loading="lazy"><figcaption>그림 6. D4 실측(평균 RTT, 로그 스케일)과 문헌 수치 병기. 자체 작성.</figcaption></figure>
+<div class="table-wrap"><table class="cols-5">
+<thead>
+<tr>
+<th>페이로드</th>
+<th>pipe(기준선)</th>
+<th>Zenoh</th>
+<th>CycloneDDS(py)</th>
+<th>읽기</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>64 B</td>
+<td>76 µs</td>
+<td>280 µs</td>
+<td>232 µs</td>
+<td>소형 메시지는 DDS가 Zenoh보다 약간 빠름 — 문헌(단일머신 Cyclone 최저)과 방향 일치</td>
+</tr>
+<tr>
+<td>4 KB</td>
+<td>96 µs</td>
+<td>319 µs</td>
+<td>584 µs</td>
+<td>바인딩의 요소별 직렬화가 보이기 시작</td>
+</tr>
+<tr>
+<td>64 KB</td>
+<td>163 µs</td>
+<td>405 µs</td>
+<td>6,600 µs</td>
+<td>CycloneDDS 파이썬 바인딩이 <code>sequence&lt;uint8&gt;</code>을 원소 단위로 직렬화 → 크기에 선형</td>
+</tr>
+<tr>
+<td>1 MB</td>
+<td>1,968 µs</td>
+<td><strong>1,285 µs</strong></td>
+<td>113,546 µs</td>
+<td>Zenoh는 바이트 패스스루라 파이프보다도 빠름; DDS(py)는 100 ms 초과</td>
+</tr>
+</tbody>
+</table></div>
+<p>이 표에서 배울 것은 "Zenoh가 DDS보다 빠르다"가 아니다. 두 가지다. 첫째, 소형 메시지(64 B)에서는 어느 미들웨어든 파이프 대비 3~4배 오버헤드가 붙고 그 차이는 미들웨어 간 차이보다 크다. 둘째, <strong>직렬화 경로 하나가 대용량 메시지 지연을 두 자릿수 배로 바꾼다.</strong> CycloneDDS 자체가 느린 것이 아니라 파이썬 바인딩이 바이트를 리스트로 다루기 때문이며, 바로 이것이 C++ 스택에서도 "가변 크기 타입의 복사·직렬화를 없애라"(Agnocast, arena, ION)는 요구의 이유다. 문헌 수치와 나란히 두면 다음과 같다.</p>
+<div class="table-wrap"><table class="cols-3">
+<thead>
+<tr>
+<th>출처</th>
+<th>조건</th>
+<th>수치</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>iceoryx2 공식 벤치(README 원데이터) <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>i7-13700H, busy-wait 핑퐁, 64 B → 4 MB</td>
+<td><strong>0.092~0.099 µs 상수</strong>; POSIX mq 1.1 → 980 µs; UDS 1.6 → 1,100 µs. RPi 4B 0.78~0.95 µs</td>
+</tr>
+<tr>
+<td>iRobot ros2-performance <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>RPi 3, 10노드 토폴로지, 8 B~10 KB, 2~100 Hz</td>
+<td>평균 744 µs, 최대 37 ms, late 0.16%</td>
+</tr>
+<tr>
+<td>Kronauer et al. 2021 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>ROS 2 Foxy, Fast RTPS/Cyclone/Connext, 다중 노드 체인</td>
+<td>ROS 2 계층이 순수 DDS 대비 <strong>최대 50% 오버헤드</strong>; 100 KB 이상에서 UDP 프래그먼트로 증가</td>
+</tr>
+<tr>
+<td>Teper et al. RTAS 2024 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>다중 Executor 체인 분석 + 제약 최적화</td>
+<td>오벌 레이싱 AD 스택 지연 상한 최대 50.2% 감소</td>
+</tr>
+<tr>
+<td>Agnocast <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span><span class="ev" title="미확인·추정">⚠️</span></td>
+<td>조건 미열람</td>
+<td>약 0.2 ms 상수, Autoware 응답시간 약 4 ms 개선</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="s8-4"><a class="anchor" href="#s8-4">8.4 AUTOSAR Adaptive — ara::com 바인딩과 오픈 구현</a></h3>
+<ul>
+<li><strong>표준 구조</strong>(autosar.org 차단 → 2차 출처): ara::com은 SOA 기반 표준 C++ API로 초기 SOME/IP 기반이나 연결 기술 불가지론을 목표로 하며, 아래 네트워크 바인딩(SOME/IP·DDS·IPC)이 SOA 의미론을 미들웨어 호출로 변환한다. DDS 바인딩의 도입 근거는 콘텐츠·시간 필터, 파티션, durability, liveliness, deadline 모니터링이다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span> RTI. Execution Management는 앱 생명주기, Platform Health Management는 alive/deadline/logical supervision을 맡는다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. 표준 자체의 안전 등급은 <strong>ASIL B까지</strong>이며 Vector MICROSAR Adaptive Safe도 ASIL B다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span> ETAS·Vector.</li>
+<li><strong>vsomeip 3.7</strong>(BMW, MPL-2.0): 코어·설정·서비스 디스커버리·E2E 4개 .so, C++20, 로컬 통신은 기본 UDS, 노드당 routing manager가 로컬 라우팅과 외부 TCP/UDP를 담당 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> README.</li>
+<li><strong>Eclipse S-CORE Communication = LoLa(Low Latency)</strong>: "Adaptive AUTOSAR Communication Management 사양 기반의 고성능·안전 IPC — ara::com 부분 구현", zero-copy 공유메모리, skeleton/proxy, <strong>ASIL-B 설계</strong>, Linux+QNX(<code>qnx_dispatch</code>) <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> README. 혼합 등급 설계의 핵심은 <strong>공유메모리 세그먼트를 ASIL 레벨별로 분리</strong>(QM 프로세스는 상위 ASIL 세그먼트에 쓰기 불가), OS ACL로 접근 제한, QM 메시지가 ASIL 메시지에 영향 못 주도록 전용 스레드, 생산자가 슬롯을 못 찾으면 QM 소비자를 배제하는 규칙이다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>score/docs/features/communication/ipc/architecture</code>. 인터-ECU SOME/IP 게이트웨이는 기획 단계다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>.</li>
+<li><strong>ROS 2 ↔ ara::com</strong>: DDS↔SOME/IP 변환 브리지(azu-lab), ASIRA(2024), 동적 디스커버리 브리지(Electronics 2025-09, SOME/IP-SD와 DDS 디스커버리 이벤트를 감지해 브리지 엔티티를 동적 생성·파괴), 그리고 ara::com 안에 ROS 네트워크 바인딩을 넣는 제안(arXiv 2511.17540) <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. 공식 매핑표는 없다 <span class="ev" title="미확인·추정">⚠️</span>. 대응 관계는 노드/토픽/서비스 ↔ 서비스 인스턴스/이벤트/메서드, QoS는 DDS 바인딩에서 1:1에 가깝고 SOME/IP 바인딩에서는 reliable/best-effort·E2E로 축소, 라이프사이클은 managed node ↔ EM 상태머신·PHM supervision을 따로 매핑해야 한다.</li>
+<li><strong>인증 파생물</strong>: Apex.Grace(구 Apex.OS)는 TÜV NORD ISO 26262 <strong>ASIL D</strong> 인증 ROS 2 파생물이고 Apex.Ida가 기본 RMW/DDS를 대체하는 미들웨어(공유메모리 zero-copy·결정적 전달·E2E) <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>; RTI Connext Drive 기초 컴포넌트 TÜV SÜD ASIL D <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>; iceoryx2는 ekxide가 ISO 26262 정렬 lifecycle을 지원하나 인증 완료는 아니며 QNX는 tier 3(CI 미검증) <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span><span class="ev" title="미확인·추정">⚠️</span>.</li>
+</ul>
+<h3 id="s8-5"><a class="anchor" href="#s8-5">8.5 SOAFEE와 Eclipse SDV — 실제로 제공하는 것</a></h3>
+<p><strong>SOAFEE 아키텍처 v1.0</strong>(gitlab.com/soafee/architecture 클론). 핵심 개념은 <strong>environmental parity</strong>(가상 환경의 실행환경이 물리 임베디드와 동등해야 테스트·검증을 클라우드로 옮길 수 있다)이고, v1.0 필수 요소는 OCI 호환 컨테이너 런타임, <strong>Kubernetes API 호환</strong> 오케스트레이션, 클라우드 개발-엣지 배포, CI로 유지되는 레퍼런스 구현(meta-ewaol), SystemReady 펌웨어 플랫폼에서 무수정 동작이다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>architecture.rst</code>. <strong>Future Work(=아직 없는 것)</strong>: 관측성으로 parity 입증, <strong>Mixed-critical safety orchestration</strong>, <strong>Partitioning Recipes</strong>(컨테이너 vs 하이퍼바이저 vs eBPF 선택 지침) <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. EWAOL 저장소 README는 2026 스냅샷에서 "archived, meta-cassini로 이전"이라 적혀 있어 아키텍처 문서와 불일치한다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span><span class="ev" title="미확인·추정">⚠️</span>. 회원은 13개 창립사 → 150+ 조직, Governing Body에 Arm·AWS·Bosch·Cariad·Continental·Red Hat·SUSE·Woven·Panasonic Automotive, LG전자는 이사회 참여, 2026년 SOAFEE는 Arm·Linaro의 CoreCollective Working Group으로 편입됐다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</p>
+<p><strong>블루프린트 Open AD Kit</strong>: R1(2022-10)은 Autoware(ROS 2 + CycloneDDS) 컨테이너를 EWAOL 위에 올린 것이고, R2(WIP)는 액추에이션 컨테이너를 <strong>Zephyr RTOS로 재구현해 NXP S32Z(Cortex-R52, 코어 락)에 배포</strong>하는 이기종 PoC(Kernkonzept·NXP·Arm)다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> <code>open-ad-kit/r2/README.md</code>. 2025 블로그의 다음 단계는 "safety island에서 MRM 구현"이다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. 즉 안전 부분은 컨테이너가 아니라 RTOS + 하이퍼바이저로 분리한다.</p>
+<p><strong>Eclipse S-CORE</strong>: 릴리스 v0.5.0-alpha(2025-11-17, 첫 공개; communication·FEO·persistency·orchestration 초기; QNX·Red Hat AutoSD·EB corbos Linux 실험 이미지) → v0.6.0(2026-02-23, Rust baselibs) → v0.8.0(QNX 8 aarch64 레퍼런스 이미지, Lifecycle &amp; Health Management) <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span> 릴리스 노트. 모든 노트가 "production 릴리스 아님 — 안전 논증·평가 미수행"이라 쓴다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. AP를 대체하는 방식은 <strong>Lifecycle</strong>(Run State, sandbox = QNX secpol·Linux cgroup·OCI 컨테이너, 프로세스 aliveness 감시) ≈ EM+PHM, <strong>Orchestration</strong>(고정 스레드풀 위 협력적 태스크, cause-effect chain을 선언적 그래프로 — "AP처럼 앱이 스레드 우선순위를 직접 관리해 배포 시 깨지는 문제"와 "15개 서비스 × 150 앱 = 2,000+ 스레드" 문제를 겨냥), <strong>FEO</strong>(고정 실행 순서 + 재처리, ADAS 데이터 구동 앱용) <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. 회원은 BMW·Mercedes-Benz Tech Innovation·ETAS·Elektrobit·Qorix·Accenture·Aumovio, Qualcomm 2025-11 합류 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>, 현대모비스 2026-05 참여 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. 주변 도구로 Ankaios(컨테이너 오케스트레이터, Podman·containerd), BlueChi(systemd D-Bus 다중 노드 확장), Kuksa Databroker(VSS 신호 gRPC 브로커)가 있다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>.</p>
+<h3 id="s8-6"><a class="anchor" href="#s8-6">8.6 OS·하이퍼바이저 — 스택이 의존하는 사실만</a></h3>
+<ul>
+<li><strong>QNX SDP 8.0</strong>(GA 2024-03): 새 마이크로커널이 thread executive + 코어 클러스터로 <strong>2~64코어 근선형 확장</strong> <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. <strong>QNX Hypervisor 8.0 for Safety</strong> GA 2026-03-10: ISO 26262 ASIL D·IEC 61508·IEC 62304 대응, 게스트 장애 시 Design Safe State 전이, 게스트 QNX/Linux/Android <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. QNX 위 오픈 미들웨어 실태: iceoryx2 QNX tier 3, S-CORE LoLa <code>qnx_dispatch</code> 구현 + v0.8 QNX 8 이미지 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>.</li>
+<li><strong>NVIDIA DriveOS</strong>: Type-1 하이퍼바이저 위 파티션별 Linux/QNX 게스트, 파티션-코어 바인딩, Thor 세대 QNX OS for Safety 8 게스트, ASIL D 인증(TÜV SÜD) <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. 7.0에는 LLM SDK가 들어왔다(§6.1). 상세는 별도 조사 대상이다.</li>
+<li><strong>Linux</strong>: AGL "Ultimate Unagi"(2026-05)에 SoDeV(하드웨어 분리 SDV 레퍼런스, Panasonic·Honda 주도) 포함 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. ELISA는 "Linux를 인증하지 않음 — 분석·프로세스·도구 제공"이고, 인증은 배포판 단위(Red Hat In-Vehicle OS ASIL B capable, Codethink Trustable Linux ASIL D baseline 평가) <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</li>
+<li><strong>혼합 중요도 분리 포인트</strong>: (i) 하이퍼바이저·코어 파티셔닝(QNX HV·Xen·L4Re) (ii) OS 프로세스 격리 + ACL/secpol/cgroup(S-CORE sandbox) (iii) 미들웨어 공유메모리의 ASIL별 세그먼트(LoLa) (iv) 컨테이너는 배포 단위.</li>
+</ul>
+<h3 id="s8-7"><a class="anchor" href="#s8-7">8.7 비교표 — SOME/IP vs DDS vs Zenoh vs iceoryx2 vs Agnocast</a></h3>
+<div class="table-wrap"><table class="cols-6">
+<thead>
+<tr>
+<th>항목</th>
+<th>SOME/IP(vsomeip)</th>
+<th>DDS(Fast DDS/Cyclone/Connext)</th>
+<th>Zenoh(rmw_zenoh)</th>
+<th>iceoryx2</th>
+<th>Agnocast</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>디스커버리</td>
+<td>SOME/IP-SD 멀티캐스트, 정적 설정 중심 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>SPDP/SEDP 멀티캐스트(전체 그래프) <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>gossip via 로컬 router(멀티캐스트 off) + liveliness 토큰 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>파일시스템 기반, 데몬 불필요 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>커널 모듈 레지스트리 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+</tr>
+<tr>
+<td>전송</td>
+<td>TCP/UDP(원격), UDS(로컬), routing manager <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>UDP RTPS(64 KB 프래그먼트), 옵션 TCP/SHM <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>TCP/QUIC/UDP/serial, 로컬 p2p TCP, 옵션 SHM <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>POSIX 공유메모리(단일 호스트) <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>공유메모리(단일 호스트) <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+</tr>
+<tr>
+<td>QoS</td>
+<td>reliable/unreliable + E2E 프로파일 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>22+ 정책 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>congestion_control·priority·reliability, Deadline/Lifespan 미구현 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>서비스 속성</td>
+<td>depth, transient_local(브리지) <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+</tr>
+<tr>
+<td>Zero-copy</td>
+<td>없음</td>
+<td><strong>고정 크기 타입 한정</strong> loaned message <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>SHM opt-in(임계값 이상, 직렬화 1회) <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>true zero-copy, 고정 크기 타입 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>true zero-copy, <strong>가변 크기 포함</strong> <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+</tr>
+<tr>
+<td>와이어 오버헤드</td>
+<td>헤더 16 B <span class="ev" title="미확인·추정">⚠️</span></td>
+<td>RTPS ≈56 B <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>최소 5 B <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>해당 없음</td>
+<td>해당 없음</td>
+</tr>
+<tr>
+<td>안전 인증</td>
+<td>자체 없음(QM); AP 스택 ASIL B <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>Connext Drive ASIL D <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>; Fast DDS/Cyclone 없음</td>
+<td>없음; zenoh-pico ASIL D 작업 중 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>없음; ekxide 지원 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>없음(커널 모듈, KUnit) <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+</tr>
+<tr>
+<td>자동차 사용</td>
+<td>AP 기본 바인딩, BMW·COVESA 양산</td>
+<td>ROS 2 기본, AP DDS 바인딩(RTI), Open AD Kit R1</td>
+<td>uProtocol 전송, ROS 2 Tier-1, V2X 브리지</td>
+<td>Apex.Ida·eCAL 기반(v1), QNX 포팅 진행(v2)</td>
+<td>Autoware 양산 통합(TIER IV)</td>
+</tr>
+<tr>
+<td>단일 호스트 대표 지연</td>
+<td>미측정 <span class="ev" title="미확인·추정">⚠️</span></td>
+<td>수백 µs~ms(iRobot 744 µs) <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>; D4 232 µs(64 B, py) <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>D4 280 µs(64 B, py), 1 MB 1.3 ms <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>0.09 µs(i7)·0.8 µs(RPi4), 크기 무관 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>약 0.2 ms 상수 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+</tbody>
+</table></div>
+<aside class="callout hpc"><span class="lbl">HPC 메모</span><p>이 장을 플랫폼 선정 체크리스트로 압축하면 다섯 항목이다. (a) 프로세스 간·게스트 간 공유메모리 zero-copy 지원 — 커널 모듈(Agnocast) 허용 여부, QNX 이식 여부 포함. (b) 코어·스레드 우선순위를 미들웨어 Executor에 노출하는 경로(cpuset, SCHED_FIFO, secpol). (c) ASIL별 메모리 세그먼트와 ACL(LoLa 방식). (d) SOME/IP·DDS·Zenoh 게이트웨이 — 존/도메인 간과 차량-클라우드 링크는 Zenoh·SOME/IP, 호스트 내는 공유메모리 계열로 혼용이 현실적 답. (e) 인증 미들웨어 가용성 — ASIL D는 Apex.Grace·Connext Drive뿐이고 오픈소스(Zenoh·iceoryx2·Agnocast·LoLa)는 QM~ASIL B 설계 단계이므로, 2026년의 기본값은 "안전 파티션에는 인증 스택, QM 파티션에 오픈 스택"이라는 이중 구조다.</p></aside>
+
+</section>
+<section id="sec-s9" class="chapter" data-num="9">
+<h2 id="s9"><a class="anchor" href="#s9">9. 데모·실행 — 직접 돌려본 것</a></h2>
+<aside class="callout qa">
+<div class="qa-q"><span class="lbl">이 장의 질문</span><p>이 보고서의 수치 중 무엇이 우리 손으로 확인한 것이고, 무엇이 문헌이며, 무엇을 GPU 머신에서 다시 돌려야 하나.</p></div>
+<div class="qa-a"><span class="lbl">세 줄 답</span><ol class="three"><li><span class="num">①</span><span>CPU 샌드박스(Xeon 4코어, 15 GB, GPU 없음)에서 4건을 실행했고 스크립트·원시 로그를 저장소에 넣어 재실행 가능하게 했다.</span></li><li><span class="num">②</span><span>문헌 수치는 하드웨어·조건이 제각각이라 실측과 나란히 두되 섞지 않았다.</span></li><li><span class="num">③</span><span>GPU가 필요한 것(학계 E2E 추론, Alpamayo 추론, Autoware 시뮬레이터, ROS 2 컨테이너 실측)은 부록 B의 재현 절차로 남겼다.</span></li></ol></div>
+</aside>
+<div class="table-wrap"><table class="cols-5">
+<thead>
+<tr>
+<th>#</th>
+<th>데모</th>
+<th>문헌 수치</th>
+<th>샌드박스 실측 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></th>
+<th>GPU 재현(부록 B)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D1</td>
+<td>Autoware 소스 정적 해부 (<code>scripts/autoware_anatomy.py</code>, 2.3초)</td>
+<td>Autoware "500+ 기업, 30+ 차종" <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>; VAD 노드 "~20 ms" <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td>패키지 365, 노드 등록 287, 런치 378+30, msg 190·srv 39·action 0, C++ 657k줄, CUDA 16.7k줄(universe만), 의존 간선 6,202, Agnocast 80 pkgs, TensorRT 23 pkgs, 런치 트리 167노드</td>
+<td>릴리스 태그 트리 재측정, planning simulator 실행(ROS 2 apt·GPU 필요), 런타임 노드·토픽 그래프</td>
+</tr>
+<tr>
+<td>D2</td>
+<td>Apollo Cyber RT·DAG 해부 (<code>scripts/apollo_dag_graph.py</code>, 약 8초)</td>
+<td>"zero-copy µs 지연, 10× 성능", "단일 Orin 5 Hz" <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td>dag 109, 컴포넌트 188(타이머 17), 클래스 92, 채널 128, proto 478, BUILD 721, 스케줄러 prio 20단계·compute 그룹 16 proc, arena SHM 32 MiB × 32, control 10 ms 타이머, 12개월 커밋 21건</td>
+<td>Cyber RT 벤치(<code>cyber/tools/cyber_performance</code>), i9/Orin 성능 보고 재현</td>
+</tr>
+<tr>
+<td>D3</td>
+<td>openpilot 구조 + 주행 모델 CPU 추론 (<code>scripts/openpilot_onnx_probe.py</code>)</td>
+<td>디바이스 20 Hz <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>; 0.10.3 msgq 711 → 90 MB <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>; big 모델 880M <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td>supercombo 30.0M 파라미터·60.9 MB·351노드; CPU 추론 <strong>395 ms</strong>(4스레드)·406 ms(1스레드); dmonitoring 3.4M·49~56 ms; 프로세스 44, 서비스 69, CAR 플랫폼 260</td>
+<td>tinygrad 경로 컴파일·CPU/GPU 실행, <code>tools/replay</code>(commadata 필요), big 모델(766 MB) 프로브</td>
+</tr>
+<tr>
+<td>D4</td>
+<td>Zenoh vs CycloneDDS vs 파이프 IPC 벤치 (<code>scripts/ipc_bench.py</code>)</td>
+<td>iceoryx2 0.09 µs <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>; iRobot 744 µs <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>; Zenoh 처리량 2× DDS <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>; Agnocast 0.2 ms <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>64 B RTT: pipe 76 / Zenoh 280 / Cyclone(py) 232 µs; 1 MB: 1,968 / <strong>1,285</strong> / 113,546 µs</td>
+<td>ROS 2 컨테이너에서 rmw_fastrtps/cyclonedds/zenoh C++ 노드 핑퐁(Docker Hub 블롭 CDN 차단으로 이 세션에서는 불가)</td>
+</tr>
+<tr>
+<td>D5</td>
+<td>학계 E2E(NAVSIM+DiffusionDrive) 정적 해부</td>
+<td>88.1 PDMS, 45 FPS(4090) <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td>코드 구조·2스텝 디노이징·CPU 평가 경로 확인 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>navtest 평가(OpenScene 데이터·timm 가중치 HF 필요)</td>
+</tr>
+<tr>
+<td>D6</td>
+<td>Alpamayo 추론</td>
+<td>0.600 s / 3.35 s <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td>불가(GPU 없음)</td>
+<td>Alpamayo 1.5 노드 벤치, FlashDrive 재현</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>실측에서 배운 것.</strong> D1·D2는 "코드를 세어 보면 벤더 문서와 다른 것이 보인다"는 예다. Core README의 "비어 있음"은 낡았고(74 pkgs), VAD 노드는 런치에 없으며, Apollo <code>version.json</code>은 9.0.0이다. D3는 "같은 가중치도 런타임이 다르면 8배 느리다"를 보여 준다. D4는 "직렬화 경로 하나가 대용량 메시지 지연을 두 자릿수 배로 바꾼다"를 보여 준다. 네 건 모두 GPU 없이 얻은 결론이고, GPU가 생기면 부록 B의 절차로 수치를 보강하면 된다.</p>
+
+</section>
+<section id="sec-s10" class="chapter" data-num="10">
+<h2 id="s10"><a class="anchor" href="#s10">10. 동향 뉴스 — 2026년 1~9월</a></h2>
+<aside class="callout qa">
+<div class="qa-q"><span class="lbl">이 장의 질문</span><p>최근 9개월에 무슨 일이 있었고, 각 사건은 차량 HPC 팀에 무엇을 뜻하나.</p></div>
+</aside>
+<div class="table-wrap"><table class="cols-5">
+<thead>
+<tr>
+<th>날짜</th>
+<th>분야</th>
+<th>사건</th>
+<th>HPC 관점 한 줄</th>
+<th>근거</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>09-09~11</td>
+<td>칩+스택</td>
+<td>TIER IV, Automotive World 2026에서 Autoware + Reference E2E 모델을 Renesas R-Car X5H와 Jetson Orin 양쪽에서 구동 데모</td>
+<td>같은 스택이 두 SoC에 — "칩 독립 오픈 스택"의 시연</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>09-03</td>
+<td>E2E</td>
+<td>Wayve–Uber, 런던 감독(안전운전자) 로보택시 서비스 개시</td>
+<td>단일 파운데이션 모델 + 사람 폴백의 상용화</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>09-01</td>
+<td>오픈소스</td>
+<td>Renesas, Autoware Foundation 최상위 회원 가입 — Autoware E2E를 R-Car에 사전 통합</td>
+<td>양산 ADAS SoC 벤더가 오픈 스택을 레퍼런스 SW로 채택</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>09-01</td>
+<td>중국</td>
+<td>Momenta L3 양산·구독 모델 계획; Waymo 14개 도시</td>
+<td>—</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>08-31</td>
+<td>중국</td>
+<td>Momenta H1: 누적 설치 100만 대, R7 월드모델 Q3 양산 배치 주장</td>
+<td>월드모델의 온보드 배치 주장은 검증 필요</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span><span class="ev" title="미확인·추정">⚠️</span></td>
+</tr>
+<tr>
+<td>08-26</td>
+<td>오픈소스</td>
+<td>TIER IV, HD 지도 없는 카메라 전용 Reference E2E 모델·Co-MLOps 자동 라벨링·Cosmos 합성 데이터 출품 예고</td>
+<td>모델 사양(파라미터·지연) 미공개 — Orin 구동으로만 간접 추정</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>08-20</td>
+<td>칩+스택</td>
+<td>TIER IV–Renesas 포괄 협력(R-Car Gen 5 포팅); Waymo 자체 ASIC 공개(TSMC 5 nm, 1,000+ TOPS, 이중 엔진)</td>
+<td>Arm+NPU 이기종 위 ROS 2 스택 이식성 검증 / 폴백을 실리콘에</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>08-18</td>
+<td>로보택시</td>
+<td>Baidu Q2: Apollo Go 완전무인 분기 약 100만 회, 누적 2,300만 회</td>
+<td>ADFM+RT6(1,200 TOPS 이중화) 수직통합 — 스택과 HPC가 함께 폐쇄</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>08-13</td>
+<td>한국</td>
+<td>LG그룹–NVIDIA MOU: LG전자 VS, DRIVE Hyperion 기반 AIDV용 HPC 플랫폼, IVI+ADAS 통합</td>
+<td>우리 회사의 공식 방향 — §13</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>08-12</td>
+<td>openpilot</td>
+<td>0.11.2 + chestnut: 880M 모델을 외장 RX 9060(100 W)에서</td>
+<td>10 W SoC 한계를 외장 GPU로 돌파 — "모델 크기 = 컴퓨트 예산"의 소비자급 실증</td>
+<td class="src"><span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>08-05</td>
+<td>E2E</td>
+<td>Alpamayo 2 Super(34B) 상용 가중치 공개; TIER IV 노드 3.35 s/추론</td>
+<td>34B VLA는 현행 차량 HPC에서 실시간 불가 — 증류 없이는 오프보드용</td>
+<td class="src"><span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td>07-31</td>
+<td>규제(미국)</td>
+<td>NHTSA AV Framework 업데이트, §555 면제 개정 IFR</td>
+<td>수동 제어장치 없는 차량의 이중화·폴백 요구가 규정화될 전망</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>07-29</td>
+<td>Tier-1</td>
+<td>AUMOVIO, Aurora Driver 산업화 공동 개발 + <strong>백업 컴퓨터</strong> 공급(2027 양산)</td>
+<td>스택은 외부, 안전 폴백 HPC는 Tier-1 — "폴백 컴퓨터"가 새 상품</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>07-23</td>
+<td>칩+스택</td>
+<td>Mobileye Q2: EyeQ6H Surround ADAS 1,900만 대 전망, 수직통합 로보택시 2027 미국</td>
+<td>단일 34 TOPS SoC로 서라운드 ADAS — 통합 HPC와 경쟁하는 반대 노선</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>07-21</td>
+<td>SDV</td>
+<td>SOAFEE, CoreCollective(Arm·Linaro) Working Group 편입</td>
+<td>Arm 기반 HPC의 컨테이너·오케스트레이션 표준화 가속</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>07-10</td>
+<td>중국</td>
+<td>XPeng 광저우 로보택시 시험(카메라 전용, Turing ×4)</td>
+<td>자체 칩 3,000 TOPS로 VLA 로보택시</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>07-01</td>
+<td>OEM/Tier-1</td>
+<td>Bosch–CARIAD L2/L3 AI 스택 공동개발 완료, 2026 중반 양산 적용</td>
+<td>소형~프리미엄 단일 스택 → 스케일러블 HPC SKU 요구</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>06-09</td>
+<td>오픈소스</td>
+<td>AWF <code>auto_drive</code>·<code>auto_speed</code>·<code>auto_steer</code> 공개(ONNX FP32/INT8)</td>
+<td>INT8 ONNX 제공 → NPU 이식 용이; 단안 L2는 존 ECU급에서도 가능</td>
+<td class="src"><span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td>05-28</td>
+<td>한국/SDV</td>
+<td>현대모비스, Eclipse SDV·S-CORE 참여, 컨테이너 격리 기술 공개 예정</td>
+<td>국내 Tier-1이 ASIL-B 목표 오픈 미들웨어를 HPC 기반으로 채택 신호</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>05-22</td>
+<td>미들웨어</td>
+<td>ROS 2 Lyrical Luth LTS(2031), EventsCBGExecutor, <code>rosidl::Buffer</code></td>
+<td>Autoware 차기 기준 배포판 후보 — executor·GPU 버퍼가 멀티코어 활용에 직결</td>
+<td class="src"><span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td>05-12</td>
+<td>중국</td>
+<td>Li Auto Mach M100(5 nm, 1,280 TOPS, 데이터플로)</td>
+<td>자체 칩 대열 합류</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>04-10</td>
+<td>규제(EU)</td>
+<td>네덜란드 RDW, Tesla FSD Supervised 형식승인(UN R-171 + Art.39)</td>
+<td>E2E 단일망의 유럽 형식승인 첫 사례</td>
+<td class="src"><span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td>04-07</td>
+<td>E2E</td>
+<td>Tesla FSD v14.3 — MLIR 컴파일러·런타임 재작성으로 반응 20% 단축</td>
+<td>모델이 아니라 툴체인이 지연을 좌우한다는 공식 인정</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>03-18</td>
+<td>오픈소스</td>
+<td>TIER IV, Alpamayo·Cosmos 채택 발표(GTC)</td>
+<td>Autoware에 GPU 필수 VLA 노드 등장</td>
+<td class="src"><span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td>03-17</td>
+<td>openpilot</td>
+<td>0.11 — 2B DiT 월드모델로 만든 학습 시뮬레이터에서 정책 전량 학습</td>
+<td>학습 컴퓨트(2B)와 차량(SDM845)의 비대칭</td>
+<td class="src"><span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>03-16</td>
+<td>한국/칩</td>
+<td>현대차·기아–NVIDIA 확대: DRIVE Hyperion 기반 L2~L4 통합 아키텍처 + Motional L4; Isuzu L4 버스에 Autoware+Thor; NHTSA FMVSS 개정 NPRM</td>
+<td>42dot 자체 E2E(Atria AI)와 NVIDIA DRIVE AV 이중 트랙</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>03-10</td>
+<td>SDV·OS</td>
+<td>Qorix S-CORE 기반 양산급 미들웨어 시연; QNX Hypervisor 8.0 for Safety GA</td>
+<td>S-CORE가 HPC ECU용 실제 제품으로; 안전 파티션 기준점 갱신</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>03-03</td>
+<td>중국</td>
+<td>VW, XPeng VLA 2.0 첫 고객·Turing 첫 외부 고객(글로벌 2027)</td>
+<td>중국 스택+칩 번들의 유럽 OEM 진입</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>02-27</td>
+<td>SDV</td>
+<td>Eclipse S-CORE 0.6.0: C++/Rust 이중 언어(Ferrocene), ISO 26262·21434·ASPICE 정렬</td>
+<td>HPC 미들웨어 언어 전환 신호</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>02-25</td>
+<td>E2E</td>
+<td>Wayve Series D $1.2B(NVIDIA·MS·Uber·Mercedes·Nissan·Stellantis)</td>
+<td>E2E 스택 벤더가 OEM 다수와 동시 계약 — "외부 E2E 스택 수용" 시나리오 준비 필요</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>01-30</td>
+<td>오픈소스</td>
+<td>Apollo 11.0 — 저속 기능차 지향, BEV+OCC, 증분 학습</td>
+<td>오픈소스 Apollo의 승용 HPC 레퍼런스 가치는 하락</td>
+<td class="src"><span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td>01-07</td>
+<td>한국/칩</td>
+<td>현대모비스–Qualcomm 포괄 계약(Ride Flex, 주행+주차 단일칩)</td>
+<td>국내 Tier-1의 멀티 SoC 축 확보 — 스택 이식성 요구</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>01-05</td>
+<td>칩+스택</td>
+<td>NVIDIA CES: DRIVE AV 풀스택 Mercedes CLA 첫 양산, Alpamayo 1 공개, Hyperion ECU를 Bosch·Magna·ZF·AUMOVIO·Astemo·Quanta가 제작; Magna는 "Hyperion 호환 ECU + DRIVE AV 통합 서비스"; Qualcomm Ride Flex 혼합 중요도 상용화</td>
+<td>Thor 기반 "칩+센서+스택" 번들이 Tier-1 ECU를 표준화 — Hyperion 호환 여부가 사업 조건</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>01</td>
+<td>Tier-1</td>
+<td>Harman(삼성), ZF ADAS 사업 €1.5B 인수(2026 하반기 클로징 예정)</td>
+<td>삼성 진영이 ADAS 컴퓨트 사업 확보 — 국내 HPC 경쟁사 등장</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+<tr>
+<td>2025-12</td>
+<td>규제(중국)</td>
+<td>MIIT 첫 L3 양산 허가(Changan Deepal SL03·BAIC Arcfox αS)</td>
+<td>L3 책임 전환은 HPC 이중화·DSSAD 기록을 요구</td>
+<td class="src"><span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+</tr>
+</tbody>
+</table></div>
+<p>한국 보조 사실: 42dot Atria AI는 카메라 8대 전용 완전 E2E 모델이고, 현대차그룹은 2028 첫 양산 SDV에 NVIDIA 협력 L2+를 탑재할 계획이며 Pleos Vehicle OS·Atria AI·Pleos Connect를 공개했다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</p>
+
+</section>
+<section id="sec-s11" class="chapter" data-num="11">
+<h2 id="s11"><a class="anchor" href="#s11">11. 한계와 리스크</a></h2>
+<h3 id="s11-1"><a class="anchor" href="#s11-1">11.1 라이선스 — 코드와 가중치는 다르다</a></h3>
+<div class="table-wrap"><table class="cols-4">
+<thead>
+<tr>
+<th>대상</th>
+<th>코드</th>
+<th>가중치·데이터</th>
+<th>주의</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Autoware 7개 저장소</td>
+<td>Apache-2.0 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>diffusion_planner ONNX 등 모델은 별도 확인 필요 <span class="ev" title="미확인·추정">⚠️</span></td>
+<td>NOTICE에 TIER IV·AutoCore·Leo Drive 저작권</td>
+</tr>
+<tr>
+<td>Apollo</td>
+<td>Apache-2.0 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>릴리스 노트 "연구 목적, 상용화 권장하지 않음" <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td>third_party 53개, ad-rss-lib 표기 "GPL 2.1"(실제 LGPL 추정) <span class="ev" title="미확인·추정">⚠️</span></td>
+</tr>
+<tr>
+<td>openpilot·panda·opendbc·msgq</td>
+<td>MIT <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td><strong>가중치 라이선스 문구 없음</strong> <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>safety 코드 수정 시 상표 사용 불가 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td>NAVSIM / DiffusionDrive / UniAD / VAD</td>
+<td>Apache-2.0 / MIT / Apache / Apache <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td>nuPlan·OpenScene 별도 약관, timm 가중치 HF</td>
+<td><strong>Bench2Drive는 CC-BY-NC-ND</strong>(상업·파생 금지) <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td>Alpamayo 1 / 1.5 / 2 Super</td>
+<td>Apache-2.0 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td>OpenMDW-1.1 / HF 카드 "비상용" / OpenMDW-1.1 상용 허용 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td>1.5 카드와 TIER IV 저장소 README는 여전히 비상용 표기 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td>Physical AI AV 데이터셋</td>
+<td>—</td>
+<td>NVIDIA AV Dataset License, 합성은 CC-BY-4.0 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td>게이트</td>
+</tr>
+<tr>
+<td>ad-rss-lib</td>
+<td>LGPL-2.1 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td>—</td>
+<td>Intel 유지보수 중단 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+</tr>
+<tr>
+<td>Waymo Open Dataset</td>
+<td>Apache-2.0(일부 폴더 BSD-3 + 제한 특허) <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td>별도 약관</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Zenoh / iceoryx2 / Agnocast / vsomeip / S-CORE</td>
+<td>EPL-2.0·Apache / Apache·MIT / Apache / MPL-2.0 / Apache <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>—</td>
+<td>인증 없음(§8.7)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="s11-2"><a class="anchor" href="#s11-2">11.2 "reference"와 "production-ready"의 뜻</a></h3>
+<p>Autoware README는 "production-ready"라고 쓰지만 안전 인증은 스택 단위가 아니라 배포자(TIER IV 등)의 몫이고, <code>processing_time_checker</code>는 임계 검증이 없다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span><span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. Alpamayo README는 "완전한 주행 스택이 아니며 자동차급 검증을 거치지 않았다"고 명시한다 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>. S-CORE 모든 릴리스 노트는 "production 릴리스 아님"이다 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>. 오픈 스택을 양산에 쓰려면 인증 산출물은 전부 우리가 만든다는 전제로 봐야 한다.</p>
+<h3 id="s11-3"><a class="anchor" href="#s11-3">11.3 공개 정보 편향</a></h3>
+<p>중국·상용 스택 사실은 대부분 보도자료·2차 보도(<span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>)이고 마케팅 수치를 교차 검증할 방법이 없다. 이 보고서는 그런 수치를 "공개 주장"으로 표기했고, 특히 Huawei 1,000 TOPS, XPeng 750 TOPS/칩, Tesla HW4 500 TOPS·Cortex H100 10만 장, Momenta R7 온보드 배치는 단일 출처다 <span class="ev" title="미확인·추정">⚠️</span>.</p>
+<h3 id="s11-4"><a class="anchor" href="#s11-4">11.4 벤치마크 비교 불가성</a></h3>
+<p>지연 수치는 하드웨어(SDM845 / Xeon / 4090 / A100 / RTX PRO 6000 / Thor)와 측정 범위(모델만 / 노드 end-to-end / 파이썬 바인딩 포함)가 제각각이다. 이 보고서의 표는 같은 행 안에서만 비교하고, 행 사이 비교는 "자릿수" 수준으로만 읽어야 한다. D4는 파이썬 바인딩 오버헤드를 포함한다.</p>
+<h3 id="s11-5"><a class="anchor" href="#s11-5">11.5 이 조사의 제약</a></h3>
+<p>세션 네트워크 정책상 arxiv·Hugging Face·nvidia.com·docs.ros.org·autosar.org·벤더 사이트·Docker Hub 블롭 CDN이 차단됐다. GitHub 클론·raw, GitLab, PyPI, 웹 검색 요약만 가능했다. 그래서 논문 수치는 검색 요약(<span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>)이고, ROS 2 컨테이너 실측(D4')은 못 했으며, Hugging Face에 있는 모델·데이터(학계 E2E, Alpamayo)는 받지 못했다. 접근 실패 URL 목록은 <code>reference/references.md</code>에 있다.</p>
+
+</section>
+<section id="sec-s12" class="chapter" data-num="12">
+<h2 id="s12"><a class="anchor" href="#s12">12. 시사점 — 차량 HPC 개발 관점에서 주의 깊게 볼 것</a></h2>
+<aside class="callout qa">
+<div class="qa-q"><span class="lbl">이 장의 질문</span><p>열두 스택을 한 틀에 놓고 나서, HPC를 만드는 팀은 무엇을 다르게 봐야 하나.</p></div>
+</aside>
+<ol>
+<li><strong>스택을 고르는 것이 아니라 층 경계를 설계하는 것이 Tier-1의 일이다.</strong> 열두 스택은 L4·L5의 답이 제각각이지만 L2·L3·L6에 요구하는 것은 같다. 공유메모리 zero-copy, 코어 파티셔닝, ASIL 분리, 폴백 컴퓨터. 어느 스택이 이기든 이 네 가지는 우리가 만든다(§1.3, §4.4, §8). 반대로 NVIDIA처럼 층 전체를 번들로 가져오는 벤더 앞에서는 Tier-1의 자리가 "Hyperion 호환 ECU 제작 + 통합 서비스"(Magna)로 좁아진다(§10).</li>
+<li><strong>미들웨어는 "DDS 고정"이 아니라 "rmw/ara::com 추상화 + zero-copy 층"으로 봐야 한다.</strong> ROS 2 기본 경로는 최대 50% 오버헤드가 있고, 양산 트랙은 rmw 교체(Zenoh Tier-1)나 우회(Agnocast 커널 모듈, Apex.Ida)로 수렴한다(§8.1). AUTOSAR Adaptive도 바인딩 교체가 가능한 API이며 오픈 구현(LoLa)은 ASIL별 공유메모리 세그먼트를 핵심으로 잡았다(§8.4). 플랫폼이 제공해야 할 것은 특정 미들웨어가 아니라 <strong>커널 모듈·공유메모리·ACL·코어 우선순위를 노출하는 경로</strong>다.</li>
+<li><strong>E2E는 HPC의 메모리·지연 예산을 바꾼다. TOPS는 그 다음이다.</strong> 온보드 파라미터 예산은 수십억이 상한이고(XPeng·Alpamayo), 34B는 3.35 s가 걸리며(§6.1), 같은 30M 모델도 런타임에 따라 8배 차이 난다(§4.3). Tesla는 컴파일러 재작성만으로 20%를 얻었고(§6.2), NIO는 메모리 대역폭을 스펙의 앞자리에 뒀다(§7.5). HPC 로드맵의 "E2E 준비"는 KV 캐시 대역폭, FP8/NVFP4 경로, 컴파일러 스택(TensorRT·MLIR·tinygrad류)으로 정의해야 한다.</li>
+<li><strong>안전 감시·폴백 층이 차별화 지점이다.</strong> E2E일수록 이 층이 커지고, 그 형태는 병렬 클래식 스택(NVIDIA), 수식(RSS), 하드웨어 이중 엔진(Waymo), 별도 MCU 펌웨어(panda), 원격 인간(Tesla)으로 갈린다(§7.6). AUMOVIO가 "백업 컴퓨터"를 상품화한 것(§10)은 이 층이 Tier-1의 독립 상품이 될 수 있음을 뜻한다. NHTSA·UNECE가 사람 폴백을 언제까지 허용할지가 시장 크기를 정한다.</li>
+<li><strong>데이터 플라이휠 부재는 구조적 약점이며, 월드모델은 오프보드 컴퓨트다.</strong> 플라이휠의 주어가 마일에서 월드모델로 바뀌었고(§7.6) 학습 컴퓨트가 온보드 SoC보다 경쟁력을 더 갈라놓는다(§7 HPC 메모). HPC 팀이 직접 플라이휠을 가질 수는 없지만, 스택 벤더의 플라이휠에 <strong>우리 플랫폼의 텔레메트리(지연·전력·열)를 넣는 인터페이스</strong>는 가질 수 있다(Autoware pipeline_latency_monitor, Cyber statistics 같은 관측 채널).</li>
+</ol>
+<p><strong>사업을 위해 고려할 것.</strong></p>
+<ul>
+<li><strong>오픈 스택의 칩 독립성이 상품이 된다.</strong> Renesas·AMD가 Autoware를 레퍼런스로 삼고 TIER IV가 Orin·R-Car 양쪽 데모를 하는 것은(§4.1, §10) "어떤 SoC에도 같은 스택"이 팔린다는 뜻이다. 우리 HPC가 NVIDIA 외 SoC(Ride Flex, R-Car Gen 5)를 품는다면 오픈 스택 호환성이 진입 조건이다.</li>
+<li><strong>"외부 E2E 스택 수용" 시나리오를 준비해야 한다.</strong> Wayve가 Nissan·Mercedes·Stellantis와 동시에 계약하고(§6.3), XPeng이 VW에 스택+칩을 팔며(§7.4), Momenta가 26개 OEM에 들어간다(§7.3). OEM이 스택을 외부에서 사 오면 Tier-1 HPC는 "그 스택이 요구하는 층 경계"를 빠르게 맞추는 능력으로 평가받는다.</li>
+<li><strong>폴백 컴퓨터·안전 파티션을 독립 상품으로 볼 수 있다.</strong> §4 참조.</li>
+<li><strong>국내 관점.</strong> 현대차그룹은 NVIDIA DRIVE AV와 42dot 자체 E2E 이중 트랙, 현대모비스는 Qualcomm Ride Flex + S-CORE, Harman은 ZF ADAS 인수(§10). 국내 경쟁은 "어느 스택"이 아니라 "몇 개 스택·몇 개 SoC를 동시에 받는 플랫폼인가"로 옮겨간다.</li>
+</ul>
+<p><strong>주시할 것 ①~⑤.</strong>
+① Autoware 2.0 Generator–Selector의 코드 구현 시점과 Agnocast 기본 활성화 여부(현재 <code>ENABLE_AGNOCAST=1</code> opt-in). ② Alpamayo의 Thor 공식 지연 수치와 DriveOS LLM SDK 연결(현재 미공개). ③ rmw_zenoh가 Autoware 공식 rmw 옵션이 되는지, ROS 2 Lyrical의 <code>rosidl::Buffer</code> CUDA 경로가 Autoware에 들어오는지. ④ S-CORE의 첫 production 릴리스와 Qorix·현대모비스의 양산 적용. ⑤ NHTSA §555·UNECE R157/R171 개정이 "사람 폴백" E2E와 "하드웨어 폴백" 스택 중 어느 쪽에 유리하게 정리되는지.</p>
+
+</section>
+<section id="sec-s13" class="chapter" data-num="13">
+<h2 id="s13"><a class="anchor" href="#s13">13. 자사 관점 — LG전자 VS(차량용 HPC·AI 플랫폼)</a></h2>
+<h3 id="s13-1"><a class="anchor" href="#s13-1">13.1 공개된 접점(사실)</a></h3>
+<ul>
+<li>2026-08-13 LG그룹–NVIDIA MOU: LG전자 VS는 <strong>DRIVE Hyperion 기반 AI 정의 차량(AIDV)용 HPC 플랫폼</strong>을 개발하고 IVI+ADAS 통합 솔루션을 지향한다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</li>
+<li>LG전자는 SOAFEE 이사회에 참여한다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. SOAFEE는 2026년 CoreCollective Working Group으로 편입됐다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>.</li>
+<li>NVIDIA Hyperion ECU 제작사로 공개된 곳은 Bosch·Magna·ZF·AUMOVIO·Astemo·Quanta다 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>. LG전자는 이 목록에 없다(2026-01 기준).</li>
+</ul>
+<h3 id="s13-2"><a class="anchor" href="#s13-2">13.2 이 보고서의 특이사항(자사 관점)</a></h3>
+<div class="table-wrap"><table class="cols-3">
+<thead>
+<tr>
+<th>#</th>
+<th>특이사항</th>
+<th>근거 절</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Hyperion 기반 HPC를 만든다면 DRIVE AV·Alpamayo가 요구하는 층 경계(듀얼 스택, Halos 가드레일, LLM SDK 런타임)를 우리가 "받는" 위치다. Magna 사례처럼 "호환 ECU + 통합 서비스"가 기본 역할이 된다</td>
+<td class="src">§6.1, §10</td>
+</tr>
+<tr>
+<td>2</td>
+<td>같은 HPC가 Autoware(Renesas·AMD·NVIDIA 3축)·Momenta(Orin/Thor)·Wayve(Thor) 같은 외부 스택도 받을 수 있어야 OEM 선택지가 넓어진다. 요구는 공통이다: 공유메모리 zero-copy, 코어 파티셔닝, ASIL 분리</td>
+<td class="src">§4.4, §8.7</td>
+</tr>
+<tr>
+<td>3</td>
+<td>IVI+ADAS 통합은 Qualcomm Ride Flex가 "업계 첫 상용 혼합 중요도" 타이틀을 먼저 가져갔고, 현대모비스가 Ride Flex 축을 확보했다</td>
+<td class="src">§10</td>
+</tr>
+<tr>
+<td>4</td>
+<td>안전 파티션에는 인증 미들웨어(Apex.Grace·Connext Drive·QNX HV 8.0 for Safety), QM 파티션에는 오픈 스택이라는 이중 구조가 2026년 기본값이다</td>
+<td class="src">§8.6, §8.7</td>
+</tr>
+<tr>
+<td>5</td>
+<td>openpilot·Autoware·Apollo 모두 관측 채널(지연·자원)을 런타임에 내장한다. 플랫폼 텔레메트리를 스택 벤더 플라이휠에 넣는 인터페이스가 차별화 요소가 될 수 있다</td>
+<td class="src">§4, §12-5</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="s13-3"><a class="anchor" href="#s13-3">13.3 접점 지도(층별)</a></h3>
+<div class="table-wrap"><table class="cols-3">
+<thead>
+<tr>
+<th>층</th>
+<th>외부 스택이 요구하는 것(사실)</th>
+<th>VS 접점(추정 <span class="ev" title="미확인·추정">⚠️</span>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>L1 HW</td>
+<td>Thor sm_110 fat binary(Autoware), Turing/EyeQ6/자체 ASIC(경쟁 스택), 메모리 대역폭(NIO 546 GB/s)</td>
+<td>Hyperion 호환 ECU 설계, 메모리 서브시스템·전력·열</td>
+</tr>
+<tr>
+<td>L2 OS</td>
+<td>DriveOS 하이퍼바이저 파티션, QNX HV 8.0 for Safety, Linux(AGL·Red Hat IVOS)</td>
+<td>IVI(Linux/Android)와 ADAS(QNX/DriveOS) 파티션 공존 설계</td>
+</tr>
+<tr>
+<td>L3 IPC</td>
+<td>Agnocast 커널 모듈, cuda_blackboard, Cyber arena, msgq/ION, LoLa ASIL 세그먼트, Zenoh 게이트웨이</td>
+<td>커널 모듈 허용·공유메모리·ACL·GPU 버퍼 공유 경로 제공</td>
+</tr>
+<tr>
+<td>L4–L5</td>
+<td>TensorRT 경로(Autoware·Apollo), tinygrad류 컴파일 경로(openpilot), LLM SDK(Alpamayo student)</td>
+<td>컴파일러·런타임 검증, FP8/NVFP4</td>
+</tr>
+<tr>
+<td>L6 안전</td>
+<td>병렬 클래식 스택(DRIVE AV), 별도 MCU(panda), 백업 컴퓨터(AUMOVIO)</td>
+<td>안전 파티션·폴백 컴퓨터 상품화</td>
+</tr>
+<tr>
+<td>L7 데이터</td>
+<td>벤더 플라이휠(Co-MLOps·Cosmos·GAIA·World Engine)</td>
+<td>플랫폼 텔레메트리 인터페이스, HIL 규모(현대모비스 60대 병렬 사례)</td>
+</tr>
+<tr>
+<td>L8 API</td>
+<td>AD API(Autoware), 벤더 HMI</td>
+<td>IVI 통합 — 추론 텍스트(CoC) HMI 노출</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="s13-4"><a class="anchor" href="#s13-4">13.4 협업·사업 고려사항</a></h3>
+<ol>
+<li>Hyperion 호환 ECU의 공개 제작사 목록에 들어가는 것이 첫 관문이다(§10 CES 2026).</li>
+<li>Autoware 호환성(ROS 2 Jazzy/Lyrical, Agnocast 커널 모듈, CUDA 13 fat binary)은 Renesas·AMD 축까지 열어 준다(§4.1).</li>
+<li>안전 파티션의 인증 미들웨어(QNX HV 8.0 for Safety, Apex.Grace 또는 Connext Drive) 선택은 오픈 스택과 독립적으로 결정할 수 있다(§8.4, §8.6).</li>
+<li>폴백 컴퓨터를 독립 상품으로 검토한다(AUMOVIO–Aurora 모델, §10).</li>
+<li>S-CORE·SOAFEE 참여를 "관망"에서 "레퍼런스 이미지 기여"로 바꾸면 QNX 8·Linux 양쪽 인증 경로에서 발언권이 생긴다(§8.5).</li>
+<li>외부 E2E 스택(Wayve·Momenta·XPeng) 수용 시나리오를 HPC 요구사항 문서에 포함한다(§12).</li>
+</ol>
+<h3 id="s13-5"><a class="anchor" href="#s13-5">13.5 결정 항목</a></h3>
+<div class="table-wrap"><table class="cols-3">
+<thead>
+<tr>
+<th>결정 항목</th>
+<th>선택지·확인 사항</th>
+<th>근거</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>호스트 내 IPC 기본 경로</td>
+<td>DDS 유지 + Agnocast/커널 모듈 허용 vs iceoryx2/LoLa 계열 vs Zenoh</td>
+<td class="src">§8.1~8.3, D4</td>
+</tr>
+<tr>
+<td>안전 파티션 미들웨어</td>
+<td>Apex.Grace / Connext Drive / 자체</td>
+<td class="src">§8.4</td>
+</tr>
+<tr>
+<td>하이퍼바이저</td>
+<td>DriveOS 내장 / QNX HV 8.0 for Safety / Xen·L4Re(Open AD Kit R2)</td>
+<td class="src">§8.6</td>
+</tr>
+<tr>
+<td>E2E 런타임 검증 범위</td>
+<td>TensorRT만 / + LLM SDK / + tinygrad·MLIR류</td>
+<td class="src">§6.5</td>
+</tr>
+<tr>
+<td>폴백 컴퓨터</td>
+<td>통합 SoC 이중화 / 별도 ECU 상품</td>
+<td class="src">§12-4</td>
+</tr>
+<tr>
+<td>오픈 스택 CI</td>
+<td>Autoware universe-cuda 이미지로 우리 HPC 회귀 테스트</td>
+<td class="src">§4.1</td>
+</tr>
+</tbody>
+</table></div>
+
+</section>
+<section id="sec-appendix-a" class="section">
+<h2 id="appendix-a"><a class="anchor" href="#appendix-a">부록 A. 용어집</a></h2>
+<ul>
+<li><strong>E2E(End-to-End)</strong>: 센서 입력에서 궤적(또는 제어)까지 하나의 학습 모델. 이 보고서에서는 L4·L5를 합친 것으로 정의.</li>
+<li><strong>VLA(Vision-Language-Action)</strong>: 시각 입력과 언어 추론을 거쳐 행동(궤적)을 내는 모델. Alpamayo·LINGO-2·XPeng VLA 2.0.</li>
+<li><strong>CoC(Chain of Causation)</strong>: 주행 행동과 정렬된 인과 추론 트레이스. 일반 CoT와 달리 실제 궤적과 짝지어 라벨링.</li>
+<li><strong>Flow matching</strong>: 노이즈에서 데이터로의 속도장을 학습하는 생성 기법. Alpamayo 액션 디코더의 실제 구현.</li>
+<li><strong>PDMS/EPDMS</strong>: NAVSIM의 예측 주행 모델 점수. 충돌·주행 가능 영역·진행·TTC·승차감의 곱·가중평균.</li>
+<li><strong>rmw</strong>: ROS 2 미들웨어 인터페이스. 구현체 = Fast DDS, CycloneDDS, Connext, Zenoh.</li>
+<li><strong>Loaned message / zero-copy</strong>: 미들웨어가 공유메모리에서 메시지를 대여해 복사 없이 전달. 표준 경로는 고정 크기 타입만.</li>
+<li><strong>Agnocast</strong>: TIER IV/AWF의 ROS 2 호환 zero-copy IPC(커널 모듈 + 공유메모리 + 힙 후킹).</li>
+<li><strong>Cyber RT</strong>: Apollo 자체 미들웨어(컴포넌트·채널·코루틴 스케줄러·SHM/RTPS).</li>
+<li><strong>msgq / VisionIPC</strong>: openpilot의 공유메모리 pub/sub과 카메라 프레임 전달 계층.</li>
+<li><strong>ara::com</strong>: AUTOSAR Adaptive 통신 API. 바인딩 = SOME/IP, DDS, IPC.</li>
+<li><strong>LoLa</strong>: Eclipse S-CORE의 ara::com 부분 구현 zero-copy IPC(ASIL-B 설계).</li>
+<li><strong>SOAFEE / EWAOL / Open AD Kit</strong>: Arm 주도 클라우드 네이티브 SDV 프레임워크 / 레퍼런스 구현 / Autoware 블루프린트.</li>
+<li><strong>MRM(Minimal Risk Maneuver)</strong>: 최소위험기동. 시스템 실패 시 안전 정지 등.</li>
+<li><strong>RSS</strong>: Mobileye의 수식화된 안전 포락선.</li>
+<li><strong>TOPS</strong>: 초당 조 단위 연산. 이 보고서는 벤더 공개 주장으로만 취급.</li>
+</ul>
+
+</section>
+<section id="sec-appendix-b" class="section">
+<h2 id="appendix-b"><a class="anchor" href="#appendix-b">부록 B. 재현 절차</a></h2>
+<p>모든 절차는 저장소 밖 작업 디렉터리(<code>$WORK</code>)에서 실행하고, 저장소에는 <code>scripts/</code>·<code>reference/demo-logs/</code>만 둔다.</p>
+<h3 id="appendix-b-1"><a class="anchor" href="#appendix-b-1">B.1 CPU 트랙(이 세션에서 실행한 것)</a></h3>
+<pre><code class="language-bash">WORK=$HOME/adstack-work; mkdir -p $WORK &amp;&amp; cd $WORK
+REPO=/path/to/AI-Vehicle-Research/research/autonomous-driving-sw-stack
+
+# D1 — Autoware
+for r in autoware autoware_core autoware_universe autoware_launch autoware_msgs autoware_adapi_msgs autoware_internal_msgs; do
+  git clone --depth 1 https://github.com/autowarefoundation/$r.git $WORK/autoware/$r
+done
+python3 $REPO/scripts/autoware_anatomy.py $WORK/autoware &gt; $REPO/reference/demo-logs/d1-autoware-anatomy.md
+
+# D2 — Apollo
+git clone --depth 1 https://github.com/ApolloAuto/apollo.git $WORK/apollo
+python3 $REPO/scripts/apollo_dag_graph.py $WORK/apollo &gt; $REPO/reference/demo-logs/d2-apollo-anatomy.md
+
+# D3 — openpilot (가중치는 GitLab LFS)
+GIT_LFS_SKIP_SMUDGE=1 git clone --depth 1 https://github.com/commaai/openpilot.git $WORK/openpilot/src
+cd $WORK/openpilot
+LFS_URL=https://gitlab.com/commaai/openpilot-lfs.git/info/lfs
+fetch_lfs() { PTR=$1; OUT=$2
+  OID=$(grep -oP 'sha256:\K[0-9a-f]+' &quot;$PTR&quot;); SIZE=$(grep -oP '^size \K[0-9]+' &quot;$PTR&quot;)
+  HREF=$(curl -sS -X POST &quot;$LFS_URL/objects/batch&quot; -H 'Accept: application/vnd.git-lfs+json' -H 'Content-Type: application/vnd.git-lfs+json' \
+    -d &quot;{\&quot;operation\&quot;:\&quot;download\&quot;,\&quot;transfer\&quot;:[\&quot;basic\&quot;],\&quot;objects\&quot;:[{\&quot;oid\&quot;:\&quot;$OID\&quot;,\&quot;size\&quot;:$SIZE}]}&quot; \
+    | python3 -c 'import sys,json; print(json.load(sys.stdin)[&quot;objects&quot;][0][&quot;actions&quot;][&quot;download&quot;][&quot;href&quot;])')
+  curl -sS -L -o &quot;$OUT&quot; &quot;$HREF&quot;; echo &quot;$OID  $OUT&quot; | sha256sum -c; }
+mkdir -p models
+fetch_lfs src/openpilot/selfdrive/modeld/models/driving_supercombo.onnx models/driving_supercombo.onnx
+fetch_lfs src/openpilot/selfdrive/modeld/models/dmonitoring_model.onnx  models/dmonitoring_model.onnx
+pip install onnx onnxruntime numpy
+python3 $REPO/scripts/openpilot_onnx_probe.py models/driving_supercombo.onnx models/dmonitoring_model.onnx \
+  --warmup 20 --runs 200 --threads 4,1 --commit $(git -C src rev-parse HEAD) --out $REPO/reference/demo-logs/d3-openpilot-onnx.md
+
+# D4 — IPC 벤치 (IPv6 없는 환경을 위해 Zenoh는 IPv4 루프백 고정)
+python3 -m venv $WORK/ipcenv &amp;&amp; $WORK/ipcenv/bin/pip install eclipse-zenoh cyclonedds
+$WORK/ipcenv/bin/python $REPO/scripts/ipc_bench.py --sizes 64,4096,65536,1048576 --n 1000 --warmup 50 \
+  --transports pipe,zenoh,cyclonedds --out $REPO/reference/demo-logs/d4-ipc-bench.md
+</code></pre>
+<h3 id="appendix-b-2"><a class="anchor" href="#appendix-b-2">B.2 GPU 머신 트랙(이 세션에서 하지 못한 것)</a></h3>
+<pre><code class="language-bash"># D4' — ROS 2 컨테이너에서 rmw별 C++ 핑퐁 (Docker Hub 접근 가능한 환경)
+docker pull ros:kilted-ros-base   # rmw_fastrtps·cyclonedds 포함, rmw_zenoh는 apt install ros-kilted-rmw-zenoh-cpp
+# ros2/rmw_zenoh, ros2/demos의 ping-pong 또는 ApexAI/performance_test로 rmw_fastrtps_cpp / rmw_cyclonedds_cpp / rmw_zenoh_cpp 비교
+# RMW_IMPLEMENTATION=rmw_zenoh_cpp ros2 run rmw_zenoh_cpp rmw_zenohd &amp;  (라우터 필요)
+
+# D5 — NAVSIM + DiffusionDrive navtest 평가 (HF 접근 필요: OpenScene 데이터, timm resnet34, hustvl/DiffusionDrive 체크포인트)
+git clone https://github.com/autonomousvision/navsim &amp;&amp; git clone https://github.com/hustvl/DiffusionDrive
+# docs/install.md → OPENSCENE_DATA_ROOT, NUPLAN_MAPS_ROOT 설정 후
+# python navsim/planning/script/run_metric_caching.py train_test_split=navtest
+# python navsim/planning/script/run_pdm_score.py train_test_split=navtest agent=diffusiondrive_agent agent.checkpoint_path=$CKPT
+
+# D6 — Alpamayo 1.5 노드 벤치 (24 GB+ GPU) 및 FlashDrive 재현
+# autowarefoundation/alpamayo-autoware(alpamayo1.5 브랜치) README &quot;Performance&quot; 절: rosbag 재생 rate=0.5, 로그 &quot;Alpamayo inference completed in X.XXs&quot; 15회 이상 중앙값
+# z-lab/flashdrive README: RTX PRO 6000 / Jetson Thor 단계별 지연 재현
+
+# Autoware planning simulator (ROS 2 apt 저장소 + GPU)
+# docs: autowarefoundation.github.io/autoware-documentation → tutorials/ad-hoc-simulation/planning-simulation
+# D1 보강: autoware.repos가 pin한 릴리스 태그(autoware_core 1.9.0, autoware_universe 0.52.1)로 재측정
+</code></pre>
+
+</section>
+<section id="sec-unverified" class="section">
+<h2 id="unverified"><a class="anchor" href="#unverified">미확인 항목</a></h2>
+<div class="table-wrap"><table class="cols-3">
+<thead>
+<tr>
+<th>#</th>
+<th>항목</th>
+<th>상태</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Alpamayo의 Thor 공식 지연 수치, DriveOS LLM SDK와의 연결</td>
+<td>미공개</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Alpamayo 1 가중치의 HF 카드 라이선스 개정 여부("비상용" → OpenMDW)</td>
+<td>원문 미열람</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Autoware 2.0 Generator–Selector의 코드 착수 시점, AutoDrive 파라미터·지연</td>
+<td>문서만</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Agnocast 정량치(0.2 ms, 4 ms, CV &lt;5%)의 HW·Autoware 버전 조건</td>
+<td>논문 미열람</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Zenoh vs DDS 지연 µs 표(arXiv 2303.09419), Woven by Toyota의 Zenoh 채택</td>
+<td>원문 미열람</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Apollo <code>version.json</code> 9.0.0 유지 이유, ad-rss-lib 라이선스 표기</td>
+<td>미확인</td>
+</tr>
+<tr>
+<td>7</td>
+<td>openpilot big 모델(766 MB) 프로브, tinygrad 경로 실제 지연</td>
+<td>미실행</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Huawei MDC 1,000 TOPS, XPeng 750 TOPS/칩, Tesla HW4 500 TOPS·Cortex 규모, AI5 테이프아웃 일자</td>
+<td>단일 출처</td>
+</tr>
+<tr>
+<td>9</td>
+<td>XPeng VLA 2.0 "오픈소스" 저장소, 72B vs 720B</td>
+<td>미확인</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Momenta R7 월드모델 온보드 배치의 실체, Qualcomm Ride 탑재 여부</td>
+<td>공개 주장</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Mobileye Chauffeur 2026 첫 양산 차종, REM 관련 최신 출처</td>
+<td>미공개</td>
+</tr>
+<tr>
+<td>12</td>
+<td>S-CORE v0.7/v0.8 릴리스 일자, EWAOL→Cassini 이관 여부</td>
+<td>노트 "TBD"</td>
+</tr>
+<tr>
+<td>13</td>
+<td>QNX Hypervisor 8.0 for Safety의 IEC 61508 등급</td>
+<td>보도자료 표현만</td>
+</tr>
+<tr>
+<td>14</td>
+<td>SenseTime 양산 "UniAD"와 오픈소스 UniAD의 동일성</td>
+<td>미확인</td>
+</tr>
+<tr>
+<td>15</td>
+<td>Bench2Drive-Robust의 지연 모델링 세부</td>
+<td>README만</td>
+</tr>
+</tbody>
+</table></div>
+
+</section>
+<section id="sec-verification-log" class="section">
+<h2 id="verification-log"><a class="anchor" href="#verification-log">검증 로그(판정 이력)</a></h2>
+<div class="table-wrap"><table class="cols-4">
+<thead>
+<tr>
+<th>쟁점</th>
+<th>소스 A</th>
+<th>소스 B</th>
+<th>판정</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Autoware Core는 비어 있는가</td>
+<td>core README "currently empty" <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td>트리 74 pkgs + core-only 런치 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td><strong>README가 낡음.</strong> 74 pkgs가 사실</td>
+</tr>
+<tr>
+<td>VAD E2E 노드는 Autoware에 통합됐는가</td>
+<td>universe/e2e 패키지 존재 <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td>autoware_launch grep 0건 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td><strong>미연결.</strong> 패키지만 존재</td>
+</tr>
+<tr>
+<td>Alpamayo 액션 디코더는 diffusion인가</td>
+<td>모델 카드·매체 "diffusion" <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>코드 <code>FlowMatching</code> + Euler <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td><strong>flow matching.</strong> 확산 계열의 하위 범주</td>
+</tr>
+<tr>
+<td>Alpamayo 지연 99 ms vs 600 ms</td>
+<td>논문 초록 99 ms <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>TIER IV 노드 0.600 s <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td><strong>측정 범위가 다름.</strong> 노드는 CoC 텍스트 생성 포함</td>
+</tr>
+<tr>
+<td>Alpamayo 2 Super 크기</td>
+<td>발표일 X "32B" <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>저장소 "32B + 2B" <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td><strong>34B</strong>(32B VLM + 2B expert)</td>
+</tr>
+<tr>
+<td>AutoDrive는 VLA인가</td>
+<td>이름·AMD 보도 "E2E 모델" <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>auto_drive README "CIPO 거리·곡률·존재" <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td><strong>단안 L2 소형 모델</strong></td>
+</tr>
+<tr>
+<td>rmw_zenoh가 ROS 2 기본인가</td>
+<td>"Kilted에서 Tier-1" <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>Lyrical 지원 표 "기본 rmw_fastrtps_cpp" <span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span></td>
+<td><strong>Tier-1이지만 기본 아님</strong></td>
+</tr>
+<tr>
+<td>Apollo는 개발이 멈췄는가</td>
+<td>2025년 커밋 공백 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>2026-01 11.0 스쿼시 8건 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td><strong>내부 개발 + 릴리스 덤프.</strong> 방향은 저속 기능차로 이동</td>
+</tr>
+<tr>
+<td>Apollo 버전</td>
+<td>version.json 9.0.0 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>RELEASE.md 11.0 + 태그 v11.0.0 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td><strong>11.0.</strong> version.json 미갱신</td>
+</tr>
+<tr>
+<td>openpilot 가중치 라이선스</td>
+<td>저장소 MIT <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td>modeld·docs에 license 0건 <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td><strong>명시 없음</strong>(MIT 적용 여부 불명)</td>
+</tr>
+<tr>
+<td>Waymo Driver는 E2E인가</td>
+<td>EMMA 논문 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>Waymo "EMMA는 연구" <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td><strong>하이브리드.</strong> EMMA 미탑재</td>
+</tr>
+<tr>
+<td>Huawei ADS 3는 단일 E2E인가</td>
+<td>마케팅 "E2E" <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>GOD + PDP 2단 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td><strong>2단 구성</strong></td>
+</tr>
+<tr>
+<td>Tesla 로보택시 폴백</td>
+<td>"안전요원 제거" <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td>추적 차량 → 원격 조작, NHTSA 사고 2건 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td><strong>사람 폴백(원격)</strong></td>
+</tr>
+<tr>
+<td>D4에서 CycloneDDS가 1 MB에 113 ms인 이유</td>
+<td>DDS 프래그먼트 한계?</td>
+<td>파이썬 바인딩 <code>sequence&lt;uint8&gt;</code> 요소별 직렬화(64 KB 직렬화 3~4 ms 실측) <span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span></td>
+<td><strong>바인딩 오버헤드.</strong> DDS 자체 성능 아님</td>
+</tr>
+<tr>
+<td>Zenoh 벤치 인용 저자</td>
+<td>"Teper, Latency Analysis of ROS 2 Multi-Node Systems"</td>
+<td>Kronauer 2021 / Teper RTAS 2024 별개 <span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span></td>
+<td><strong>저자 정정</strong>(Kronauer 2021, Teper 2024)</td>
+</tr>
+</tbody>
+</table></div>
+
+</section>
+<section id="sec-references" class="section">
+<h2 id="references"><a class="anchor" href="#references">레퍼런스</a></h2>
+<p>출처 전체 목록(등급·URL·확인 사실·접근 실패 포함)은 <a href="reference/references.md">reference/references.md</a>에 있다. 본문 인라인 표기의 근거 파일은 다음과 같다.</p>
+<ul>
+<li>코드·스크립트 출력(<span class="ev" title="코드·스크립트 출력에서 직접 확인(파일:줄)">💻</span>): <code>reference/demo-logs/d1-autoware-anatomy.md</code>, <code>d2-apollo-anatomy.md</code>, <code>d3-openpilot-onnx.md</code>, <code>d4-ipc-bench.md</code>; 클론 대상 저장소 — autowarefoundation/{autoware, autoware_core, autoware_universe, autoware_launch, autoware_msgs, autoware_adapi_msgs, autoware_internal_msgs, agnocast}, ApolloAuto/apollo, commaai/{openpilot, panda, opendbc, msgq}, autonomousvision/navsim, hustvl/DiffusionDrive, ros2/{rmw, rmw_zenoh, rmw_fastrtps, rclcpp, design, ros2_documentation}, eclipse-zenoh/zenoh, eclipse-iceoryx/iceoryx2, eclipse-score/{score, communication, reference_integration}, COVESA/vsomeip, eclipse-ankaios/ankaios, eclipse-bluechi/bluechi, gitlab.com/soafee/{architecture, blueprints/open-ad-kit, ewaol/meta-ewaol}.</li>
+<li>1차 문서(<span class="ev" title="1차 출처 원문 확인(README·LICENSE·공식 문서)">🔍</span>): 각 저장소 README·LICENSE·RELEASES·docs raw; ROS 2 Kilted·Lyrical 릴리스 노트; autoware-documentation architecture-v2; auto_drive·privately-owned-vehicles README; NVlabs/alpamayo·alpamayo1.5·alpamayo2·alpamayo-recipes·alpasim·alpagym README; autowarefoundation/alpamayo-autoware README(브랜치 alpamayo1.5·alpamayo2.0-super); z-lab/flashdrive; intel/ad-rss-lib; waymo-research/waymo-open-dataset.</li>
+<li>이 저장소의 선행 조사(출처로만 인용): <code>research/nvidia-fullstack/03-autonomous-driving-stack.md</code>, <code>research/tier4-alpamayo-autoware/tier4_alpamayo_autoware_보고서.md</code>, <code>research/flashdrive/flashdrive_analysis.md</code>.</li>
+<li>보도·검색 요약(<span class="ev" title="검색 요약·보도만 확인(원문 미열람)">📰</span>): references.md의 "서드파티" 절.</li>
+</ul>
+</section>
+
+<footer>
+  <p><strong>자율주행 SW Stack 파헤치기</strong> — 작성일 2026-09-08. 이 페이지는 Markdown 원본을 웹용으로 변환한 것이며 내용은 원본과 동일하다.</p>
+  <ul>
+    <li><a href="autonomous-driving-sw-stack.md">Markdown 원본</a></li>
+    <li><a href="article.md">article.md</a></li>
+    <li><a href="reference/references.md">reference/references.md (출처 전체)</a></li>
+    <li><a href="reference/demo-logs/">reference/demo-logs/ (실측 로그)</a></li>
+  </ul>
+</footer>
+</main>
+</div>
+
+<button id="totop" class="totop" type="button" aria-label="맨 위로"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg><span>맨 위로</span></button>
+<script>
+(function(){
+  var root=document.documentElement;
+  try{var s=localStorage.getItem('adstack-theme');if(s==='dark'||s==='light')root.setAttribute('data-theme',s);}catch(e){}
+})();
+document.addEventListener('DOMContentLoaded',function(){
+  var root=document.documentElement;
+  var btn=document.getElementById('theme-toggle');
+  function current(){
+    var t=root.getAttribute('data-theme');
+    if(t)return t;
+    return (window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';
+  }
+  function paint(){
+    var dark=current()==='dark';
+    btn.querySelector('.t-sun').hidden=!dark;
+    btn.querySelector('.t-moon').hidden=dark;
+    btn.querySelector('span').textContent=dark?'라이트':'다크';
+    btn.setAttribute('aria-label',dark?'라이트 테마로 전환':'다크 테마로 전환');
+  }
+  btn.addEventListener('click',function(){
+    var next=current()==='dark'?'light':'dark';
+    root.setAttribute('data-theme',next);
+    try{localStorage.setItem('adstack-theme',next);}catch(e){}
+    paint();
+  });
+  if(window.matchMedia){window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',paint);}
+  paint();
+
+  // mobile TOC
+  var toc=document.getElementById('toc');
+  var tt=document.getElementById('toc-toggle');
+  tt.addEventListener('click',function(){
+    var open=toc.classList.toggle('open');
+    tt.setAttribute('aria-expanded',open?'true':'false');
+  });
+  toc.addEventListener('click',function(e){
+    if(e.target.tagName==='A'){toc.classList.remove('open');tt.setAttribute('aria-expanded','false');}
+  });
+
+  // scroll-spy
+  var links={};
+  toc.querySelectorAll('a[data-target]').forEach(function(a){links[a.getAttribute('data-target')]=a;});
+  var heads=Array.prototype.slice.call(document.querySelectorAll('main h2[id], main h3[id]'));
+  var active=null;
+  function setActive(id){
+    if(active===id)return;
+    if(active&&links[active])links[active].classList.remove('active');
+    active=id;
+    if(links[id]){links[id].classList.add('active');
+      var r=links[id].getBoundingClientRect(),tr=toc.getBoundingClientRect();
+      if(r.top<tr.top+40||r.bottom>tr.bottom-40){links[id].scrollIntoView({block:'center'});}
+    }
+  }
+  function spy(){
+    var y=window.scrollY+90,cur=heads[0]?heads[0].id:null;
+    for(var i=0;i<heads.length;i++){if(heads[i].offsetTop<=y)cur=heads[i].id;else break;}
+    if(cur)setActive(cur);
+  }
+  var ticking=false;
+  window.addEventListener('scroll',function(){if(!ticking){ticking=true;requestAnimationFrame(function(){spy();ticking=false;});}},{passive:true});
+  window.addEventListener('resize',spy);
+  spy();
+
+  // to-top
+  var top=document.getElementById('totop');
+  function tv(){top.classList.toggle('show',window.scrollY>600);}
+  window.addEventListener('scroll',tv,{passive:true});tv();
+  top.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+});
+</script>
+</body>
+</html>

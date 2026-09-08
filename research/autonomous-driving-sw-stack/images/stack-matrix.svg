@@ -1,0 +1,179 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="640" viewBox="0 0 1180 640" font-family="IBM Plex Sans KR, Pretendard, Noto Sans KR, Apple SD Gothic Neo, sans-serif">
+  <style>
+    .h{font-size:17px;font-weight:700;fill:#111827}
+    .lbl{font-size:11px;fill:#6b7280}
+    .row{font-size:12.5px;font-weight:600;fill:#1f2937}
+    .col{font-size:11.5px;font-weight:600;fill:#374151}
+    .c{font-size:10.5px;fill:#1f2937}
+    .cw{font-size:10.5px;fill:#ffffff}
+    rect.cell{stroke:#ffffff;stroke-width:1.5}
+  </style>
+  <rect width="1180" height="640" fill="#ffffff"/>
+  <text x="24" y="32" class="h">열두 스택 × 여덟 축 — 공개 자료로 확인되는 정도</text>
+  <text x="24" y="50" class="lbl">색: 진한 파랑 = 코드·1차 문서로 확인(💻🔍) · 중간 = 보도·검색 요약만(📰) · 옅은 회색 = 미공개·추정(⚠️). 셀 글자는 요약. 자체 작성(2026-09-08).</text>
+
+  <!-- column headers -->
+  <g class="col">
+    <text x="232" y="80">① 아키텍처</text>
+    <text x="352" y="80">② 미들웨어·IPC</text>
+    <text x="472" y="80">③ OS</text>
+    <text x="580" y="80">④ 타깃 SoC</text>
+    <text x="700" y="80">⑤ 센서</text>
+    <text x="808" y="80">⑥ 안전·폴백</text>
+    <text x="928" y="80">⑦ 데이터·시뮬</text>
+    <text x="1048" y="80">⑧ 공개도</text>
+  </g>
+
+  <!-- rows: y from 92, height 42 -->
+  <!-- helper colors: dark #1e40af, mid #93c5fd, light #e5e7eb -->
+  <!-- Autoware -->
+  <g>
+    <text x="24" y="118" class="row">Autoware</text>
+    <rect class="cell" x="224" y="92" width="116" height="42" fill="#1e40af"/><text x="230" y="110" class="cw">모듈형+학습 플래너</text><text x="230" y="124" class="cw">2.0: Gen–Selector</text>
+    <rect class="cell" x="344" y="92" width="116" height="42" fill="#1e40af"/><text x="350" y="110" class="cw">ROS 2 + Agnocast</text><text x="350" y="124" class="cw">cuda_blackboard</text>
+    <rect class="cell" x="464" y="92" width="100" height="42" fill="#1e40af"/><text x="470" y="116" class="cw">Ubuntu 22/24</text>
+    <rect class="cell" x="572" y="92" width="116" height="42" fill="#1e40af"/><text x="578" y="110" class="cw">Orin·Thor, R-Car</text><text x="578" y="124" class="cw">AMD(학습)</text>
+    <rect class="cell" x="692" y="92" width="100" height="42" fill="#1e40af"/><text x="698" y="116" class="cw">라이다+카메라</text>
+    <rect class="cell" x="800" y="92" width="116" height="42" fill="#1e40af"/><text x="806" y="110" class="cw">system 모듈</text><text x="806" y="124" class="cw">MRM·진단·지연감시</text>
+    <rect class="cell" x="920" y="92" width="116" height="42" fill="#1e40af"/><text x="926" y="110" class="cw">scenario_sim_v2</text><text x="926" y="124" class="cw">Co-MLOps</text>
+    <rect class="cell" x="1040" y="92" width="116" height="42" fill="#1e40af"/><text x="1046" y="116" class="cw">Apache-2.0 전체</text>
+  </g>
+  <!-- Apollo -->
+  <g>
+    <text x="24" y="160" class="row">Baidu Apollo</text>
+    <rect class="cell" x="224" y="134" width="116" height="42" fill="#1e40af"/><text x="230" y="152" class="cw">모듈형(시나리오)</text><text x="230" y="166" class="cw">BEV+OCC 옵션</text>
+    <rect class="cell" x="344" y="134" width="116" height="42" fill="#1e40af"/><text x="350" y="152" class="cw">Cyber RT</text><text x="350" y="166" class="cw">SHM arena/RTPS</text>
+    <rect class="cell" x="464" y="134" width="100" height="42" fill="#1e40af"/><text x="470" y="158" class="cw">Ubuntu 18~22</text>
+    <rect class="cell" x="572" y="134" width="116" height="42" fill="#93c5fd"/><text x="578" y="152" class="c">x86+GPU, Orin</text><text x="578" y="166" class="c">(BEV 5 Hz)</text>
+    <rect class="cell" x="692" y="134" width="100" height="42" fill="#1e40af"/><text x="698" y="152" class="cw">라이다·카메라·</text><text x="698" y="166" class="cw">레이더, HD맵</text>
+    <rect class="cell" x="800" y="134" width="116" height="42" fill="#1e40af"/><text x="806" y="152" class="cw">monitor/guardian</text><text x="806" y="166" class="cw">RSS decider</text>
+    <rect class="cell" x="920" y="134" width="116" height="42" fill="#93c5fd"/><text x="926" y="152" class="c">Dreamview·record</text><text x="926" y="166" class="c">ADFM 비공개</text>
+    <rect class="cell" x="1040" y="134" width="116" height="42" fill="#1e40af"/><text x="1046" y="152" class="cw">Apache-2.0</text><text x="1046" y="166" class="cw">모델 "연구용"</text>
+  </g>
+  <!-- openpilot -->
+  <g>
+    <text x="24" y="202" class="row">openpilot</text>
+    <rect class="cell" x="224" y="176" width="116" height="42" fill="#1e40af"/><text x="230" y="194" class="cw">E2E 모델(30M)</text><text x="230" y="208" class="cw">+ 규칙 제어기</text>
+    <rect class="cell" x="344" y="176" width="116" height="42" fill="#1e40af"/><text x="350" y="194" class="cw">msgq SHM</text><text x="350" y="208" class="cw">VisionIPC(ION)</text>
+    <rect class="cell" x="464" y="176" width="100" height="42" fill="#1e40af"/><text x="470" y="200" class="cw">AGNOS</text>
+    <rect class="cell" x="572" y="176" width="116" height="42" fill="#1e40af"/><text x="578" y="194" class="cw">SDM845 + 외장</text><text x="578" y="208" class="cw">AMD GPU</text>
+    <rect class="cell" x="692" y="176" width="100" height="42" fill="#1e40af"/><text x="698" y="194" class="cw">카메라 2~3</text><text x="698" y="208" class="cw">지도 없음</text>
+    <rect class="cell" x="800" y="176" width="116" height="42" fill="#1e40af"/><text x="806" y="194" class="cw">panda 펌웨어</text><text x="806" y="208" class="cw">+ 3중 클램프</text>
+    <rect class="cell" x="920" y="176" width="116" height="42" fill="#93c5fd"/><text x="926" y="194" class="c">3억 마일</text><text x="926" y="208" class="c">학습된 시뮬레이터</text>
+    <rect class="cell" x="1040" y="176" width="116" height="42" fill="#1e40af"/><text x="1046" y="194" class="cw">MIT</text><text x="1046" y="208" class="cw">가중치 문구 없음</text>
+  </g>
+  <!-- UniAD/VAD -->
+  <g>
+    <text x="24" y="244" class="row">UniAD / VAD 계열</text>
+    <rect class="cell" x="224" y="218" width="116" height="42" fill="#1e40af"/><text x="230" y="242" class="cw">E2E(nuScenes)</text>
+    <rect class="cell" x="344" y="218" width="116" height="42" fill="#e5e7eb"/><text x="350" y="242" class="c">없음(PyTorch)</text>
+    <rect class="cell" x="464" y="218" width="100" height="42" fill="#e5e7eb"/><text x="470" y="242" class="c">—</text>
+    <rect class="cell" x="572" y="218" width="116" height="42" fill="#93c5fd"/><text x="578" y="242" class="c">3090/A100 보고</text>
+    <rect class="cell" x="692" y="218" width="100" height="42" fill="#1e40af"/><text x="698" y="242" class="cw">6카메라</text>
+    <rect class="cell" x="800" y="218" width="116" height="42" fill="#e5e7eb"/><text x="806" y="242" class="c">없음</text>
+    <rect class="cell" x="920" y="218" width="116" height="42" fill="#1e40af"/><text x="926" y="242" class="cw">nuScenes</text>
+    <rect class="cell" x="1040" y="218" width="116" height="42" fill="#1e40af"/><text x="1046" y="242" class="cw">Apache-2.0</text>
+  </g>
+  <!-- NAVSIM -->
+  <g>
+    <text x="24" y="286" class="row">NAVSIM 계열</text>
+    <rect class="cell" x="224" y="260" width="116" height="42" fill="#1e40af"/><text x="230" y="278" class="cw">앵커 디퓨전·</text><text x="230" y="292" class="cw">어휘 스코어링</text>
+    <rect class="cell" x="344" y="260" width="116" height="42" fill="#e5e7eb"/><text x="350" y="284" class="c">없음(CPU 평가)</text>
+    <rect class="cell" x="464" y="260" width="100" height="42" fill="#e5e7eb"/><text x="470" y="284" class="c">—</text>
+    <rect class="cell" x="572" y="260" width="116" height="42" fill="#93c5fd"/><text x="578" y="284" class="c">4090 보고</text>
+    <rect class="cell" x="692" y="260" width="100" height="42" fill="#1e40af"/><text x="698" y="278" class="cw">3캠 스티치</text><text x="698" y="292" class="cw">+ 라이다</text>
+    <rect class="cell" x="800" y="260" width="116" height="42" fill="#1e40af"/><text x="806" y="284" class="cw">PDM 스코어러</text>
+    <rect class="cell" x="920" y="260" width="116" height="42" fill="#1e40af"/><text x="926" y="284" class="cw">OpenScene/nuPlan</text>
+    <rect class="cell" x="1040" y="260" width="116" height="42" fill="#1e40af"/><text x="1046" y="278" class="cw">MIT/Apache</text><text x="1046" y="292" class="cw">B2D는 NC-ND</text>
+  </g>
+  <!-- NVIDIA -->
+  <g>
+    <text x="24" y="328" class="row">NVIDIA Alpamayo·DRIVE AV</text>
+    <rect class="cell" x="224" y="302" width="116" height="42" fill="#1e40af"/><text x="230" y="320" class="cw">VLA teacher +</text><text x="230" y="334" class="cw">E2E‖클래식 병렬</text>
+    <rect class="cell" x="344" y="302" width="116" height="42" fill="#93c5fd"/><text x="350" y="326" class="c">DriveWorks(비공개)</text>
+    <rect class="cell" x="464" y="302" width="100" height="42" fill="#93c5fd"/><text x="470" y="326" class="c">DriveOS</text>
+    <rect class="cell" x="572" y="302" width="116" height="42" fill="#93c5fd"/><text x="578" y="326" class="c">Thor, Hyperion 10</text>
+    <rect class="cell" x="692" y="302" width="100" height="42" fill="#93c5fd"/><text x="698" y="326" class="c">Hyperion 센서</text>
+    <rect class="cell" x="800" y="302" width="116" height="42" fill="#93c5fd"/><text x="806" y="320" class="c">Halos 가드레일</text><text x="806" y="334" class="c">듀얼 스택</text>
+    <rect class="cell" x="920" y="302" width="116" height="42" fill="#1e40af"/><text x="926" y="320" class="cw">AlpaSim·Cosmos</text><text x="926" y="334" class="cw">NuRec</text>
+    <rect class="cell" x="1040" y="302" width="116" height="42" fill="#1e40af"/><text x="1046" y="320" class="cw">모델 OpenMDW</text><text x="1046" y="334" class="cw">스택 비공개</text>
+  </g>
+  <!-- Tesla -->
+  <g>
+    <text x="24" y="370" class="row">Tesla FSD</text>
+    <rect class="cell" x="224" y="344" width="116" height="42" fill="#93c5fd"/><text x="230" y="362" class="c">단일 E2E 신경망</text><text x="230" y="376" class="c">v14.3 RL·MLIR</text>
+    <rect class="cell" x="344" y="344" width="116" height="42" fill="#e5e7eb"/><text x="350" y="368" class="c">비공개</text>
+    <rect class="cell" x="464" y="344" width="100" height="42" fill="#e5e7eb"/><text x="470" y="368" class="c">비공개</text>
+    <rect class="cell" x="572" y="344" width="116" height="42" fill="#93c5fd"/><text x="578" y="368" class="c">HW4 → AI5</text>
+    <rect class="cell" x="692" y="344" width="100" height="42" fill="#93c5fd"/><text x="698" y="368" class="c">카메라 전용</text>
+    <rect class="cell" x="800" y="344" width="116" height="42" fill="#93c5fd"/><text x="806" y="362" class="c">규칙 폴백 없음</text><text x="806" y="376" class="c">원격 인간</text>
+    <rect class="cell" x="920" y="344" width="116" height="42" fill="#93c5fd"/><text x="926" y="362" class="c">140억 마일</text><text x="926" y="376" class="c">Cortex ⚠️</text>
+    <rect class="cell" x="1040" y="344" width="116" height="42" fill="#e5e7eb"/><text x="1046" y="368" class="c">없음</text>
+  </g>
+  <!-- Wayve -->
+  <g>
+    <text x="24" y="412" class="row">Wayve</text>
+    <rect class="cell" x="224" y="386" width="116" height="42" fill="#93c5fd"/><text x="230" y="404" class="c">단일 파운데이션</text><text x="230" y="418" class="c">+ VLA(LINGO-2)</text>
+    <rect class="cell" x="344" y="386" width="116" height="42" fill="#e5e7eb"/><text x="350" y="410" class="c">비공개</text>
+    <rect class="cell" x="464" y="386" width="100" height="42" fill="#e5e7eb"/><text x="470" y="410" class="c">비공개</text>
+    <rect class="cell" x="572" y="386" width="116" height="42" fill="#93c5fd"/><text x="578" y="410" class="c">NVIDIA Orin/Thor</text>
+    <rect class="cell" x="692" y="386" width="100" height="42" fill="#93c5fd"/><text x="698" y="404" class="c">카메라 중심</text><text x="698" y="418" class="c">OEM 라이다</text>
+    <rect class="cell" x="800" y="386" width="116" height="42" fill="#e5e7eb"/><text x="806" y="404" class="c">안전운전자</text><text x="806" y="418" class="c">가드 미공개</text>
+    <rect class="cell" x="920" y="386" width="116" height="42" fill="#93c5fd"/><text x="926" y="410" class="c">GAIA-3/4 월드모델</text>
+    <rect class="cell" x="1040" y="386" width="116" height="42" fill="#e5e7eb"/><text x="1046" y="410" class="c">논문·블로그만</text>
+  </g>
+  <!-- Waymo -->
+  <g>
+    <text x="24" y="454" class="row">Waymo</text>
+    <rect class="cell" x="224" y="428" width="116" height="42" fill="#93c5fd"/><text x="230" y="446" class="c">모듈형+ML</text><text x="230" y="460" class="c">EMMA는 연구</text>
+    <rect class="cell" x="344" y="428" width="116" height="42" fill="#e5e7eb"/><text x="350" y="452" class="c">비공개</text>
+    <rect class="cell" x="464" y="428" width="100" height="42" fill="#e5e7eb"/><text x="470" y="452" class="c">비공개</text>
+    <rect class="cell" x="572" y="428" width="116" height="42" fill="#93c5fd"/><text x="578" y="446" class="c">자체 ASIC 1,000+</text><text x="578" y="460" class="c">이중 엔진</text>
+    <rect class="cell" x="692" y="428" width="100" height="42" fill="#93c5fd"/><text x="698" y="446" class="c">캠13·라이다4</text><text x="698" y="460" class="c">레이더6</text>
+    <rect class="cell" x="800" y="428" width="116" height="42" fill="#93c5fd"/><text x="806" y="446" class="c">HW 이중화</text><text x="806" y="460" class="c">백업 조향/제동</text>
+    <rect class="cell" x="920" y="428" width="116" height="42" fill="#93c5fd"/><text x="926" y="452" class="c">200M+ 무인 마일</text>
+    <rect class="cell" x="1040" y="428" width="116" height="42" fill="#1e40af"/><text x="1046" y="446" class="cw">WOD-E2E</text><text x="1046" y="460" class="cw">Apache-2.0</text>
+  </g>
+  <!-- Mobileye -->
+  <g>
+    <text x="24" y="496" class="row">Mobileye</text>
+    <rect class="cell" x="224" y="470" width="116" height="42" fill="#93c5fd"/><text x="230" y="488" class="c">Compound AI</text><text x="230" y="502" class="c">다중 독립 엔진</text>
+    <rect class="cell" x="344" y="470" width="116" height="42" fill="#e5e7eb"/><text x="350" y="494" class="c">비공개</text>
+    <rect class="cell" x="464" y="470" width="100" height="42" fill="#93c5fd"/><text x="470" y="494" class="c">Linux(업스트림)</text>
+    <rect class="cell" x="572" y="470" width="116" height="42" fill="#93c5fd"/><text x="578" y="494" class="c">EyeQ6H 34 TOPS×N</text>
+    <rect class="cell" x="692" y="470" width="100" height="42" fill="#93c5fd"/><text x="698" y="488" class="c">카메라 + 독립</text><text x="698" y="502" class="c">레이더/라이다</text>
+    <rect class="cell" x="800" y="470" width="116" height="42" fill="#1e40af"/><text x="806" y="488" class="cw">RSS 포락선</text><text x="806" y="502" class="cw">2차 지각계</text>
+    <rect class="cell" x="920" y="470" width="116" height="42" fill="#e5e7eb"/><text x="926" y="494" class="c">REM 지도 ⚠️</text>
+    <rect class="cell" x="1040" y="470" width="116" height="42" fill="#93c5fd"/><text x="1046" y="488" class="c">ad-rss-lib LGPL</text><text x="1046" y="502" class="c">(유지보수 중단)</text>
+  </g>
+  <!-- Huawei -->
+  <g>
+    <text x="24" y="538" class="row">Huawei ADS 4</text>
+    <rect class="cell" x="224" y="512" width="116" height="42" fill="#93c5fd"/><text x="230" y="530" class="c">WEWA(World Engine</text><text x="230" y="544" class="c">+ World Action)</text>
+    <rect class="cell" x="344" y="512" width="116" height="42" fill="#e5e7eb"/><text x="350" y="536" class="c">비공개</text>
+    <rect class="cell" x="464" y="512" width="100" height="42" fill="#e5e7eb"/><text x="470" y="536" class="c">비공개</text>
+    <rect class="cell" x="572" y="512" width="116" height="42" fill="#e5e7eb"/><text x="578" y="536" class="c">MDC/Ascend ⚠️</text>
+    <rect class="cell" x="692" y="512" width="100" height="42" fill="#93c5fd"/><text x="698" y="530" class="c">고체 라이다</text><text x="698" y="544" class="c">+ 레이더</text>
+    <rect class="cell" x="800" y="512" width="116" height="42" fill="#e5e7eb"/><text x="806" y="536" class="c">미공개</text>
+    <rect class="cell" x="920" y="512" width="116" height="42" fill="#93c5fd"/><text x="926" y="530" class="c">140만 대</text><text x="926" y="544" class="c">100억 km</text>
+    <rect class="cell" x="1040" y="512" width="116" height="42" fill="#e5e7eb"/><text x="1046" y="536" class="c">없음</text>
+  </g>
+  <!-- Momenta/XPeng -->
+  <g>
+    <text x="24" y="580" class="row">Momenta / XPeng</text>
+    <rect class="cell" x="224" y="554" width="116" height="42" fill="#93c5fd"/><text x="230" y="572" class="c">R6 E2E→R7 월드모델</text><text x="230" y="586" class="c">/ VLA 2.0 암묵토큰</text>
+    <rect class="cell" x="344" y="554" width="116" height="42" fill="#e5e7eb"/><text x="350" y="578" class="c">비공개</text>
+    <rect class="cell" x="464" y="554" width="100" height="42" fill="#e5e7eb"/><text x="470" y="578" class="c">비공개</text>
+    <rect class="cell" x="572" y="554" width="116" height="42" fill="#93c5fd"/><text x="578" y="572" class="c">Orin/Thor</text><text x="578" y="586" class="c">/ Turing ×1~4</text>
+    <rect class="cell" x="692" y="554" width="100" height="42" fill="#93c5fd"/><text x="698" y="572" class="c">차종별 /</text><text x="698" y="586" class="c">카메라 전용</text>
+    <rect class="cell" x="800" y="554" width="116" height="42" fill="#e5e7eb"/><text x="806" y="578" class="c">미공개</text>
+    <rect class="cell" x="920" y="554" width="116" height="42" fill="#93c5fd"/><text x="926" y="572" class="c">100만 대 /</text><text x="926" y="586" class="c">1억 클립·X-World</text>
+    <rect class="cell" x="1040" y="554" width="116" height="42" fill="#e5e7eb"/><text x="1046" y="572" class="c">없음 /</text><text x="1046" y="586" class="c">"오픈소스" 주장 ⚠️</text>
+  </g>
+
+  <!-- legend -->
+  <rect x="24" y="612" width="14" height="14" fill="#1e40af"/><text x="44" y="623" class="lbl">코드·1차 문서 확인</text>
+  <rect x="170" y="612" width="14" height="14" fill="#93c5fd"/><text x="190" y="623" class="lbl">보도·검색 요약(공개 주장)</text>
+  <rect x="340" y="612" width="14" height="14" fill="#e5e7eb"/><text x="360" y="623" class="lbl">미공개·추정</text>
+  <text x="480" y="623" class="lbl">열 ②③(미들웨어·OS)과 ⑥(안전·폴백)이 가장 덜 열려 있고, ⑦(데이터·시뮬)은 모두가 말한다.</text>
+</svg>

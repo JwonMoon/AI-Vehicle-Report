@@ -1,0 +1,156 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1260" height="854" viewBox="0 0 1260 854" font-family="IBM Plex Sans KR, Pretendard, Noto Sans KR, Apple SD Gothic Neo, sans-serif">
+<defs><marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#4b5563"/></marker></defs>
+<title>오픈소스 풀스택 3종 조립 비교</title>
+<rect width="1260" height="854" fill="#ffffff"/>
+<text x="24" y="32" font-size="18" fill="#111827" font-weight="700">오픈소스 풀스택 3종 — 조립 단위 · IPC · 안전층 · GPU 경계 (2026-09-08 정적 측정)</text>
+<text x="24" y="52" font-size="11" fill="#6b7280">파랑 = 파이프라인 모듈 · 초록 = GPU 상주 · 노랑 = IPC 층 · 빨강 = 안전 감시·폴백 · 점선 = 오프보드. 숫자는 D1 · D2 · D3 스크립트 출력(💻). 자체 작성.</text>
+<rect x="24" y="70" width="396" height="746.7899999999997" rx="10" fill="#f8fafc" stroke="#e5e7eb" stroke-width="1.2"/>
+<text x="36" y="96" font-size="15" fill="#111827" font-weight="700">Autoware (ROS 2)</text>
+<text x="36" y="112" font-size="10.5" fill="#374151">패키지 365 · 노드 등록 287 · 런치 378 · C++ 657k줄 · 의존 간선 6,202 ·</text>
+<text x="36" y="125" font-size="10.5" fill="#374151">CUDA 16.7k줄(universe만)</text>
+<rect x="36" y="144" width="372" height="61.54000000000002" rx="6" fill="#eef2ff" stroke="#818cf8" stroke-width="1.2"/>
+<text x="44" y="163.55" font-size="11" fill="#111827">sensing 13+5 pkgs → perception 51+4 pkgs (GPU: CUDA 12.4k줄,</text>
+<text x="44" y="178.73000000000002" font-size="11" fill="#111827">TensorRT) → localization 14+8 (NDT · YabLoc · Eagleye 중재) ·</text>
+<text x="44" y="193.91000000000003" font-size="11" fill="#111827">map 1+5 (Lanelet2)</text>
+<line x1="222.0" y1="205.54000000000002" x2="222.0" y2="213.54000000000002" stroke="#d1d5db" stroke-width="1.2"/>
+<rect x="36" y="213.54000000000002" width="372" height="46.360000000000014" rx="6" fill="#dcfce7" stroke="#22c55e" stroke-width="1.2"/>
+<text x="44" y="233.09000000000003" font-size="11" fill="#111827">perception · sensing의 17개 패키지만 CUDA 상주. Core에는 CUDA</text>
+<text x="44" y="248.27000000000004" font-size="11" fill="#111827">0줄 — GPU 가속은 전부 &quot;확장&quot;</text>
+<line x1="222.0" y1="259.90000000000003" x2="222.0" y2="267.90000000000003" stroke="#d1d5db" stroke-width="1.2"/>
+<rect x="36" y="267.90000000000003" width="372" height="93.20999999999987" rx="6" fill="#eef2ff" stroke="#818cf8" stroke-width="1.2"/>
+<text x="44" y="287.975" font-size="11.5" fill="#111827" font-weight="600">planning 67+15 pkgs — rule_based(시나리오 체인) /</text>
+<text x="44" y="303.845" font-size="11.5" fill="#111827" font-weight="600">diffusion_planner(런치 1급 옵션)</text>
+<text x="44" y="320.665" font-size="10.5" fill="#374151">e2e/tensorrt_vad는 런치 미연결 · behavior_path · velocity →</text>
+<text x="44" y="335.155" font-size="10.5" fill="#374151">validator · control 21+3 (MPC · PID) · vehicle 4 · api 4 (AD API 61</text>
+<text x="44" y="349.6449999999999" font-size="10.5" fill="#374151">msg · 19 srv)</text>
+<line x1="222.0" y1="361.1099999999999" x2="222.0" y2="369.1099999999999" stroke="#d1d5db" stroke-width="1.2"/>
+<rect x="36" y="369.1099999999999" width="372" height="110.31999999999977" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.2"/>
+<text x="44" y="389.1849999999999" font-size="11.5" fill="#111827" font-weight="600">IPC: ROS 2 rmw (CycloneDDS 기본)</text>
+<text x="44" y="406.0049999999999" font-size="10.5" fill="#374151">+ Agnocast: 커널 모듈 + 공유메모리 + 힙 후킹 → 가변 타입 zero-copy</text>
+<text x="44" y="420.49499999999983" font-size="10.5" fill="#374151">(80 pkgs 준비, ENABLE_AGNOCAST=1 opt-in)</text>
+<text x="44" y="436.9849999999998" font-size="10.5" fill="#374151">+ cuda_blackboard: GPU→GPU zero-copy, negotiated 토픽 (7 pkgs)</text>
+<text x="44" y="453.47499999999974" font-size="10.5" fill="#374151">&lt;node 329 vs 컴포저블 ≈150 — 부분 컴포지션, 대부분 개별 프로세스 ·</text>
+<text x="44" y="467.9649999999997" font-size="10.5" fill="#374151">Single 230 vs Multi 54</text>
+<line x1="222.0" y1="479.42999999999967" x2="222.0" y2="487.42999999999967" stroke="#d1d5db" stroke-width="1.2"/>
+<rect x="36" y="487.42999999999967" width="372" height="79.34000000000009" rx="6" fill="#fee2e2" stroke="#ef4444" stroke-width="1.2"/>
+<text x="44" y="507.50499999999965" font-size="11.5" fill="#111827" font-weight="600">안전 감시: system 24 pkgs (같은 SoC)</text>
+<text x="44" y="524.3249999999997" font-size="10.5" fill="#374151">mrm_handler · diagnostic_graph_aggregator ·</text>
+<text x="44" y="538.8149999999997" font-size="10.5" fill="#374151">pipeline_latency_monitor · command_mode_switcher</text>
+<text x="44" y="555.3049999999997" font-size="10.5" fill="#374151">processing_time_checker: 임계 검증 아직 없음(&quot;항상 OK&quot;)</text>
+<line x1="222.0" y1="566.7699999999998" x2="222.0" y2="574.7699999999998" stroke="#d1d5db" stroke-width="1.2"/>
+<rect x="36" y="574.7699999999998" width="372" height="93.82999999999993" rx="6" fill="#fff" stroke="#9ca3af" stroke-width="1.2"/>
+<text x="44" y="594.3199999999997" font-size="11" fill="#111827" font-weight="600">실행 구성 = 런치 XML (정적 트리 167 노드) → System Designer</text>
+<text x="44" y="609.4999999999997" font-size="11" fill="#111827" font-weight="600">YAML로 이동 중</text>
+<text x="44" y="626.1549999999996" font-size="10.5" fill="#374151">타깃: sm_86/87/89/90/110 fat binary (Orin → Thor) · CUDA 13.0 ·</text>
+<text x="44" y="640.6449999999996" font-size="10.5" fill="#374151">TRT 10.13</text>
+<text x="44" y="657.1349999999996" font-size="10.5" fill="#374151">2.0 로드맵: Generator(E2E 포함) – Selector(규칙 검사)</text>
+<line x1="222.0" y1="668.5999999999997" x2="222.0" y2="676.5999999999997" stroke="#d1d5db" stroke-width="1.2"/>
+<rect x="36" y="676.5999999999997" width="372" height="107.63" rx="6" fill="#fff" stroke="#9ca3af" stroke-width="1.2" stroke-dasharray="4 3"/>
+<text x="44" y="696.1499999999996" font-size="11" fill="#111827" font-weight="600">데이터 · 시뮬 (오프보드)</text>
+<text x="44" y="712.8049999999996" font-size="10.5" fill="#374151">scenario_simulator_v2 · AWSIM · TIER IV Co-MLOps · Cosmos</text>
+<text x="44" y="727.2949999999996" font-size="10.5" fill="#374151">합성 · Vision Pilot(단안 L2): AutoSpeed · AutoSteer · AutoDrive</text>
+<text x="44" y="741.7849999999996" font-size="10.5" fill="#374151">ONNX INT8</text>
+<text x="44" y="758.2749999999996" font-size="10.5" fill="#374151">라이선스 Apache-2.0 전 저장소 · 활동: main 매일 커밋 · Renesas · AMD</text>
+<text x="44" y="772.7649999999996" font-size="10.5" fill="#374151">· NVIDIA 3축</text>
+<line x1="222.0" y1="784.2299999999997" x2="222.0" y2="792.2299999999997" stroke="#d1d5db" stroke-width="1.2"/>
+<rect x="438" y="70" width="396" height="746.7899999999997" rx="10" fill="#f8fafc" stroke="#e5e7eb" stroke-width="1.2"/>
+<text x="450" y="96" font-size="15" fill="#111827" font-weight="700">Baidu Apollo (Cyber RT)</text>
+<text x="450" y="112" font-size="10.5" fill="#374151">dag 109 · 컴포넌트 188(타이머 17) · 클래스 92 · 채널 128 · proto 478 ·</text>
+<text x="450" y="125" font-size="10.5" fill="#374151">BUILD 721 · cyber 72k줄</text>
+<rect x="450" y="144" width="372" height="61.54000000000002" rx="6" fill="#eef2ff" stroke="#818cf8" stroke-width="1.2"/>
+<text x="458" y="163.55" font-size="11" fill="#111827">drivers 56k줄 → perception 42 dag (GPU: CUDA 41파일 ·</text>
+<text x="458" y="178.73000000000002" font-size="11" fill="#111827">TensorRT 79 · 융합 컴포넌트) → prediction 33k줄 (GPU: LibTorch</text>
+<text x="458" y="193.91000000000003" font-size="11" fill="#111827">56) · localization 39k줄 (MSF / NDT / RTK, CPU)</text>
+<line x1="636.0" y1="205.54000000000002" x2="636.0" y2="213.54000000000002" stroke="#d1d5db" stroke-width="1.2"/>
+<rect x="450" y="213.54000000000002" width="372" height="61.54000000000002" rx="6" fill="#dcfce7" stroke="#22c55e" stroke-width="1.2"/>
+<text x="458" y="233.09000000000003" font-size="11" fill="#111827">GPU 경계 = 모듈 경계: perception · prediction만 GPU, control ·</text>
+<text x="458" y="248.27000000000004" font-size="11" fill="#111827">canbus · localization · routing은 CPU. 추론 백엔드 추상화:</text>
+<text x="458" y="263.45000000000005" font-size="11" fill="#111827">tensorrt · migraphx(ROCm) · libtorch · onnx · paddle</text>
+<line x1="636.0" y1="275.08000000000004" x2="636.0" y2="283.08000000000004" stroke="#d1d5db" stroke-width="1.2"/>
+<rect x="450" y="283.08000000000004" width="372" height="93.20999999999987" rx="6" fill="#eef2ff" stroke="#818cf8" stroke-width="1.2"/>
+<text x="458" y="303.15500000000003" font-size="11.5" fill="#111827" font-weight="600">planning 150k줄 — Scenario(19, 활성 12) → Stage → Task(35)</text>
+<text x="458" y="319.02500000000003" font-size="11.5" fill="#111827" font-weight="600">플러그인</text>
+<text x="458" y="335.845" font-size="10.5" fill="#374151">learning_mode: NO_LEARNING 기본 · &quot;E2E 미시험&quot; · BEV+OCC는</text>
+<text x="458" y="350.335" font-size="10.5" fill="#374151">융합 우회 · control 10 ms 타이머(LatLon / MPC) · canbus 10</text>
+<text x="458" y="364.82499999999993" font-size="10.5" fill="#374151">ms(차종 프로토콜 92k줄 분리)</text>
+<line x1="636.0" y1="376.2899999999999" x2="636.0" y2="384.2899999999999" stroke="#d1d5db" stroke-width="1.2"/>
+<rect x="450" y="384.2899999999999" width="372" height="140.67999999999978" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.2"/>
+<text x="458" y="404.3649999999999" font-size="11.5" fill="#111827" font-weight="600">IPC: Cyber RT — same_proc INTRA / diff_proc SHM /</text>
+<text x="458" y="420.2349999999999" font-size="11.5" fill="#111827" font-weight="600">diff_host RTPS(Fast-RTPS)</text>
+<text x="458" y="437.0549999999999" font-size="10.5" fill="#374151">arena SHM: protobuf arena를 공유메모리에 직접 배치, /apollo/msg</text>
+<text x="458" y="451.54499999999985" font-size="10.5" fill="#374151">32 MiB × 풀 32 (10.0)</text>
+<text x="458" y="468.0349999999998" font-size="10.5" fill="#374151">스케줄러: classic(prio 0~19 큐 + 워크 스틸링) / choreography(코어</text>
+<text x="458" y="482.52499999999975" font-size="10.5" fill="#374151">핀 8 + 풀 12) · 코루틴 컨텍스트 스위치 어셈블리</text>
+<text x="458" y="499.0149999999997" font-size="10.5" fill="#374151">프로세스 경계 = mainboard -d dag -p group -s sched (코드가 아니라</text>
+<text x="458" y="513.5049999999997" font-size="10.5" fill="#374151">배치)</text>
+<line x1="636.0" y1="524.9699999999997" x2="636.0" y2="532.9699999999997" stroke="#d1d5db" stroke-width="1.2"/>
+<rect x="450" y="532.9699999999997" width="372" height="79.34000000000003" rx="6" fill="#fee2e2" stroke="#ef4444" stroke-width="1.2"/>
+<text x="458" y="553.0449999999997" font-size="11.5" fill="#111827" font-weight="600">안전 감시: monitor · guardian (같은 SoC)</text>
+<text x="458" y="569.8649999999997" font-size="10.5" fill="#374151">planning/tasks/rss_decider ← ad-rss-lib(Mobileye RSS, LGPL)</text>
+<text x="458" y="586.3549999999997" font-size="10.5" fill="#374151">Statistics::SamplingProcLatency 매 Proc 내장 ·</text>
+<text x="458" y="600.8449999999997" font-size="10.5" fill="#374151">cyber_performance · modules/statistics</text>
+<line x1="636.0" y1="612.3099999999997" x2="636.0" y2="620.3099999999997" stroke="#d1d5db" stroke-width="1.2"/>
+<rect x="450" y="620.3099999999997" width="372" height="62.15999999999997" rx="6" fill="#fff" stroke="#9ca3af" stroke-width="1.2"/>
+<text x="458" y="639.8599999999997" font-size="11" fill="#111827" font-weight="600">실행 구성 = dag + launch + sched conf (cpuset 0-7,16-23 등)</text>
+<text x="458" y="656.5149999999996" font-size="10.5" fill="#374151">우선순위가 파이프라인 순: lidar 10 &lt; detect 13 &lt; fusion 15 &lt; pred 16</text>
+<text x="458" y="671.0049999999997" font-size="10.5" fill="#374151">&lt; plan 17 &lt; loc 20 — 하류가 상류를 선점</text>
+<line x1="636.0" y1="682.4699999999997" x2="636.0" y2="690.4699999999997" stroke="#d1d5db" stroke-width="1.2"/>
+<rect x="450" y="690.4699999999997" width="372" height="93.13999999999999" rx="6" fill="#fff" stroke="#9ca3af" stroke-width="1.2" stroke-dasharray="4 3"/>
+<text x="458" y="710.0199999999996" font-size="11" fill="#111827" font-weight="600">데이터 · 시뮬 (오프보드)</text>
+<text x="458" y="726.6749999999996" font-size="10.5" fill="#374151">Dreamview 시나리오 · cyber_recorder(.record, LZ4 / BZ2) ·</text>
+<text x="458" y="741.1649999999996" font-size="10.5" fill="#374151">Baige(비공개) · 11.0(2026-01): 저속 기능차 지향, 모델 &quot;연구용&quot;</text>
+<text x="458" y="757.6549999999996" font-size="10.5" fill="#374151">라이선스 Apache-2.0 + third_party 53개 · 활동: 12개월 21커밋 ·</text>
+<text x="458" y="772.1449999999996" font-size="10.5" fill="#374151">작성자 5명 · 릴리스 단위 덤프</text>
+<line x1="636.0" y1="783.6099999999997" x2="636.0" y2="791.6099999999997" stroke="#d1d5db" stroke-width="1.2"/>
+<rect x="852" y="70" width="396" height="746.7899999999997" rx="10" fill="#f8fafc" stroke="#e5e7eb" stroke-width="1.2"/>
+<text x="864" y="96" font-size="15" fill="#111827" font-weight="700">comma openpilot</text>
+<text x="864" y="112" font-size="10.5" fill="#374151">프로세스 44(네이티브 6) · 서비스 69 · CAR 플랫폼 260 · 모델 30M 파라미터</text>
+<text x="864" y="125" font-size="10.5" fill="#374151">· 플릿 3억 마일</text>
+<rect x="864" y="144" width="372" height="76.72000000000003" rx="6" fill="#eef2ff" stroke="#818cf8" stroke-width="1.2"/>
+<text x="872" y="163.55" font-size="11" fill="#111827">camerad(C++, ISP → VisionIPC 20 Hz) → modeld 20 Hz</text>
+<text x="872" y="178.73000000000002" font-size="11" fill="#111827">(tinygrad, Adreno GPU, core 7 FIFO 54) → plannerd(acados</text>
+<text x="872" y="193.91000000000003" font-size="11" fill="#111827">MPC, MPC vs E2E 후보 경합) · locationd · calibrationd · paramsd</text>
+<text x="872" y="209.09000000000003" font-size="11" fill="#111827">· torqued · lagd</text>
+<line x1="1050.0" y1="220.72000000000003" x2="1050.0" y2="228.72000000000003" stroke="#d1d5db" stroke-width="1.2"/>
+<rect x="864" y="228.72000000000003" width="372" height="76.72000000000003" rx="6" fill="#dcfce7" stroke="#22c55e" stroke-width="1.2"/>
+<text x="872" y="248.27000000000004" font-size="11" fill="#111827">모델: supercombo ONNX 60.9 MB → tinygrad pkl(JIT 커널, 워프</text>
+<text x="872" y="263.45000000000005" font-size="11" fill="#111827">포함). 입력 2캠 (1,12,128,256) u8 + hidden 24×512 → 출력</text>
+<text x="872" y="278.63000000000005" font-size="11" fill="#111827">(1,2576) 슬라이스. CPU onnxruntime 실측 395 ms vs 디바이스 20</text>
+<text x="872" y="293.81000000000006" font-size="11" fill="#111827">Hz</text>
+<line x1="1050.0" y1="305.44000000000005" x2="1050.0" y2="313.44000000000005" stroke="#d1d5db" stroke-width="1.2"/>
+<rect x="864" y="313.44000000000005" width="372" height="93.20999999999987" rx="6" fill="#eef2ff" stroke="#818cf8" stroke-width="1.2"/>
+<text x="872" y="333.51500000000004" font-size="11.5" fill="#111827" font-weight="600">controlsd 100 Hz — modelV2.action.desiredCurvature →</text>
+<text x="872" y="349.38500000000005" font-size="11.5" fill="#111827" font-weight="600">clip_curvature → PID / Torque / Angle · 종방향 PID</text>
+<text x="872" y="366.20500000000004" font-size="10.5" fill="#374151">횡 MPC는 0.9.5에서 삭제(모델이 곡률 직접 출력) · card 100</text>
+<text x="872" y="380.695" font-size="10.5" fill="#374151">Hz(opendbc CAN) · pandad → panda(USB / SPI) · selfdrived</text>
+<text x="872" y="395.18499999999995" font-size="10.5" fill="#374151">상태머신 100 Hz</text>
+<line x1="1050.0" y1="406.6499999999999" x2="1050.0" y2="414.6499999999999" stroke="#d1d5db" stroke-width="1.2"/>
+<rect x="864" y="414.6499999999999" width="372" height="93.82999999999981" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.2"/>
+<text x="872" y="434.7249999999999" font-size="11.5" fill="#111827" font-weight="600">IPC: msgq — /dev/shm mmap 링버퍼 pub/sub + Cap&#x27;n Proto</text>
+<text x="872" y="451.5449999999999" font-size="10.5" fill="#374151">VisionIPC: ION DMA 버퍼 공유(zero-copy) · 큐 크기 명시(250 KB /</text>
+<text x="872" y="466.03499999999985" font-size="10.5" fill="#374151">2 MB / 10 MB) · 20 Hz 33개 · 100 Hz 7개 · 104 Hz 2개 서비스</text>
+<text x="872" y="482.5249999999998" font-size="10.5" fill="#374151">ZMQ는 원격 브리지에만 · 코어 격리: isolcpus core 7(모델) · core</text>
+<text x="872" y="497.01499999999976" font-size="10.5" fill="#374151">4(제어 100 Hz) · core 5(플래너)</text>
+<line x1="1050.0" y1="508.47999999999973" x2="1050.0" y2="516.4799999999998" stroke="#d1d5db" stroke-width="1.2"/>
+<rect x="864" y="516.4799999999998" width="372" height="93.83000000000004" rx="6" fill="#fee2e2" stroke="#ef4444" stroke-width="1.2"/>
+<text x="872" y="536.5549999999998" font-size="11.5" fill="#111827" font-weight="600">안전층: panda 펌웨어 (STM32H7, 별도 MCU) + SW 3중 클램프</text>
+<text x="872" y="553.3749999999998" font-size="10.5" fill="#374151">opendbc/safety: controls_allowed · TX 화이트리스트 · 토크 / 각도 /</text>
+<text x="872" y="567.8649999999998" font-size="10.5" fill="#374151">곡률 / 가속 한도(ISO 11270 · 15622)</text>
+<text x="872" y="584.3549999999998" font-size="10.5" fill="#374151">MISRA C · 뮤테이션 테스트 · heartbeat 손실 시 SILENT · 수정 시</text>
+<text x="872" y="598.8449999999998" font-size="10.5" fill="#374151">상표 사용 금지</text>
+<line x1="1050.0" y1="610.3099999999998" x2="1050.0" y2="618.3099999999998" stroke="#d1d5db" stroke-width="1.2"/>
+<rect x="864" y="618.3099999999998" width="372" height="77.33999999999992" rx="6" fill="#fff" stroke="#9ca3af" stroke-width="1.2"/>
+<text x="872" y="637.8599999999998" font-size="11" fill="#111827" font-weight="600">E2E 모델은 &quot;제안자&quot;, 액추에이터 명령은 규칙 제어기가 100 Hz로</text>
+<text x="872" y="653.0399999999997" font-size="11" fill="#111827" font-weight="600">생성</text>
+<text x="872" y="669.6949999999997" font-size="10.5" fill="#374151">Chill: MPC vs E2E 최소 가속 선택 · Experimental: E2E 가속 사용 —</text>
+<text x="872" y="684.1849999999997" font-size="10.5" fill="#374151">학습 정책의 점진 편입</text>
+<line x1="1050.0" y1="695.6499999999997" x2="1050.0" y2="703.6499999999997" stroke="#d1d5db" stroke-width="1.2"/>
+<rect x="864" y="703.6499999999997" width="372" height="93.13999999999999" rx="6" fill="#fff" stroke="#9ca3af" stroke-width="1.2" stroke-dasharray="4 3"/>
+<text x="872" y="723.1999999999997" font-size="11" fill="#111827" font-weight="600">데이터 · 시뮬 (오프보드)</text>
+<text x="872" y="739.8549999999997" font-size="10.5" fill="#374151">플릿 3억 마일 · 2B DiT 월드모델 → 학습된 시뮬레이터로 전량 학습(0.11)</text>
+<text x="872" y="754.3449999999997" font-size="10.5" fill="#374151">· 0.11.2: 880M big 모델 + 외장 GPU(chestnut, RX 9060, 100 W)</text>
+<text x="872" y="770.8349999999997" font-size="10.5" fill="#374151">라이선스 MIT(가중치 문구 없음) · 활동: 매일 커밋 · 월간 릴리스 ·</text>
+<text x="872" y="785.3249999999997" font-size="10.5" fill="#374151">comma four(SDM845)</text>
+<line x1="1050.0" y1="796.7899999999997" x2="1050.0" y2="804.7899999999997" stroke="#d1d5db" stroke-width="1.2"/>
+<text x="24" y="838.7899999999997" font-size="11.5" fill="#6b7280">공통 요구: 공유메모리 zero-copy + 코어 파티셔닝 + 안전층 분리. 다른 것은 그 형태 — 커널 모듈(Autoware) / 설정 파일(Apollo) / 별도 MCU(openpilot).</text>
+</svg>

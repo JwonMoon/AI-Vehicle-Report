@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="859" viewBox="0 0 1240 859" font-family="IBM Plex Sans KR, Pretendard, Noto Sans KR, Apple SD Gothic Neo, sans-serif">
+<defs><marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#4b5563"/></marker></defs>
+<title>자율주행 SW 스택 8층 지도</title>
+<rect width="1240" height="859" fill="#ffffff"/>
+<text x="24" y="34" font-size="18" fill="#111827" font-weight="700">자율주행 SW 스택 8층 지도 — 무엇이 어디에 있고, 누가 어느 층을 여는가</text>
+<text x="24" y="54" font-size="11" fill="#6b7280">한 대의 차 안(온보드, L1~L6 · L8)과 밖(오프보드, L7). 가운데 열은 모듈형 스택의 실제 구성요소, 오른쪽 열은 E2E / VLA에서 달라지는 점. 실선 = 출처 확인, 점선 = 추정·유동.</text>
+<text x="34" y="84" font-size="11" fill="#6b7280">층</text>
+<text x="130" y="84" font-size="11" fill="#6b7280">이름 · 역할</text>
+<text x="400" y="84" font-size="11" fill="#6b7280">모듈형 스택의 구성요소 (Autoware · Apollo · openpilot 등)</text>
+<text x="890" y="84" font-size="11" fill="#6b7280">E2E / VLA 스택에서 달라지는 점</text>
+<rect x="26" y="94" width="1188" height="66.5" rx="8" fill="#f8fafc" stroke="#cbd2dc" stroke-width="1.2"/>
+<text x="34" y="133.25" font-size="15" fill="#111827" font-weight="700">L8</text>
+<text x="130" y="114" font-size="12.5" fill="#111827" font-weight="600">API · HMI · 앱</text>
+<text x="130" y="129.5" font-size="10.8" fill="#374151">운행 요청, 상태 표시, MRM 인터페이스</text>
+<text x="400" y="114" font-size="12" fill="#111827">Autoware AD API(adapi_msgs 61 msg · 19 srv) · Apollo Dreamview ·</text>
+<text x="400" y="129.5" font-size="12" fill="#111827">openpilot UI(raylib)</text>
+<text x="400" y="145.0" font-size="10.8" fill="#374151">차량 밖 서비스(플릿·원격 감시)와의 경계</text>
+<text x="890" y="114" font-size="12" fill="#111827">변화 적음 — 궤적 대신 &quot;언어 설명&quot;이 추가되는 정도</text>
+<text x="890" y="129.5" font-size="10.8" fill="#374151">Alpamayo · LINGO-2: 추론 텍스트를 HMI에 노출</text>
+<rect x="26" y="168.5" width="1188" height="82.0" rx="8" fill="#fff7ed" stroke="#cbd2dc" stroke-width="1.2" stroke-dasharray="5 4"/>
+<text x="34" y="215.5" font-size="15" fill="#111827" font-weight="700">L7</text>
+<text x="130" y="188.5" font-size="12.5" fill="#111827" font-weight="600">데이터 · 시뮬 · MLOps (오프보드)</text>
+<text x="130" y="204.0" font-size="10.8" fill="#374151">데이터 엔진, 라벨링, 학습, 폐루프 평가, OTA</text>
+<text x="400" y="188.5" font-size="12" fill="#111827">Autoware: scenario_simulator_v2 · AWSIM · Co-MLOps / Apollo: Dreamview</text>
+<text x="400" y="204.0" font-size="12" fill="#111827">시나리오 · record / openpilot: 플릿 로그 · 학습된 시뮬레이터</text>
+<text x="400" y="219.5" font-size="10.8" fill="#374151">학계: nuScenes · Bench2Drive · NAVSIM / NVIDIA: AlpaSim · Cosmos · NuRec / Wayve</text>
+<text x="400" y="235.0" font-size="10.8" fill="#374151">GAIA · Huawei World Engine</text>
+<text x="890" y="188.5" font-size="12" fill="#111827">스택의 무게중심이 이 층으로 이동</text>
+<text x="890" y="204.0" font-size="10.8" fill="#374151">플라이휠 규모(플릿·합성 데이터)가 성능을 결정</text>
+<rect x="26" y="258.5" width="1188" height="82.0" rx="8" fill="#fef2f2" stroke="#cbd2dc" stroke-width="1.2"/>
+<text x="34" y="305.5" font-size="15" fill="#111827" font-weight="700">L6</text>
+<text x="130" y="278.5" font-size="12.5" fill="#111827" font-weight="600">안전 감시 · 폴백</text>
+<text x="130" y="294.0" font-size="10.8" fill="#374151">MRM, 감시기, 규칙 기반 가드</text>
+<text x="400" y="278.5" font-size="12" fill="#111827">Autoware system(mrm_handler · diagnostic_graph ·</text>
+<text x="400" y="294.0" font-size="12" fill="#111827">pipeline_latency_monitor) / Apollo monitor · guardian / openpilot panda 안전</text>
+<text x="400" y="309.5" font-size="12" fill="#111827">펌웨어</text>
+<text x="400" y="325.0" font-size="10.8" fill="#374151">Mobileye RSS · NVIDIA 듀얼 스택(DRIVE AV) · Waymo 이중 엔진</text>
+<text x="890" y="278.5" font-size="12" fill="#111827">E2E일수록 이 층이 커진다 (하이브리드 · 듀얼)</text>
+<text x="890" y="294.0" font-size="10.8" fill="#374151">모델 출력을 검증·제한하는 규칙층이 남는다</text>
+<rect x="26" y="348.5" width="1188" height="97.5" rx="8" fill="#eef2ff" stroke="#cbd2dc" stroke-width="1.2"/>
+<text x="34" y="403.25" font-size="15" fill="#111827" font-weight="700">L5</text>
+<text x="130" y="368.5" font-size="12.5" fill="#111827" font-weight="600">예측 · 계획 · 제어</text>
+<text x="130" y="384.0" font-size="10.8" fill="#374151">모듈형: 시나리오·행동·궤적·추종 / E2E:</text>
+<text x="130" y="399.5" font-size="10.8" fill="#374151">센서→궤적 단일 모델 / VLA: +언어 추론</text>
+<text x="400" y="368.5" font-size="12" fill="#111827">Autoware planning 67 pkgs · control 21 / Apollo prediction ·</text>
+<text x="400" y="384.0" font-size="12" fill="#111827">planning(시나리오 19) · control / openpilot plannerd → controlsd(모델 궤적 +</text>
+<text x="400" y="399.5" font-size="12" fill="#111827">규칙 제어기)</text>
+<text x="400" y="415.0" font-size="10.8" fill="#374151">학습 옵션: Autoware diffusion_planner(런치 1급), tensorrt_vad(e2e/, 미연결) · 학계:</text>
+<text x="400" y="430.5" font-size="10.8" fill="#374151">UniAD → VAD → SparseDrive → DiffusionDrive</text>
+<text x="890" y="368.5" font-size="12" fill="#111827">L4+L5가 한 모델로 합쳐진다 — Tesla FSD v12+ ·</text>
+<text x="890" y="384.0" font-size="12" fill="#111827">Wayve · Alpamayo · Huawei ADS · Momenta</text>
+<text x="890" y="399.5" font-size="10.8" fill="#374151">지연 예산이 &quot;모델 1회 추론&quot;으로 바뀜 · Alpamayo ×</text>
+<text x="890" y="415.0" font-size="10.8" fill="#374151">Autoware 노드 0.600 s → 3.35 s</text>
+<rect x="26" y="454.0" width="1188" height="97.5" rx="8" fill="#ecfdf5" stroke="#cbd2dc" stroke-width="1.2"/>
+<text x="34" y="508.75" font-size="15" fill="#111827" font-weight="700">L4</text>
+<text x="130" y="474.0" font-size="12.5" fill="#111827" font-weight="600">센서 · 인지 · 측위</text>
+<text x="130" y="489.5" font-size="10.8" fill="#374151">드라이버, 전처리, 검출·추적, 지도·측위</text>
+<text x="400" y="474.0" font-size="12" fill="#111827">Autoware sensing · perception(CUDA 16.7k줄, TensorRT 23 pkgs) ·</text>
+<text x="400" y="489.5" font-size="12" fill="#111827">localization(NDT · YabLoc · Eagleye) / Apollo drivers · perception 42 dag ·</text>
+<text x="400" y="505.0" font-size="12" fill="#111827">localization</text>
+<text x="400" y="520.5" font-size="10.8" fill="#374151">openpilot camerad → modeld(supercombo ONNX) · 지도: Lanelet2 / Apollo HD map /</text>
+<text x="400" y="536.0" font-size="10.8" fill="#374151">openpilot 무지도</text>
+<text x="890" y="474.0" font-size="12" fill="#111827">인지·측위가 모델 내부로 흡수</text>
+<text x="890" y="489.5" font-size="10.8" fill="#374151">HD 지도 의존 감소(&quot;map-less&quot;), 카메라 중심화</text>
+<rect x="26" y="559.5" width="1188" height="97.5" rx="8" fill="#fefce8" stroke="#cbd2dc" stroke-width="1.2"/>
+<text x="34" y="614.25" font-size="15" fill="#111827" font-weight="700">L3</text>
+<text x="130" y="579.5" font-size="12.5" fill="#111827" font-weight="600">미들웨어 · IPC</text>
+<text x="130" y="595.0" font-size="10.8" fill="#374151">pub/sub, 서비스, 실행기, zero-copy</text>
+<text x="400" y="579.5" font-size="12" fill="#111827">ROS 2(rmw: CycloneDDS · Fast DDS · Zenoh) + Agnocast · cuda_blackboard /</text>
+<text x="400" y="595.0" font-size="12" fill="#111827">Apollo Cyber RT(SHM arena · RTPS) / openpilot msgq(공유메모리) ·</text>
+<text x="400" y="610.5" font-size="12" fill="#111827">VisionIPC</text>
+<text x="400" y="626.0" font-size="10.8" fill="#374151">양산: AUTOSAR Adaptive ara::com(SOME/IP · DDS) · Apex.Grace · iceoryx2 · S-CORE</text>
+<text x="400" y="641.5" font-size="10.8" fill="#374151">LoLa</text>
+<text x="890" y="579.5" font-size="12" fill="#111827">사라지지 않는다 — 모델 입출력도 IPC를 탄다</text>
+<text x="890" y="595.0" font-size="10.8" fill="#374151">대용량 텐서·이미지의 zero-copy가 핵심 요구</text>
+<rect x="26" y="665.0" width="1188" height="66.5" rx="8" fill="#f3f4f6" stroke="#cbd2dc" stroke-width="1.2"/>
+<text x="34" y="704.25" font-size="15" fill="#111827" font-weight="700">L2</text>
+<text x="130" y="685.0" font-size="12.5" fill="#111827" font-weight="600">OS · 하이퍼바이저</text>
+<text x="130" y="700.5" font-size="10.8" fill="#374151">혼합 중요도 분리, 컨테이너</text>
+<text x="400" y="685.0" font-size="12" fill="#111827">Linux(Ubuntu 24.04 · AGL) · QNX 8 / Hypervisor 8.0 for Safety · NVIDIA</text>
+<text x="400" y="700.5" font-size="12" fill="#111827">DriveOS · SOAFEE(EWAOL, 컨테이너·가상화 참조)</text>
+<text x="400" y="716.0" font-size="10.8" fill="#374151">Autoware · Apollo는 Linux 전제, openpilot은 AGNOS(Ubuntu 기반 자체 OS)</text>
+<text x="890" y="685.0" font-size="12" fill="#111827">GPU 상주 워크로드의 파티셔닝 요구</text>
+<text x="890" y="700.5" font-size="10.8" fill="#374151">ASIL 파티션 ↔ 모델 파티션 분리</text>
+<rect x="26" y="739.5" width="1188" height="82.0" rx="8" fill="#e5e7eb" stroke="#cbd2dc" stroke-width="1.2"/>
+<text x="34" y="786.5" font-size="15" fill="#111827" font-weight="700">L1</text>
+<text x="130" y="759.5" font-size="12.5" fill="#111827" font-weight="600">HW · SoC</text>
+<text x="130" y="775.0" font-size="10.8" fill="#374151">연산·메모리·센서 I/O</text>
+<text x="400" y="759.5" font-size="12" fill="#111827">NVIDIA Orin / Thor(Autoware sm_87 / 110 빌드) · Renesas R-Car Gen 5 ·</text>
+<text x="400" y="775.0" font-size="12" fill="#111827">AMD(학습) · Qualcomm Ride Flex · Mobileye EyeQ6H</text>
+<text x="400" y="790.5" font-size="10.8" fill="#374151">자체 칩: Tesla HW4 / AI5 · XPeng Turing · Huawei MDC · Li Auto M100 · NIO NX9031 ·</text>
+<text x="400" y="806.0" font-size="10.8" fill="#374151">Waymo ASIC / openpilot: comma 3X · four(SDM845)</text>
+<text x="890" y="759.5" font-size="12" fill="#111827">메모리 용량·대역폭이 새 병목</text>
+<text x="890" y="775.0" font-size="10.8" fill="#374151">수억~수십억 파라미터 상주, KV 캐시</text>
+<text x="24" y="843.5" font-size="11" fill="#6b7280">근거: Autoware 수치는 D1 실측(2026-09-08 main HEAD), openpilot · Apollo 구성은 D2 · D3 실측, 나머지는 각 장 출처. 자체 작성.</text>
+</svg>
